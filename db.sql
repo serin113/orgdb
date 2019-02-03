@@ -24,19 +24,23 @@ USE `mydb` ;
 DROP TABLE IF EXISTS `mydb`.`AffiliationRecordsTable` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`AffiliationRecordsTable` (
-  `clubID` VARCHAR(50) NOT NULL,
-  `dateUpdated` DATE NOT NULL,
-  `region` VARCHAR(10) NULL,
-  `level` TINYINT(1) NULL,
-  `type` TINYINT(1) NULL,
-  `school` VARCHAR(100) NULL,
-  `clubName` VARCHAR(100) NULL,
-  `address` VARCHAR(200) NULL,
-  `city` VARCHAR(45) NULL,
-  `province` VARCHAR(45) NULL,
-  `adviserName` VARCHAR(100) NULL,
-  `contact` VARCHAR(45) NULL,
-  `email` VARCHAR(45) NULL,
+  `clubID` VARCHAR(50) NOT NULL,    -- record-unique id
+  `dateUpdated` DATE NOT NULL,      -- record last modification date
+  `region` VARCHAR(10) NULL,        -- school's regional PSGC: 1 to 17
+                                    -- https://psa.gov.ph/classification/psgc/downloads/SUMWEBPROV-DEC2018-CODED-HUC-FINAL.pdf
+  `level` TINYINT(1) NULL,          -- 1: elementary
+                                    -- 2: high school
+                                    -- 3: elementary + high school
+                                    -- 4: college
+  `type` TINYINT(1) NULL,           -- 1: public, 2: private
+  `school` VARCHAR(100) NULL,       -- name of school
+  `clubName` VARCHAR(100) NULL,     -- name of club
+  `address` VARCHAR(200) NULL,      -- school's address
+  `city` VARCHAR(45) NULL,          -- school's city
+  `province` VARCHAR(45) NULL,      -- school's province
+  `adviserName` VARCHAR(100) NULL,  -- club adviser/s' name
+  `contact` VARCHAR(45) NULL,       -- club contact no.
+  `email` VARCHAR(45) NULL,         -- club email
   PRIMARY KEY (`clubID`))
 ENGINE = InnoDB;
 
@@ -47,23 +51,23 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`AffiliationTable` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`AffiliationTable` (
-  `affiliationID` SMALLINT(10) NOT NULL,
-  `affiliated` TINYINT(1) NOT NULL,
-  `status` VARCHAR(45) NULL,
-  `hasAffiliationForms` TINYINT(1) NULL,
-  `benefits` VARCHAR(200) NULL,
-  `remarks` VARCHAR(200) NULL,
-  `schoolYear` YEAR(4) NULL,
-  `yearsAffiliated` INT NULL,
-  `SCA` SMALLINT(10) NULL,
-  `SCM` SMALLINT(10) NULL,
-  `paymentMode` VARCHAR(200) NULL,
-  `paymentDate` DATE NULL,
-  `paymentID` VARCHAR(200) NULL,
-  `paymentAmount` INT NULL,
-  `receiptNumber` VARCHAR(200) NULL,
-  `paymentSendMode` VARCHAR(200) NULL,
-  `AffiliationRecordsTable_clubID` VARCHAR(50) NOT NULL,
+  `affiliationID` VARCHAR(50) NOT NULL,    -- affiliation-unique id
+  `affiliated` TINYINT(1) NOT NULL,         -- is club affiliated? 0:no, 1:yes
+  `status` VARCHAR(45) NULL,                -- "newly affiliated", "renewing", etc.
+  `hasAffiliationForms` TINYINT(1) NULL,    -- are forms submitted? 0:no, 1:yes
+  `benefits` VARCHAR(200) NULL,             -- any discounts/sponsorships/scholarships/etc.
+  `remarks` VARCHAR(200) NULL,              -- extra remarks
+  `schoolYear` YEAR(4) NULL,                -- if s.y. 2018-2019, store 2019
+  `yearsAffiliated` INT NULL,               -- duration of affiliation
+  `SCA` SMALLINT(10) NULL,                  -- # of club advisers
+  `SCM` SMALLINT(10) NULL,                  -- # of club members
+  `paymentMode` VARCHAR(200) NULL,          -- means of payment (deposit/check/etc.)
+  `paymentDate` DATE NULL,                  -- date paid
+  `paymentID` VARCHAR(200) NULL,            -- identifier for payment
+  `paymentAmount` INT NULL,                 -- amount paid
+  `receiptNumber` VARCHAR(200) NULL,        -- payment receipt number
+  `paymentSendMode` VARCHAR(200) NULL,      -- means of sending payment (delivery/in-person/etc.)
+  `AffiliationRecordsTable_clubID` VARCHAR(50) NOT NULL,    -- affiliation under which club?
   PRIMARY KEY (`affiliationID`, `AffiliationRecordsTable_clubID`),
   INDEX `fk_AffiliationTable_AffiliationRecordsTable_idx` (`AffiliationRecordsTable_clubID` ASC),
   CONSTRAINT `fk_AffiliationTable_AffiliationRecordsTable`
