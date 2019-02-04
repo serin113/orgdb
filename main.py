@@ -19,6 +19,13 @@ DBConfig = {
 
 def newID():
     return str(uuid4())
+    
+def toInt(i):
+    try:
+        int(i)
+    except:
+        return False
+    return int(i)
 
 class AffiliationDB(object):
     def __init__(self):
@@ -69,13 +76,19 @@ class AddRecord(object):
             "(affiliationID, affiliated, status, hasAffiliationForms, benefits, remarks, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode, AffiliationRecordsTable_clubID) "
             "VALUES (%(affiliationID)s, %(affiliated)s, %(status)s, %(hasAffiliationForms)s, %(benefits)s, %(remarks)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s, %(AffiliationRecordsTable_clubID)s)")
         
+        if not(1 <= toInt(region) <= 17) or not(1 <= toInt(level) <= 4) or not(1 <= toInt(type) <= 2) or (len(school) > 100) or (len(clubname) > 100) or (len(address) > 200) or (len(city) > 45) or (len(province) > 45) or (len(advisername) > 100) or (len(contact) > 45) or (len(email) > 45):
+            return "<h1>Invalid affiliation record data</h1>"
         
-        if not(1 <= region <= 17) or not(1 <= level <= 4) or not(1 <= type <= 2) or len(school) > 100 or len(clubName) > 100 or len(address) > 200 or len(city) > 45 or len(province) > 45 or len(adviserName) > 100 or len(contact) > 45 or len(email) > 45:
-            print("invalid input")   
+        today = date.today()
+        # date comparison assumes ISO format: yyyy-mm-dd
+        # valid date checking to be added
+        if not(2007 <= toInt(schoolyear) <= 2050) or not(0 <= toInt(affiliated) <= 1) or (len(status) > 45) or not(0 <= toInt(hasaffiliationforms) <= 1) or (len(benefits) > 100) or (len(remarks) > 200) or not(1 <= toInt(yearsaffiliated) <= 50) or not(1 <= toInt(sca) <= 100) or not(1 <= toInt(scm) <= 2000) or (len(paymentmode) > 200) or (str(paymentdate) > str(today)) or (len(paymentid) > 200) or (toInt(paymentamount) < 0) or (len(receiptnumber) > 200) or (len(paymentsendmode) > 200):
+            return "<h1>Invalid affiliation data</h1>"
+        
         id = newID()
         record_data = {
             'clubID':       id,
-            'dateUpdated':  date.today(),
+            'dateUpdated':  today,
             'region':       region,
             'level':        level,
             'type':         type,
@@ -89,8 +102,6 @@ class AddRecord(object):
             'email':        email
         }
 
-        if not(2007 <= schoolYear <= 2050) or not(0 <= affiliated <= 1) or len(status) > 45 or not(0 <= hasAffiliationForms <= 1 or len(benefits) > 100 or len(remarks) > 200 or not(1 <= yearsAffiliated <= 50) or not(1 <= SCA <= 100) or not(1 <= SCM <= 2000) or len(paymentMode) > 200 or len(paymentID) > 200 or paymentAmount < 0 or len(receiptNumber) > 200 or len(paymentSendMode) > 200):
-            print("invalid input")
         affiliation_data = {
             'affiliationID':                    newID(),
             'affiliated':                       affiliated,
@@ -103,7 +114,7 @@ class AddRecord(object):
             'SCA':                              sca,
             'SCM':                              scm,
             'paymentMode':                      paymentmode,
-            'paymentDate':                      paymentdate,    #validation?
+            'paymentDate':                      paymentdate,
             'paymentID':                        paymentid,
             'paymentAmount':                    paymentamount,
             'receiptNumber':                    receiptnumber,
