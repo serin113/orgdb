@@ -87,7 +87,7 @@ class AddRecord(object):
 
         # date comparison assumes ISO format: yyyy-mm-dd
         pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
-        match = re.match(pattern, paymentDate, re.M)
+        match = re.match(pattern, paymentdate, re.M)
         if not match:
             return "<h1>Invalid affiliation data</h1>"
 
