@@ -81,10 +81,11 @@ class AddRecord(object):
             return "<h1>Invalid affiliation record data</h1>"
         
         today = date.today()
-        # date comparison assumes ISO format: yyyy-mm-dd
+       
         if not(2007 <= toInt(schoolyear) <= 2050) or not(0 <= toInt(affiliated) <= 1) or (len(status) > 45) or not(0 <= toInt(hasaffiliationforms) <= 1) or (len(benefits) > 100) or (len(remarks) > 200) or not(1 <= toInt(yearsaffiliated) <= 50) or not(1 <= toInt(sca) <= 100) or not(1 <= toInt(scm) <= 2000) or (len(paymentmode) > 200) or (str(paymentdate) > str(today)) or (len(paymentid) > 200) or (toInt(paymentamount) < 0) or (len(receiptnumber) > 200) or (len(paymentsendmode) > 200):
             return "<h1>Invalid affiliation data</h1>"
 
+        # date comparison assumes ISO format: yyyy-mm-dd
         pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
         match = re.match(pattern, paymentDate, re.M)
         if not match:
