@@ -103,11 +103,16 @@ class AddRecord(object):
             return "<h1>Invalid affiliation data</h1>"
         # date comparison assumes ISO format: yyyy-mm-dd
         # date validation
-        pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
-        match = re.match(pattern, paymentdate, re.M)
-        if not match:
+        date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
+        date_match = re.match(date_pattern, paymentdate, re.M)
+        if not date_match:
             return "<h1>Invalid affiliation data</h1>"
         
+        # email validation
+        email_pattern = r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$'
+        email_match = re.match(email_pattern, email, re.M) 
+        if not email_match:
+            return "<h1>Invalid affiliation data</h1>"
         
         
         id = newID()    # generate new unique ID for record_data
