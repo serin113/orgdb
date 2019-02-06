@@ -6,7 +6,9 @@ This is a course requirement for CS191/192 Software Engineering Courses of the D
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+This project (Org Affiliations Database) is licensed under the [MIT License](https://opensource.org/licenses/MIT) - see the LICENSE.md file for details.
+
+The [CherryPy project](https://cherrypy.org) is licensed under the [BSD 3-Clause "New" or "Revised" License](https://opensource.org/licenses/BSD-3-Clause).
 
 https://orgdb.wordpress.com
 

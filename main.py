@@ -6,18 +6,14 @@
 # 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import os
-import mysql.connector
-from mysql.connector import errorcode
-from datetime import date, datetime
-from uuid import uuid4
-import cherrypy
-import re
+import os                               # for accessing the filesystem
+import mysql.connector                  # for accessing the MySQL database
+from datetime import date, datetime     # for getting the current date
+from uuid import uuid4                  # for creating a unique ID for database insertion
+import cherrypy                         # library responsible for exposing python as a webserver
+import re                               # for input validation
 
-#python-cherrypy
-#python-mysql-connector
-#https://docs.cherrypy.org/en/latest/tutorials.html
-
+# default configuration for connecting to a MySQL server
 DBConfig = {
   'user': 'orgdb',
   'password': 'orgdb',
@@ -26,15 +22,19 @@ DBConfig = {
   'raise_on_warnings': True
 }
 
+# returns a string-type
 def newID():
     return str(uuid4())
-    
-def toInt(i):
+
+# returns an integer if the input string s
+# is a valid integer, returns False otherwise;
+# used for input validation of int-type inputs
+def toInt(s):
     try:
-        int(i)
+        int(s)
     except:
         return False
-    return int(i)
+    return int(s)
 
 class AffiliationDB(object):
     def __init__(self):
@@ -153,9 +153,9 @@ def connectDB():
     try:
         cnx = mysql.connector.connect(**DBConfig)
     except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
         else:
             print(err)
