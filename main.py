@@ -118,7 +118,7 @@ class AddRecord(object):
         cur = sqlcnx.cursor()                           # create an SQL cursor to the database
 
         collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
-        cur.execute(collision_query, {'school': school, 'clubName', clubName})
+        cur.execute(collision_query, {'school': school, 'clubName': clubName})
 
         if cur.rowcount > 0:
             return "<h1>Invalid affiliation data: Record already exists</h1>"
