@@ -113,6 +113,16 @@ class AddRecord(object):
         email_match = re.match(email_pattern, email, re.M) 
         if not email_match:
             return "<h1>Invalid affiliation data</h1>"
+
+        sqlcnx = connectDB()                            # connect to SQL server
+        cur = sqlcnx.cursor()                           # create an SQL cursor to the database
+
+        collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
+        cur.execute(collision_query, {'school': school, 'clubName', clubName})
+
+        if cur.rowcount > 0:
+            return "<h1>Invalid affiliation data: Record already exists</h1>"
+
         
         
         id = newID()    # generate new unique ID for record_data
@@ -151,8 +161,7 @@ class AddRecord(object):
             'AffiliationRecordsTable_clubID':   id
         }
         
-        sqlcnx = connectDB()                            # connect to SQL server
-        cur = sqlcnx.cursor()                           # create an SQL cursor to the database
+        
         cur.execute(add_record, record_data)            # insert record_data to database
         cur.execute(add_affiliation, affiliation_data)  # insert affiliation_data to database
         sqlcnx.commit()                                 # commit changes to database
