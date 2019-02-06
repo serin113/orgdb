@@ -4,5 +4,9 @@ This is a backend and frontend application for the management of the online data
 
 This is a course requirement for CS191/192 Software Engineering Courses of the Department of Computer Science, College of Engineering, University of the Philippines, Diliman under the guidance of Ma. Rowena C. Solamo for the 1st and 2nd Semester of the academic year 2018-2019.
 
+## License
+
+This project is licensed under the MIT License - see the LICENSE.md file for details.
+
 https://orgdb.wordpress.com
 
