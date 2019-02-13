@@ -5,6 +5,7 @@
 
 # Code History:
 # 2019/02/06 - Initial working code and documentation
+# 2019/02/08 - Updated CherryPy config, added getContent()
 
 
 import os                               # for accessing the filesystem
@@ -28,6 +29,13 @@ def toInt(s):
         return False
     return int(s)
 
+# return the contents of file s if it exists,
+# return an error message otherwise
+def getContent(s):
+    if (os.path.isfile(s)):
+        return open(s,"r").read()
+    return "File \""+s+"\" does not exist"
+
 # class used by CherryPy to handle HTTP requests for / or /index.html
 class AffiliationDB(object):
     def __init__(self):
@@ -36,7 +44,7 @@ class AffiliationDB(object):
         
     @cherrypy.expose
     def index(self):                    # CherryPy method handling /
-        return "Hello world"            # should return the homepage HTML
+        return getContent("index.html") # should return the homepage HTML
 
 # class used by CherryPy for handling /view
 class ViewRecord(object):
@@ -45,7 +53,8 @@ class ViewRecord(object):
     
     @cherrypy.expose
     def index(self):                    # CherryPy method handling /view/r/
-        return "view"                   # should return a list of viewable records
+        # INSERT HERE
+        return "<html><table>"                   # should return a list of viewable records
                                         # (control ViewAffiliationRecordList)
 
 # class used by CherryPy for handling /view/r/<record_id>
@@ -72,8 +81,8 @@ class Affiliation(object):
 # class used by CherryPy for handling /addrecord
 class AddRecord(object):
     @cherrypy.expose
-    def index(self):                                # CherryPy method handling /add/
-        return open("addrecord.html","r").read()    # returns entirety of addrecord.html
+    def index(self):                        # CherryPy method handling /add/
+        return getContent("addrecord.html") # returns entirety of addrecord.html
     
     # CherryPy method handling /add/insert with incoming POST/GET data
     # every argument in the method (except for self) is defined in db.sql
@@ -115,7 +124,7 @@ class AddRecord(object):
             return "<h1>Invalid affiliation data</h1>"
 
         sqlcnx = connectDB()                            # connect to SQL server
-        cur = sqlcnx.cursor()                           # create an SQL cursor to the database
+        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
 
         collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
         cur.execute(collision_query, {'school': school, 'clubName': clubname})
@@ -202,6 +211,10 @@ def connectDB():
 # main method handling program execution
 def main():
     if __name__ == '__main__':
+        cherrypy.config.update({
+            'server.socket_host': '127.0.0.1',
+            'server.socket_port': 8080,
+        })
         conf = {
             '/': {
                 'tools.sessions.on': True,
@@ -209,7 +222,11 @@ def main():
             },
             '/static': {
                 'tools.staticdir.on': True,
-                'tools.staticdir.dir': './public'
+                'tools.staticdir.dir': './static'
+            },
+            '/favicon.ico':{
+                'tools.staticfile.on': True,
+                'tools.staticfile.filename': os.path.abspath("favicon.ico")
             }
         }
         cherrypy.quickstart(AffiliationDB(), '/', conf)
