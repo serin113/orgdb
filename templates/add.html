@@ -1,11 +1,20 @@
-<!-- Created in 2019-01-31 for PSYSC as part of a system for managing science club affiliations.
+<%doc>
+Created in 2019-01-31 for PSYSC as part of a system for managing science club affiliations.
 
 Copyright (c) 2019 Nathankissam Roy Tubis & Elfren Simon Clemente.
 Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for details.
 
 Code History:
 2019/02/06 - Initial working code and documentation
--->
+2019/02/13 - Added Mako templating
+</%doc>
+
+
+<%doc>
+Mako variables:
+    none
+</%doc>
+
 
 <html>
     <head>
@@ -20,6 +29,9 @@ Code History:
         </style>
     </head>
     <body>
+        <header>
+            <%include file="header.html"/>
+        </header>
         <form method="post" action="insert" id="add-form">
             <h1>Add Affiliation Record</h1>
             <hr>
@@ -77,5 +89,8 @@ Code History:
             <hr>
             <button type="submit">insert</button>
         </form>
+        <footer>
+            <%include file="footer.html"/>
+        </footer>
     </body>
 </html>

@@ -6,14 +6,17 @@
 # Code History:
 # 2019/02/06 - Initial working code and documentation
 # 2019/02/08 - Updated CherryPy config, added getContent()
+# 2019/02/13 - Added Mako for rendering dynamic content, renamed getContent to renderContent
 
 
 import os                               # for accessing the filesystem
 import mysql.connector                  # for accessing the MySQL database
 from datetime import date, datetime     # for getting the current date
 from uuid import uuid4                  # for creating a unique ID for database insertion
-import cherrypy                         # library responsible for exposing python as a webserver
 import re                               # for input validation
+import cherrypy                         # for exposing python as a webserver
+from mako.template import Template      # for rendering dynamic content through templating
+from mako.lookup import TemplateLookup
 
 # returns a string-type
 def newID():
@@ -31,20 +34,27 @@ def toInt(s):
 
 # return the contents of file s if it exists,
 # return an error message otherwise
-def getContent(s):
-    if (os.path.isfile(s)):
-        return open(s,"r").read()
-    return "File \""+s+"\" does not exist"
+# expects:
+#   string templateFile (required) - name of template file
+#   dict templatevars - dict of variables ("name":"value") to pass to Mako
+templatelookup = TemplateLookup(directories=["templates/"], collection_size=100, format_exceptions=True, module_directory="/tmp/mako_modules")
+def renderContent(templatefile, templatevars=None):
+    t = templatelookup.get_template(templatefile)
+    if (templatevars is None):
+        return t.render()
+    return t.render(**templatevars)
+
 
 # class used by CherryPy to handle HTTP requests for / or /index.html
 class AffiliationDB(object):
     def __init__(self):
         self.view = ViewRecord()        # class handling /view
-        self.addrecord = AddRecord()    # class handling /addrecord
+        self.add = AddRecord()          # class handling /add
         
     @cherrypy.expose
     def index(self):                    # CherryPy method handling /
-        return getContent("index.html") # should return the homepage HTML
+        # should return the homepage HTML
+        return renderContent("index.html")
 
 # class used by CherryPy for handling /view
 class ViewRecord(object):
@@ -53,8 +63,12 @@ class ViewRecord(object):
     
     @cherrypy.expose
     def index(self):                    # CherryPy method handling /view/r/
-        # INSERT HERE
-        return "<html><table>"                   # should return a list of viewable records
+        sqlcnx = connectDB()                            # connect to SQL server
+        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
+        cur.execute("SELECT clubName,school,region,contact,email,dateUpdated,clubID FROM AffiliationRecordsTable")
+        data = cur.fetchall()
+        cur.close()
+        return renderContent("view.html", {"data":data})                   # should return a list of viewable records
                                         # (control ViewAffiliationRecordList)
 
 # class used by CherryPy for handling /view/r/<record_id>
@@ -78,11 +92,12 @@ class Affiliation(object):
         # (control ViewAffiliationRecord)
         return "record id: %s<br>affiliation id: %s" % (record_id, affiliation_id)
 
-# class used by CherryPy for handling /addrecord
+# class used by CherryPy for handling /add
 class AddRecord(object):
     @cherrypy.expose
     def index(self):                        # CherryPy method handling /add/
-        return getContent("addrecord.html") # returns entirety of addrecord.html
+        # returns entirety of add.html
+        return renderContent("add.html")
     
     # CherryPy method handling /add/insert with incoming POST/GET data
     # every argument in the method (except for self) is defined in db.sql
@@ -226,7 +241,7 @@ def main():
             },
             '/favicon.ico':{
                 'tools.staticfile.on': True,
-                'tools.staticfile.filename': os.path.abspath("favicon.ico")
+                'tools.staticfile.filename': os.path.abspath("static/favicon.ico")
             }
         }
         cherrypy.quickstart(AffiliationDB(), '/', conf)
