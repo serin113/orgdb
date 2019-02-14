@@ -18,6 +18,6 @@ More information about the application is available in [orgdb.wordpress.com](htt
 
 This project (Org Affiliations Database) is licensed under the [MIT License](https://opensource.org/licenses/MIT) - see the LICENSE.md file for details.
 
-The [CherryPy library](https://cherrypy.org), used here for the webserver code, is licensed under the [BSD 3-Clause "New" or "Revised" License](https://opensource.org/licenses/BSD-3-Clause).
+The [CherryPy library](https://cherrypy.org), used here for the web-serving code, is licensed under the [BSD 3-Clause "New" or "Revised" License](https://opensource.org/licenses/BSD-3-Clause).
 
 The [Mako library](https://www.makotemplates.org), used here for templating, is licensed under the [MIT License](https://opensource.org/licenses/MIT).

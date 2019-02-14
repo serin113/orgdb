@@ -7,17 +7,28 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 Code History:
 2019/02/08 - added initial landing site
 2019/02/13 - Added Mako templating
+2019/02/14 - renamed to index.mako
 </%doc>
 
+
+<%doc>
+Mako variables:
+    none
+</%doc>
+
+
 <html>
+    <head>
+        <link rel="stylesheet" href="/styles/index.css"/>
+    </head>
     <body>
         <header>
-            <%include file="header.html"/>
+            <%include file="header.mako"/>
         </header>
         <a href="/add">Add Record</a><br>
         <a href="/view">View Record</a>
         <footer>
-            <%include file="footer.html"/>
+            <%include file="footer.mako"/>
         </footer>
     </body>
 </html>

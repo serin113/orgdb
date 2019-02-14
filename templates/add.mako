@@ -7,6 +7,7 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 Code History:
 2019/02/06 - Initial working code and documentation
 2019/02/13 - Added Mako templating
+2019/02/14 - renamed to add.mako
 </%doc>
 
 
@@ -18,19 +19,11 @@ Mako variables:
 
 <html>
     <head>
-        <style>
-            form#add-form {
-                display:block;
-                position:relative;
-                height:auto;
-                margin:100px 100px 100px;
-                text-align:center;
-            }
-        </style>
+        <link rel="stylesheet" href="/styles/add.css"/>
     </head>
     <body>
         <header>
-            <%include file="header.html"/>
+            <%include file="header.mako"/>
         </header>
         <form method="post" action="insert" id="add-form">
             <h1>Add Affiliation Record</h1>
@@ -83,14 +76,14 @@ Mako variables:
             payment mode<br><input type="text" name="paymentmode" /><br><br>
             payment date<br><input type="date" name="paymentdate" /><br><br>
             payment id<br><input type="text" name="paymentid" /><br><br>
-            payment amount<br><input type="number" name="paymentamount" min="0"/><br><br>
+            payment amount<br><input type="number" name="paymentamount" min="0"><br><br>
             receipt number<br><input type="text" name="receiptnumber" /><br><br>
             payment sendmode<br><input type="text" name="paymentsendmode" /><br><br>
             <hr>
             <button type="submit">insert</button>
         </form>
         <footer>
-            <%include file="footer.html"/>
+            <%include file="footer.mako"/>
         </footer>
     </body>
 </html>

@@ -6,13 +6,30 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 
 Code History:
 2019/02/13 - Intial template code
+2019/02/14 - renamed to view.mako
 </%doc>
 
+
+<%doc>
+Mako variables:
+    (dict type) data
+</%doc>
+
+
+<%page args="data=None"/>
+
+
 <html>
+    <head>
+        <link rel="stylesheet" href="/styles/view.css"/>
+    </head>
     <body>
         <header>
-            <%include file="header.html"/>
+            <%include file="header.mako"/>
         </header>
+        % if (data is None) or (len(data) == 0):
+        <h1>AffiliationRecordsTable is empty</h1>
+        % else:
         <table>
             <tr>
                 <th>club name</th>
@@ -33,8 +50,9 @@ Code History:
             </tr>
             % endfor
         </table>
+        % endif
         <footer>
-            <%include file="footer.html"/>
+            <%include file="footer.mako"/>
         </footer>
     </body>
 </html>

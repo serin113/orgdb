@@ -18,7 +18,7 @@ import cherrypy                         # for exposing python as a webserver
 from mako.template import Template      # for rendering dynamic content through templating
 from mako.lookup import TemplateLookup
 
-# returns a string-type
+# returns a string-type unique id
 def newID():
     return str(uuid4())
 
@@ -33,7 +33,7 @@ def toInt(s):
     return int(s)
 
 # return the contents of file s if it exists,
-# return an error message otherwise
+# return an error message otherwise 
 # expects:
 #   string templateFile (required) - name of template file
 #   dict templatevars - dict of variables ("name":"value") to pass to Mako
@@ -53,8 +53,8 @@ class AffiliationDB(object):
         
     @cherrypy.expose
     def index(self):                    # CherryPy method handling /
-        # should return the homepage HTML
-        return renderContent("index.html")
+        # returns Mako-rendered homepage HTML
+        return renderContent("index.mako")
 
 # class used by CherryPy for handling /view
 class ViewRecord(object):
@@ -68,8 +68,11 @@ class ViewRecord(object):
         cur.execute("SELECT clubName,school,region,contact,email,dateUpdated,clubID FROM AffiliationRecordsTable")
         data = cur.fetchall()
         cur.close()
-        return renderContent("view.html", {"data":data})                   # should return a list of viewable records
-                                        # (control ViewAffiliationRecordList)
+        print(data)
+        print(len(data))
+        return renderContent("view.mako", {"data":data})
+            # returns Mako-rendered view page HTML
+            # (control ViewAffiliationRecordList)
 
 # class used by CherryPy for handling /view/r/<record_id>
 @cherrypy.popargs('record_id')
@@ -96,8 +99,8 @@ class Affiliation(object):
 class AddRecord(object):
     @cherrypy.expose
     def index(self):                        # CherryPy method handling /add/
-        # returns entirety of add.html
-        return renderContent("add.html")
+        # returns Mako-rendered add page HTML
+        return renderContent("add.mako")
     
     # CherryPy method handling /add/insert with incoming POST/GET data
     # every argument in the method (except for self) is defined in db.sql
@@ -119,12 +122,39 @@ class AddRecord(object):
         # input validation
         
         # validates data for record_data
-        if not(1 <= toInt(region) <= 17) or not(1 <= toInt(level) <= 4) or not(1 <= toInt(type) <= 2) or (len(school) > 100) or (len(clubname) > 100) or (len(address) > 200) or (len(city) > 45) or (len(province) > 45) or (len(advisername) > 100) or (len(contact) > 45) or (len(email) > 45):
+        if not(1 <= toInt(region) <= 17) or \
+            not(1 <= toInt(level) <= 4) or \
+            not(1 <= toInt(type) <= 2) or \
+            (len(school) > 100) or \
+            (len(clubname) > 100) or \
+            (len(address) > 200) or \
+            (len(city) > 45) or \
+            (len(province) > 45) or \
+            (len(advisername) > 100) or \
+            (len(contact) > 45) or \
+            (len(email) > 45):
             return "<h1>Invalid affiliation record data</h1>"
+            
         today = date.today()
         # validates data for affiliation_data
-        if not(2007 <= toInt(schoolyear) <= 2050) or not(0 <= toInt(affiliated) <= 1) or (len(status) > 45) or not(0 <= toInt(hasaffiliationforms) <= 1) or (len(benefits) > 100) or (len(remarks) > 200) or not(1 <= toInt(yearsaffiliated) <= 50) or not(1 <= toInt(sca) <= 100) or not(1 <= toInt(scm) <= 2000) or (len(paymentmode) > 200) or (str(paymentdate) > str(today)) or (len(paymentid) > 200) or (toInt(paymentamount) < 0) or (len(receiptnumber) > 200) or (len(paymentsendmode) > 200):
+        if not(2007 <= toInt(schoolyear) <= 2050) or \
+            not(0 <= toInt(affiliated) <= 1) or \
+            (len(status) > 45) or \
+            not(0 <= toInt(hasaffiliationforms) <= 1) or \
+            (len(benefits) > 100) or \
+            (len(remarks) > 200) or \
+            not(1 <= toInt(yearsaffiliated) <= 50) or \
+            not(1 <= toInt(sca) <= 100) or \
+            not(1 <= toInt(scm) <= 2000) or \
+            (len(paymentmode) > 200) or\
+            (str(paymentdate) > str(today)) or \
+            (len(paymentid) > 200) or\
+            not(toInt(paymentamount) >= 0) or\
+            (len(receiptnumber) > 200) or\
+            (len(paymentsendmode) > 200):
             return "<h1>Invalid affiliation data</h1>"
+            
+        print("AAAAAA", not(toInt(paymentamount) >= 0))
         # date comparison assumes ISO format: yyyy-mm-dd
         # date validation
         date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
@@ -153,9 +183,9 @@ class AddRecord(object):
         record_data = {
             'clubID':       id,
             'dateUpdated':  today,
-            'region':       region,
-            'level':        level,
-            'type':         type,
+            'region':       toInt(region),
+            'level':        toInt(level),
+            'type':         toInt(type),
             'school':       school,
             'clubName':     clubname,
             'address':      address,
@@ -167,19 +197,19 @@ class AddRecord(object):
         }
         affiliation_data = {
             'affiliationID':                    newID(),    # generate new unique ID for affiliation_data
-            'affiliated':                       affiliated,
+            'affiliated':                       toInt(affiliated),
             'status':                           status,
-            'hasAffiliationForms':              hasaffiliationforms,
+            'hasAffiliationForms':              toInt(hasaffiliationforms),
             'benefits':                         benefits,
             'remarks':                          remarks,
-            'schoolYear':                       schoolyear,
-            'yearsAffiliated':                  yearsaffiliated,
-            'SCA':                              sca,
-            'SCM':                              scm,
+            'schoolYear':                       toInt(schoolyear),
+            'yearsAffiliated':                  toInt(yearsaffiliated),
+            'SCA':                              toInt(sca),
+            'SCM':                              toInt(scm),
             'paymentMode':                      paymentmode,
             'paymentDate':                      paymentdate,
             'paymentID':                        paymentid,
-            'paymentAmount':                    paymentamount,
+            'paymentAmount':                    toInt(paymentamount),
             'receiptNumber':                    receiptnumber,
             'paymentSendMode':                  paymentsendmode,
             'AffiliationRecordsTable_clubID':   id
@@ -238,6 +268,10 @@ def main():
             '/static': {
                 'tools.staticdir.on': True,
                 'tools.staticdir.dir': './static'
+            },
+            '/styles': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': './styles'
             },
             '/favicon.ico':{
                 'tools.staticfile.on': True,
