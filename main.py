@@ -62,17 +62,36 @@ class ViewRecord(object):
         self.r = AffiliationRecord()    # class handling /view/r/
     
     @cherrypy.expose
-    def index(self):                    # CherryPy method handling /view/r/
+    def index(self):                    # CherryPy method handling /view
         sqlcnx = connectDB()                            # connect to SQL server
         cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
-        cur.execute("SELECT clubName,school,region,contact,email,dateUpdated,clubID FROM AffiliationRecordsTable")
-        data = cur.fetchall()
+        # fetch all columns from all rows in AffiliationRecordsTable
+        cur.execute("SELECT clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email FROM AffiliationRecordsTable")
+        res = cur.fetchall()
+        # close database cursor
         cur.close()
-        print(data)
-        print(len(data))
-        return renderContent("view.mako", {"data":data})
-            # returns Mako-rendered view page HTML
-            # (control ViewAffiliationRecordList)
+        # create (list of dicts) data_list from (list of tuples) res
+        data_list = []
+        for record in res:
+            record_dict = {
+                'clubID':       record[0],
+                'dateUpdated':  record[1],
+                'region':       record[2],
+                'level':        record[3],
+                'type':         record[4],
+                'school':       record[5],
+                'clubName':     record[6],
+                'address':      record[7],
+                'city':         record[8],
+                'province':     record[9],
+                'adviserName':  record[10],
+                'contact':      record[11],
+                'email':        record[12]
+            }
+            data_list.append(record_dict)
+        # returns Mako-rendered view page HTML
+        # (control ViewAffiliationRecordList)
+        return renderContent("view.mako", {"data":data_list})
 
 # class used by CherryPy for handling /view/r/<record_id>
 @cherrypy.popargs('record_id')
@@ -171,9 +190,9 @@ class AddRecord(object):
         sqlcnx = connectDB()                            # connect to SQL server
         cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
 
+        # checking for preexisting record
         collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
         cur.execute(collision_query, {'school': school, 'clubName': clubname})
-
         if cur.rowcount > 0:
             return "<h1>Invalid affiliation data: Record already exists</h1>"
 
