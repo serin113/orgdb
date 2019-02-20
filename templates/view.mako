@@ -5,10 +5,10 @@ Copyright (c) 2019 Nathankissam Roy Tubis & Elfren Simon Clemente.
 Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for details.
 
 Code History:
-2019/02/13  - Intial template code
-2019/02/14  - renamed to view.mako
-2019/02/15  - added <section> tags
-            - changed expected data type to dict from list
+2019/02/13 (Simon) - Intial template code
+2019/02/14 (Simon) - renamed to view.mako
+2019/02/15 (Simon) - added <section> tags
+                   - changed expected data type to dict from list
 </%doc>
 
 
@@ -18,7 +18,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="data=None"/>
+<%page args="data=None, q=''"/>
 
 
 <html>
@@ -31,6 +31,9 @@ Mako variables:
         </header>
         <section>
             <h1 class="center title">View All Affiliation Records</h1>
+            <form method="get" action="" id="filter-form">
+                <input type="text" name="q" value="${q}"/><button type="submit">search</button>
+            </form>
             % if (data is not None) and (len(data) >= 0):
             <table>
                 <tr>
@@ -50,7 +53,7 @@ Mako variables:
                 </tr>
                 % for record in data:
                 <tr>
-                    <td><a href="r/${record['clubID']}">view</a></td>
+                    <td><a href="${record['clubID']}?q=${q}">view</a></td>
                     <td>edit</td>
                     <td>${record['clubName']}</td>
                     <td>${record['school']}</td>

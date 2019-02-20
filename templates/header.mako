@@ -5,8 +5,8 @@ Copyright (c) 2019 Nathankissam Roy Tubis & Elfren Simon Clemente.
 Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for details.
 
 Code History:
-2019/02/13 - added initial template
-2019/02/15 - added basic navbar
+2019/02/13 (Simon) - added initial template
+2019/02/15 (Simon) - added basic navbar
 </%doc>
 
 <h1 class="center"><a href="/">PSYSC</a></h1>

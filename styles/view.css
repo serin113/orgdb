@@ -13,3 +13,11 @@ th, td {
     padding: 10px;
     text-align: left
 }
+
+form#filter-form {
+    display:block;
+    position:relative;
+    height:auto;
+    margin:0 0 10px 0;
+    text-align:center;
+}

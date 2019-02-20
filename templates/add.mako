@@ -5,10 +5,10 @@ Copyright (c) 2019 Nathankissam Roy Tubis & Elfren Simon Clemente.
 Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for details.
 
 Code History:
-2019/02/06 - Initial working code and documentation
-2019/02/13 - Added Mako templating
-2019/02/14 - renamed to add.mako
-2019/02/15 - added <section> tags
+2019/02/06 (Simon) - Initial working code and documentation
+2019/02/13 (Simon) - Added Mako templating
+2019/02/14 (Simon) - renamed to add.mako
+2019/02/15 (Simon) - added <section> tags
 </%doc>
 
 
