@@ -31,10 +31,11 @@ Mako variables:
         </header>
         <section>
             <h1 class="center title">View All Affiliation Records</h1>
+            <hr>
+            % if (data is not None) and (len(data) > 0):
             <form method="get" action="" id="filter-form">
                 <input type="text" name="q" value="${q}"/><button type="submit">search</button>
             </form>
-            % if (data is not None) and (len(data) >= 0):
             <table>
                 <tr>
                     <th></th>
@@ -70,7 +71,7 @@ Mako variables:
                 % endfor
             </table>
             % else:
-            <h1>AffiliationRecordsTable is empty</h1>
+            <p class="center">Database is empty</p>
             % endif
         </section>
         <footer>

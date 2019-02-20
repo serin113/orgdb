@@ -2,7 +2,7 @@
     box-sizing: border-box;
 }
 
-.center {
+.center, .dialog {
     text-align: center;
 }
 
@@ -37,7 +37,7 @@ nav ul li {
     display: inline-block;
 }
 
-header a {
+a {
     text-decoration: none;
 }
 

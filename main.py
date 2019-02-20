@@ -53,14 +53,13 @@ def toInt(s):
 # parameters:
 #   (string type) templateFile (required) - name of template file
 #   (dict type) templatevars - dict of variables ("name":"value") to pass to Mako
-templatelookup = TemplateLookup(
-    directories=["templates/"],
-    collection_size=100,
-    format_exceptions=True,
-    module_directory="tmp/mako_modules"
-)
 def renderContent(templatefile, templatevars=None):
-    global templatelookup
+    templatelookup = TemplateLookup(
+        directories=["templates/"],
+        collection_size=100,
+        format_exceptions=True,
+        module_directory="tmp/mako_modules"
+    )
     t = templatelookup.get_template(templatefile)
     if (templatevars is None):
         return t.render()
@@ -71,7 +70,7 @@ def renderContent(templatefile, templatevars=None):
 # HELPER CLASSES
 #
     
-# class handling a single SQL database connection
+# class handling a single persistent SQL database connection
 # class parameters:
 #   (dict type) config      - SQL database configuration
 # methods:
@@ -89,11 +88,17 @@ class DBConnection(object):
               'database': 'mydb',
               'raise_on_warnings': True
             }
+        # use the passed config if given
         else:
             self.config = arg
-    # method that handles the connection to the database
+    
+    # for checking if there is still a connection to the database
+    # returns True if connected, False otherwise
     def is_connected(self):
         return self.connection.is_connected()
+    
+    # handles connecting to the database
+    # returns the connection object, or None if it failed to connect
     def connect(self, retries=3):
         # try connecting to the SQL server if not yet connected, handling any exceptions
         ctr = 0
@@ -121,9 +126,14 @@ class DBConnection(object):
         # check if previous SQL connection is still connected
         if self.connection is not None:
             if self.connection.is_connected():
+                # return object for interacting with the SQL database
+                print("Using existing connection")
                 return self.connection
+        # only executes if not yet connected for the first time
         print("Error: Cannot connect to SQL database")
         return None
+    
+    # disconnects from the database
     def disconnect(self):
         if self.connection is not None:
             self.connection.close()
@@ -266,7 +276,12 @@ class AddRecord(object):
             (len(advisername) > 100) or \
             (len(contact) > 45) or \
             (len(email) > 45):
-            return "<h1>Invalid affiliation record data</h1>"
+            return renderContent("dialog.mako", {
+                'title': "Error!",
+                'message': "Invalid affiliation record data.",
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&lt; Back"
+            })
             
         today = date.today()
         # validates data for affiliation_data
@@ -285,20 +300,35 @@ class AddRecord(object):
             not(toInt(paymentamount) >= 0) or\
             (len(receiptnumber) > 200) or\
             (len(paymentsendmode) > 200):
-            return "<h1>Invalid affiliation data</h1>"
+            return renderContent("dialog.mako", {
+                'title': "Error!",
+                'message': "Invalid affiliation record data.",
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
         
         # date comparison assumes ISO format: yyyy-mm-dd
         # date validation
         date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
         date_match = re.match(date_pattern, paymentdate, re.M)
         if not date_match:
-            return "<h1>Invalid affiliation data</h1>"
+            return renderContent("dialog.mako", {
+                'title': "Error!",
+                'message': "Invalid affiliation record data.",
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
         
         # email validation
         email_pattern = r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$'
         email_match = re.match(email_pattern, email, re.M) 
         if not email_match:
-            return "<h1>Invalid affiliation data</h1>"
+            return renderContent("dialog.mako", {
+                'title': "Error!",
+                'message': "Invalid affiliation record data.",
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
         
         sqlcnx = self.DBC.connect()                     # connect to SQL server
         cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
@@ -307,7 +337,12 @@ class AddRecord(object):
         collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
         cur.execute(collision_query, {'school': school, 'clubName': clubname})
         if cur.rowcount > 0:
-            return "<h1>Invalid affiliation data: Record already exists</h1>"
+            return renderContent("dialog.mako", {
+                'title': "Error!",
+                'message': "A matching record already exists in the database.",
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
         
         id = newID()    # generate new unique ID for record_data
         record_data = {
@@ -347,8 +382,11 @@ class AddRecord(object):
         cur.execute(add_record, record_data)            # insert record_data to database
         cur.execute(add_affiliation, affiliation_data)  # insert affiliation_data to database
         sqlcnx.commit()                                 # commit changes to database
-        cur.close()                                     # close cursor to the database
-        return "<h1>Affiliation record added</h1>"      # should return insertion success HTML
+        return renderContent("dialog.mako", {           # return insertion success HTML
+            'title': "Affiliation record added.",
+            'linkaddr': "/add",
+            'linktext': "Add another record"
+        })
 
 
 #
