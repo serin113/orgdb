@@ -79,33 +79,33 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------
 -- Table `AffiliationRecordsTable`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `AffiliationApplication`;
-CREATE TABLE `AffiliationApplication` (
+DROP TABLE IF EXISTS `AffiliationApplicationTable`;
+CREATE TABLE `AffiliationApplicationTable` (
   `appID` smallint(6) NOT NULL,         -- application-unique ID
-  `hasRecord` tinyint(4) DEFAULT NULL,  -- is this application for an existing record? 0:no, 1:yes
-  `clubID` varchar(45) DEFAULT NULL,    -- (only used if hasRecord is 1) for which club?
+  `hasRecord` tinyint(4) NULL,  -- is this application for an existing record? 0:no, 1:yes
+  `clubID` varchar(45) NULL,    -- (only used if hasRecord is 1) for which club?
   `dateCreated` date NOT NULL,          -- date application is created
   /* same fields as in AffiliationTable & AffiliationRecordsTable */
-  `region` varchar(10) DEFAULT NULL,
-  `level` tinyint(4) DEFAULT NULL,
-  `type` tinyint(4) DEFAULT NULL,
-  `school` varchar(200) DEFAULT NULL,
-  `clubName` varchar(200) DEFAULT NULL,
-  `address` varchar(500) DEFAULT NULL,
-  `city` varchar(100) DEFAULT NULL,
-  `adviserName` varchar(100) DEFAULT NULL,
-  `contact` varchar(100) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `schoolYear` year(4) DEFAULT NULL,
-  `yearsAffiliated` int(11) DEFAULT NULL,
-  `SCA` smallint(10) DEFAULT NULL,
-  `SCM` smallint(10) DEFAULT NULL,
-  `paymentMode` varchar(100) DEFAULT NULL,
-  `paymentDate` date DEFAULT NULL,
-  `paymentID` varchar(200) DEFAULT NULL,
-  `paymentAmount` int(11) DEFAULT NULL,
-  `receiptNumber` varchar(200) DEFAULT NULL,
-  `paymentSendMode` varchar(200) DEFAULT NULL,
+  `region` varchar(10) NULL,
+  `level` tinyint(4) NULL,
+  `type` tinyint(4) NULL,
+  `school` varchar(200) NULL,
+  `clubName` varchar(200) NULL,
+  `address` varchar(500) NULL,
+  `city` varchar(100) NULL,
+  `adviserName` varchar(100) NULL,
+  `contact` varchar(100) NULL,
+  `email` varchar(100) NULL,
+  `schoolYear` year(4) NULL,
+  `yearsAffiliated` int(11) NULL,
+  `SCA` smallint(10) NULL,
+  `SCM` smallint(10) NULL,
+  `paymentMode` varchar(100) NULL,
+  `paymentDate` date NULL,
+  `paymentID` varchar(200) NULL,
+  `paymentAmount` int(11) NULL,
+  `receiptNumber` varchar(200) NULL,
+  `paymentSendMode` varchar(200) NULL,
   PRIMARY KEY (`appID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
