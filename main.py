@@ -15,9 +15,12 @@
 #                    - Added class DBConnection for handling a single persistent SQL database connection
 #                    - Added atexit handler to disconnect from SQL database
 #                    - Connecting to the database retries 3 times by default
+# 2019/03/06 (Simon) - Added inputValidator helper class
+#                    - Added error logging to separate file
 
 
 import os                               # for accessing the filesystem
+from collections import defaultdict     # for handling inputs with a single dict object
 import mysql.connector                  # for accessing the MySQL database
 from datetime import date, datetime     # for getting the current date
 from uuid import uuid4                  # for creating a unique ID for database insertion
@@ -74,8 +77,8 @@ def renderContent(templatefile, templatevars=None):
 # class parameters:
 #   (dict type) config      - SQL database configuration
 # methods:
-#    connect(retries=0)     - connects to an SQL database using the config
-#    disconnect()           - disconnects previous connection, if any
+#   connect(retries=0)     - connects to an SQL database using the config
+#   disconnect()           - disconnects previous connection, if any
 class DBConnection(object):
     def __init__(self, arg=None):
         self.connection = None
@@ -95,6 +98,8 @@ class DBConnection(object):
     # for checking if there is still a connection to the database
     # returns True if connected, False otherwise
     def is_connected(self):
+        if self.connection is None:
+            return False
         return self.connection.is_connected()
     
     # handles connecting to the database
@@ -108,37 +113,168 @@ class DBConnection(object):
                 self.connection = mysql.connector.connect(**self.config)
                 if self.is_connected():
                     # return object for interacting with the SQL database
-                    print("Connected to SQL database")
+                    cherrypy.log.error("Connected to SQL database")
                     return self.connection
             except mysql.connector.Error as err:
                 if ctr == retries:
                     # wrong database user+pdbassword
                     if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
-                        print("Error: Something is wrong with your user name or password")
+                        cherrypy.log.error("Error: Something is wrong with your user name or password")
                     # non-existent database
                     elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
-                        print("Error: Database does not exist")
+                        cherrypy.log.error("Error: Database does not exist")
                     # everything else
                     else:
-                        print("Error: ", err)
+                        cherrypy.log.error("Error: ", err)
                 self.connection = None
                 ctr += 1
         # check if previous SQL connection is still connected
         if self.connection is not None:
             if self.connection.is_connected():
                 # return object for interacting with the SQL database
-                print("Using existing connection")
                 return self.connection
         # only executes if not yet connected for the first time
-        print("Error: Cannot connect to SQL database")
+        cherrypy.log.error("Error: Cannot connect to SQL database")
         return None
     
     # disconnects from the database
     def disconnect(self):
         if self.connection is not None:
             self.connection.close()
-        print("Disconnected from SQL database")
+        cherrypy.log.error("Disconnected from SQL database")
         return
+        
+# class handling input validation
+# class parameters:
+#   None
+
+# methods:
+#   setLimits(fields): set limits for input validator
+#   (dict/str/None) fields  - which input fields to validate
+#                   * (if dict type)
+#                       - key: (str type) input field name
+#                       - value: (tuple type) limits
+#                           - 0: field minimum (inclusive)
+#                           - 1: field maximum (inclusive)
+#                           - 2: is the field required?
+#                   * (if str type) valid preset strings:
+#                       - "record", "affiliation", "application", "application_renew"
+#   validate(inputs)    - validate inputs
+#                           - expects dict-type inputs with key:field name & value:field value
+class inputValidator(object):
+    # preset input field limits
+    _record_dict = {
+        'region':       (1,17,True),
+        'level':        (1,4,True),
+        'type':         (1,2,True),
+        'school':       (2,100,True),
+        'clubName':     (2,100,True),
+        'address':      (2,200,True),
+        'city':         (2,45,True),
+        'province':     (2,45,True),
+        'adviserName':  (1,100,True),
+        'contact':      (4,45,True),
+        'email':        (0,45,True)
+    }
+    _affiliation_dict = {
+        'affiliated':           (0,1,True),
+        'status':               (0,45,False),
+        'hasAffiliationForms':  (0,1,True),
+        'benefits':             (0,200,False),
+        'remarks':              (0,200,False),
+        'schoolYear':           (2007,2050,True),
+        'yearsAffiliated':      (1,50,True),
+        'SCA':                  (1,32767,True),
+        'SCM':                  (1,32767,True),
+        'paymentMode':          (0,200,False),
+        'paymentID':            (0,200,False),
+        'paymentAmount':        (0,1000000000,False),
+        'receiptNumber':        (0,200,False),
+        'paymentSendMode':      (0,200,False)
+    }
+    _application_dict = {
+        'hasRecord':            (0,1,False)
+    }
+    
+    def __init__(self):
+        self.useLimits()
+    
+    def useLimits(self, arg=None):
+        self.limits = defaultdict(lambda: None)
+        # checking if using preset or custom limits
+        if arg is None:
+            self.limits.update({
+                **self._record_dict, 
+                **self._affiliation_dict,
+                **self._application_dict
+            })
+        elif type(arg) is str:
+            if arg is "record":
+                self.limits.update({
+                    **self._record_dict,
+                    **self._affiliation_dict
+                })
+            elif arg is "affiliation":
+                self.limits.update({
+                    **self._affiliation_dict
+                })
+            elif arg is "application":
+                self.limits.update({
+                    **self._record_dict,
+                    **self._affiliation_dict,
+                    **self._application_dict
+                })
+            elif arg is "aplication_renew":
+                self.limits.update({
+                    **self._affiliation_dict,
+                    **self._application_dict
+                })
+        else:
+            self.limits.update(arg)
+    
+    # for validating dict-type object "inputs"
+    # returns a list of errors (empty list if none)
+    # each error is a tuple (error_message, field_name, field_value)
+    def validate(self, inputs):
+        errors = []
+        if self.limits is None:
+            return errors
+        # iterate through the "inputs" dict
+        for key, val in inputs.items():
+            # skip item if it doesn't have defined limits
+            if self.limits[key] is None:
+                continue
+            # get limits
+            min,max,required = self.limits[key]
+            # check if item is None or an empty string
+            if required:
+                if val is None:
+                    errors.append(("Missing input", key, val))
+                elif type(val) is str:
+                    if len(val) == 0:
+                        errors.append(("Missing input", key, val))
+            # check if item is within limits
+            if type(val) is int:
+                if not(min <= val <= max):
+                    errors.append(("Invalid length", key, val))
+            elif type(val) is str:
+                if not(min <= len(val) <= max):
+                    errors.append(("Invalid length", key, val))
+            # if current field item is "email", check if it has a valid format
+            if key is "email":
+                email_pattern = r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$'
+                email_match = re.match(email_pattern, val, re.M) 
+                if not email_match:
+                    errors.append(("Invalid email address", key, val))
+            # if current field item is "paymentDate", check if it has a valid format and is a valid past date
+            elif key is "paymentDate":
+                date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
+                date_match = re.match(date_pattern, val, re.M)
+                if not date_match:
+                    errors.append(("Invalid date (format is )", key, val))
+                if (str(val) > str(date.today())):
+                    errors.append(("date_future", key, val))
+        return errors
 
 
 #
@@ -147,9 +283,10 @@ class DBConnection(object):
 
 # class used by CherryPy to handle HTTP requests for /
 class Root(object):
-    def __init__(self, DBC):
-        self.view = ViewRecord(DBC)        # class handling /view
-        self.add = AddRecord(DBC)          # class handling /add
+    def __init__(self, DBC=None, Validator=None):
+        self.view = ViewRecord(DBC)             # class handling /view
+        self.add = AddRecord(DBC, Validator)    # class handling /add
+        #self.apply = AddApplication(DBC)       # class handling /apply
     
     @cherrypy.expose
     def index(self):                    # CherryPy method handling /
@@ -229,11 +366,16 @@ class ViewRecord(object):
 
 # class used by CherryPy for handling /add
 class AddRecord(object):
-    def __init__(self, DBC=None):
+    def __init__(self, DBC=None, Validator=None):
         if DBC is not None:
             self.DBC = DBC
         else:
             self.DBC = DBConnection()
+            
+        if Validator is not None:
+            self.validator = Validator
+        else:
+            self.validator = inputValidator()
     
     @cherrypy.expose
     # CherryPy method handling /add/
@@ -265,6 +407,7 @@ class AddRecord(object):
         # input validation
         
         # validates data for record_data
+        
         if not(1 <= toInt(region) <= 17) or \
             not(1 <= toInt(level) <= 4) or \
             not(1 <= toInt(type) <= 2) or \
@@ -394,19 +537,24 @@ class AddRecord(object):
 #
 
 def main():
-    # start a persistent connection to the SQL database
-    DBC = DBConnection()
-    DBC.connect()
-    
-    # disconnect from SQL database on exit
-    atexit.register(lambda dbc: dbc.disconnect(), DBC)
-    
     # configuration of CherryPy webserver
     if __name__ == '__main__':
+        print("Running server")
         cherrypy.config.update({
             'server.socket_host': '127.0.0.1',
             'server.socket_port': 8080,
+            'log.screen': False,
+            'log.error_file': 'error.log',
+            'log.access_file': ''
         })
+        
+        # start a persistent connection to the SQL database
+        DBC = DBConnection()
+        DBC.connect()
+        
+        # disconnect from SQL database on exit
+        atexit.register(lambda dbc: dbc.disconnect(), DBC)
+        
         conf = {
             '/': {
                 'tools.sessions.on': True,
@@ -431,6 +579,7 @@ def main():
         }
         # start the webserver
         cherrypy.quickstart(Root(DBC), '/', conf)
+        print("\nServer exited")
 
 # start the program
 main()
