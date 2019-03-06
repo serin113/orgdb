@@ -197,9 +197,9 @@ class inputValidator(object):
     }
     
     def __init__(self):
-        self.useLimits()
+        self.setLimits()
     
-    def useLimits(self, arg=None):
+    def setLimits(self, arg=None):
         self.limits = defaultdict(lambda: None)
         # checking if using preset or custom limits
         if arg is None:
@@ -224,7 +224,7 @@ class inputValidator(object):
                     **self._affiliation_dict,
                     **self._application_dict
                 })
-            elif arg is "aplication_renew":
+            elif arg is "application_renew":
                 self.limits.update({
                     **self._affiliation_dict,
                     **self._application_dict
@@ -268,6 +268,7 @@ class inputValidator(object):
                     errors.append(("Invalid email address", key, val))
             # if current field item is "paymentDate", check if it has a valid format and is a valid past date
             elif key is "paymentDate":
+                # date comparison assumes ISO format: yyyy-mm-dd
                 date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
                 date_match = re.match(date_pattern, val, re.M)
                 if not date_match:
@@ -404,93 +405,13 @@ class AddRecord(object):
             "VALUES (%(affiliationID)s, %(affiliated)s, %(status)s, %(hasAffiliationForms)s, %(benefits)s, %(remarks)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s, %(AffiliationRecordsTable_clubID)s)"
         )
         
-        # input validation
-        
-        # validates data for record_data
-        
-        if not(1 <= toInt(region) <= 17) or \
-            not(1 <= toInt(level) <= 4) or \
-            not(1 <= toInt(type) <= 2) or \
-            (len(school) > 100) or \
-            (len(clubname) > 100) or \
-            (len(address) > 200) or \
-            (len(city) > 45) or \
-            (len(province) > 45) or \
-            (len(advisername) > 100) or \
-            (len(contact) > 45) or \
-            (len(email) > 45):
-            return renderContent("dialog.mako", {
-                'title': "Error!",
-                'message': "Invalid affiliation record data.",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&lt; Back"
-            })
-            
-        today = date.today()
-        # validates data for affiliation_data
-        if not(2007 <= toInt(schoolyear) <= 2050) or \
-            not(0 <= toInt(affiliated) <= 1) or \
-            (len(status) > 45) or \
-            not(0 <= toInt(hasaffiliationforms) <= 1) or \
-            (len(benefits) > 100) or \
-            (len(remarks) > 200) or \
-            not(1 <= toInt(yearsaffiliated) <= 50) or \
-            not(1 <= toInt(sca) <= 100) or \
-            not(1 <= toInt(scm) <= 2000) or \
-            (len(paymentmode) > 200) or\
-            (str(paymentdate) > str(today)) or \
-            (len(paymentid) > 200) or\
-            not(toInt(paymentamount) >= 0) or\
-            (len(receiptnumber) > 200) or\
-            (len(paymentsendmode) > 200):
-            return renderContent("dialog.mako", {
-                'title': "Error!",
-                'message': "Invalid affiliation record data.",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
-        
-        # date comparison assumes ISO format: yyyy-mm-dd
-        # date validation
-        date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
-        date_match = re.match(date_pattern, paymentdate, re.M)
-        if not date_match:
-            return renderContent("dialog.mako", {
-                'title': "Error!",
-                'message': "Invalid affiliation record data.",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
-        
-        # email validation
-        email_pattern = r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$'
-        email_match = re.match(email_pattern, email, re.M) 
-        if not email_match:
-            return renderContent("dialog.mako", {
-                'title': "Error!",
-                'message': "Invalid affiliation record data.",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
-        
         sqlcnx = self.DBC.connect()                     # connect to SQL server
         cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
-
-        # checking for preexisting record
-        collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
-        cur.execute(collision_query, {'school': school, 'clubName': clubname})
-        if cur.rowcount > 0:
-            return renderContent("dialog.mako", {
-                'title': "Error!",
-                'message': "A matching record already exists in the database.",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
         
         id = newID()    # generate new unique ID for record_data
         record_data = {
             'clubID':       id,
-            'dateUpdated':  today,
+            'dateUpdated':  date.today(),
             'region':       toInt(region),
             'level':        toInt(level),
             'type':         toInt(type),
@@ -522,6 +443,33 @@ class AddRecord(object):
             'paymentSendMode':                  paymentsendmode,
             'AffiliationRecordsTable_clubID':   id
         }
+        
+        # input validation
+        self.validator.setLimits("record")
+        errors = self.validator.validate({**record_data, **affiliation_data})
+        # display errors, if any
+        if len(errors) > 0:
+            errortext = ""
+            for e in errors:
+                errortext += "["+str(e[0])+"] '"+str(e[1])+"': "+str(e[2])+"<br>"
+            return renderContent("dialog.mako", {
+                'title': "Error!",
+                'message': "Invalid affiliation record data:<br>"+errortext,
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
+        
+        # checking for preexisting record
+        collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
+        cur.execute(collision_query, {'school': school, 'clubName': clubname})
+        if cur.rowcount > 0:
+            return renderContent("dialog.mako", {
+                'title': "Error!",
+                'message': "A matching record already exists in the database.",
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
+        
         cur.execute(add_record, record_data)            # insert record_data to database
         cur.execute(add_affiliation, affiliation_data)  # insert affiliation_data to database
         sqlcnx.commit()                                 # commit changes to database
