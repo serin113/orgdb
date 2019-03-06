@@ -8,13 +8,15 @@
 -- 2019/02/17 (Simon) - Cleanup to follow same format as the mysqldump output
 -- 2019/02/27 (Nathan) - Added table for affiliation application
 -- 2019/02/27 (Simon) - Cleanup & additional documentation
+-- 2019/03/02 (Simon) - Added command to drop database every time this file is sourced
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 
-CREATE DATABASE IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+DROP DATABASE IF EXISTS `mydb`;
+CREATE DATABASE `mydb` DEFAULT CHARACTER SET utf8 ;
 USE `mydb` ;
 
 
@@ -25,7 +27,7 @@ DROP TABLE IF EXISTS `AffiliationRecordsTable`;
 CREATE TABLE IF NOT EXISTS `AffiliationRecordsTable` (
   `clubID` VARCHAR(50) NOT NULL,    -- record-unique id
   `dateUpdated` DATE NOT NULL,      -- record last modification date
-  `region` VARCHAR(10) NULL,        -- school's regional PSGC: 1 to 17
+  `region` TINYINT(1) NULL,        -- school's regional PSGC: 1 to 17
                                     -- https://psa.gov.ph/classification/psgc/downloads/SUMWEBPROV-DEC2018-CODED-HUC-FINAL.pdf
   `level` TINYINT(1) NULL,          -- 1: elementary
                                     -- 2: high school
@@ -77,35 +79,35 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 -- -----------------------------------------------------
--- Table `AffiliationRecordsTable`
+-- Table `AffiliationApplicationsTable`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `AffiliationApplicationTable`;
-CREATE TABLE `AffiliationApplicationTable` (
-  `appID` smallint(6) NOT NULL,         -- application-unique ID
-  `hasRecord` tinyint(4) NULL,  -- is this application for an existing record? 0:no, 1:yes
-  `clubID` varchar(45) NULL,    -- (only used if hasRecord is 1) for which club?
-  `dateCreated` date NOT NULL,          -- date application is created
+DROP TABLE IF EXISTS `AffiliationApplicationsTable`;
+CREATE TABLE `AffiliationApplicationsTable` (
+  `appID` SMALLINT(6) NOT NULL,         -- application-unique ID
+  `hasRecord` TINYINT(4) NULL,  -- is this application for an existing record? 0:no, 1:yes
+  `clubID` VARCHAR(45) NULL,    -- (only used if hasRecord is 1) for which club?
+  `dateCreated` DATE NOT NULL,          -- date application is created
   /* same fields as in AffiliationTable & AffiliationRecordsTable */
-  `region` varchar(10) NULL,
-  `level` tinyint(4) NULL,
-  `type` tinyint(4) NULL,
-  `school` varchar(200) NULL,
-  `clubName` varchar(200) NULL,
-  `address` varchar(500) NULL,
-  `city` varchar(100) NULL,
-  `adviserName` varchar(100) NULL,
-  `contact` varchar(100) NULL,
-  `email` varchar(100) NULL,
-  `schoolYear` year(4) NULL,
-  `yearsAffiliated` int(11) NULL,
-  `SCA` smallint(10) NULL,
-  `SCM` smallint(10) NULL,
-  `paymentMode` varchar(100) NULL,
-  `paymentDate` date NULL,
-  `paymentID` varchar(200) NULL,
-  `paymentAmount` int(11) NULL,
-  `receiptNumber` varchar(200) NULL,
-  `paymentSendMode` varchar(200) NULL,
+  `region` TINYINT(1) NULL,
+  `level` TINYINT(4) NULL,
+  `type` TINYINT(4) NULL,
+  `school` VARCHAR(200) NULL,
+  `clubName` VARCHAR(200) NULL,
+  `address` VARCHAR(500) NULL,
+  `city` VARCHAR(100) NULL,
+  `adviserName` VARCHAR(100) NULL,
+  `contact` VARCHAR(100) NULL,
+  `email` VARCHAR(100) NULL,
+  `schoolYear` YEAR(4) NULL,
+  `yearsAffiliated` INT(11) NULL,
+  `SCA` SMALLINT(10) NULL,
+  `SCM` SMALLINT(10) NULL,
+  `paymentMode` VARCHAR(100) NULL,
+  `paymentDate` DATE NULL,
+  `paymentID` VARCHAR(200) NULL,
+  `paymentAmount` INT(11) NULL,
+  `receiptNumber` VARCHAR(200) NULL,
+  `paymentSendMode` VARCHAR(200) NULL,
   PRIMARY KEY (`appID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

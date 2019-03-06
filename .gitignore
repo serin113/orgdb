@@ -3,3 +3,4 @@ tmp/
 *.cnf
 *.db
 *.csv
+*.log
