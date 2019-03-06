@@ -15,7 +15,7 @@
 #                    - Added class DBConnection for handling a single persistent SQL database connection
 #                    - Added atexit handler to disconnect from SQL database
 #                    - Connecting to the database retries 3 times by default
-# 2019/03/06 (Simon) - Added inputValidator helper class
+# 2019/03/06 (Simon) - Added InputValidator and ContentRenderer helper classes
 #                    - Added error logging to separate file
 
 
@@ -50,23 +50,6 @@ def toInt(s):
     except:
         return False
     return int(s)
-
-# return the contents of file s if it exists,
-# return an error message otherwise 
-# parameters:
-#   (string type) templateFile (required) - name of template file
-#   (dict type) templatevars - dict of variables ("name":"value") to pass to Mako
-def renderContent(templatefile, templatevars=None):
-    templatelookup = TemplateLookup(
-        directories=["templates/"],
-        collection_size=100,
-        format_exceptions=True,
-        module_directory="tmp/mako_modules"
-    )
-    t = templatelookup.get_template(templatefile)
-    if (templatevars is None):
-        return t.render()
-    return t.render(**templatevars)
 
 
 #
@@ -147,7 +130,6 @@ class DBConnection(object):
 # class handling input validation
 # class parameters:
 #   None
-
 # methods:
 #   setLimits(fields): set limits for input validator
 #   (dict/str/None) fields  - which input fields to validate
@@ -161,7 +143,7 @@ class DBConnection(object):
 #                       - "record", "affiliation", "application", "application_renew"
 #   validate(inputs)    - validate inputs
 #                           - expects dict-type inputs with key:field name & value:field value
-class inputValidator(object):
+class InputValidator(object):
     # preset input field limits
     _record_dict = {
         'region':       (1,17,True),
@@ -277,6 +259,27 @@ class inputValidator(object):
                     errors.append(("date_future", key, val))
         return errors
 
+# persistent class handling Mako template rendering
+# class parameters:
+#   None
+# methods:
+#   render(templatefile, templatevars=None): return rendered HTML
+#       (string type) templatefile (required) - name of template file
+#       (dict type) templatevars - dict of variables ("name":"value") to pass to Mako
+class ContentRenderer(object):
+    def __init__(self):
+        self.lookup = TemplateLookup(
+            directories=["templates/"],
+            collection_size=100,
+            format_exceptions=True,
+            module_directory="tmp/mako_modules"
+        )
+    def render(self, templatefile, templatevars=None):
+        t = self.lookup.get_template(templatefile)
+        if (templatevars is None):
+            return t.render()
+        return t.render(**templatevars)
+
 
 #
 # CHERRYPY-EXPOSED CLASSES
@@ -284,24 +287,33 @@ class inputValidator(object):
 
 # class used by CherryPy to handle HTTP requests for /
 class Root(object):
-    def __init__(self, DBC=None, Validator=None):
-        self.view = ViewRecord(DBC)             # class handling /view
-        self.add = AddRecord(DBC, Validator)    # class handling /add
-        #self.apply = AddApplication(DBC)       # class handling /apply
+    def __init__(self, DBC=None, Renderer=None, Validator=None):
+        self.renderer = Renderer
+        # class handling /view
+        self.view = ViewRecord(DBC=DBC, Renderer=Renderer)
+        # class handling /add
+        self.add = AddRecord(DBC=DBC, Renderer=Renderer, Validator=Validator)
+        # class handling /apply
+        #self.apply = AddApplication(DBC=DBC, Renderer=Renderer, Validator=Validator)
     
     @cherrypy.expose
-    def index(self):                    # CherryPy method handling /
+    # CherryPy method handling /
+    def index(self):
         # returns Mako-rendered homepage HTML
-        return renderContent("index.mako")
+        return self.renderer.render("index.mako")
 
 # class used by CherryPy for handling /view
 @cherrypy.popargs('record_id', 'affiliation_id')
 class ViewRecord(object):
-    def __init__(self, DBC=None):
+    def __init__(self, DBC=None, Renderer=None):
         if DBC is not None:
             self.DBC = DBC
         else:
             self.DBC = DBConnection()
+        if Renderer is not None:
+            self.renderer = Renderer
+        else:
+            self.renderer = ContentRenderer()
         
     @cherrypy.expose
     # CherryPy method handling /view
@@ -351,7 +363,7 @@ class ViewRecord(object):
                 data_list.append(record_dict)
             # returns Mako-rendered view page HTML
             # (control ViewAffiliationRecordList)
-            return renderContent("view.mako", {"data":data_list, "q":q})
+            return self.renderer.render("view.mako", {"data":data_list, "q":q})
             
         else:
             # (control ViewAffiliationRecord)
@@ -367,28 +379,30 @@ class ViewRecord(object):
 
 # class used by CherryPy for handling /add
 class AddRecord(object):
-    def __init__(self, DBC=None, Validator=None):
+    def __init__(self, DBC=None, Renderer=None, Validator=None):
         if DBC is not None:
             self.DBC = DBC
         else:
             self.DBC = DBConnection()
-            
         if Validator is not None:
             self.validator = Validator
         else:
-            self.validator = inputValidator()
+            self.validator = InputValidator()
+        if Renderer is not None:
+            self.renderer = Renderer
+        else:
+            self.renderer = ContentRenderer()
     
     @cherrypy.expose
     # CherryPy method handling /add/
     def index(self):
         # returns Mako-rendered add page HTML
-        return renderContent("add.mako")
+        return self.renderer.render("add.mako")
     
     @cherrypy.expose
     # CherryPy method handling /add/insert with incoming POST/GET data
     # every argument in the method (except for self) is defined in db.sql
     def insert(self, region, level, type, school, clubname, address, city, province, advisername, contact, email, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode):
-        
         # string format for inserting record_data into SQL database
         # table structure is defined in db.sql
         add_record = (
@@ -396,7 +410,6 @@ class AddRecord(object):
             "(clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email) "
             "VALUES (%(clubID)s, %(dateUpdated)s, %(region)s, %(level)s, %(type)s, %(school)s, %(clubName)s, %(address)s, %(city)s, %(province)s, %(adviserName)s, %(contact)s, %(email)s)"
         )
-        
         # string format for inserting affiliation_data into SQL database
         # table structure is defined in db.sql
         add_affiliation = (
@@ -404,10 +417,8 @@ class AddRecord(object):
             "(affiliationID, affiliated, status, hasAffiliationForms, benefits, remarks, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode, AffiliationRecordsTable_clubID) "
             "VALUES (%(affiliationID)s, %(affiliated)s, %(status)s, %(hasAffiliationForms)s, %(benefits)s, %(remarks)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s, %(AffiliationRecordsTable_clubID)s)"
         )
-        
         sqlcnx = self.DBC.connect()                     # connect to SQL server
         cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
-        
         id = newID()    # generate new unique ID for record_data
         record_data = {
             'clubID':       id,
@@ -443,7 +454,6 @@ class AddRecord(object):
             'paymentSendMode':                  paymentsendmode,
             'AffiliationRecordsTable_clubID':   id
         }
-        
         # input validation
         self.validator.setLimits("record")
         errors = self.validator.validate({**record_data, **affiliation_data})
@@ -452,32 +462,31 @@ class AddRecord(object):
             errortext = ""
             for e in errors:
                 errortext += "["+str(e[0])+"] '"+str(e[1])+"': "+str(e[2])+"<br>"
-            return renderContent("dialog.mako", {
+            return self.renderer.render("dialog.mako", {
                 'title': "Error!",
                 'message': "Invalid affiliation record data:<br>"+errortext,
                 'linkaddr': "javascript:history.back();",
                 'linktext': "&gt; Back"
             })
-        
         # checking for preexisting record
         collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
         cur.execute(collision_query, {'school': school, 'clubName': clubname})
         if cur.rowcount > 0:
-            return renderContent("dialog.mako", {
+            return self.renderer.render("dialog.mako", {
                 'title': "Error!",
                 'message': "A matching record already exists in the database.",
                 'linkaddr': "javascript:history.back();",
                 'linktext': "&gt; Back"
             })
-        
         cur.execute(add_record, record_data)            # insert record_data to database
         cur.execute(add_affiliation, affiliation_data)  # insert affiliation_data to database
         sqlcnx.commit()                                 # commit changes to database
-        return renderContent("dialog.mako", {           # return insertion success HTML
+        return self.renderer.render("dialog.mako", {           # return insertion success HTML
             'title': "Affiliation record added.",
             'linkaddr': "/add",
             'linktext': "Add another record"
         })
+        cur.close() # close database cursor
 
 
 #
@@ -496,12 +505,16 @@ def main():
             'log.access_file': ''
         })
         
+        # initialize persistent renderer & validator classes
+        renderer = ContentRenderer()
+        validator = InputValidator()
+        
         # start a persistent connection to the SQL database
-        DBC = DBConnection()
-        DBC.connect()
+        dbc = DBConnection()
+        dbc.connect()
         
         # disconnect from SQL database on exit
-        atexit.register(lambda dbc: dbc.disconnect(), DBC)
+        atexit.register(lambda d: d.disconnect(), dbc)
         
         conf = {
             '/': {
@@ -526,7 +539,7 @@ def main():
             }
         }
         # start the webserver
-        cherrypy.quickstart(Root(DBC), '/', conf)
+        cherrypy.quickstart(Root(dbc, renderer, validator), '/', conf)
         print("\nServer exited")
 
 # start the program
