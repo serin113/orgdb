@@ -9,6 +9,7 @@ Code History:
 2019/02/14 (Simon) - renamed to view.mako
 2019/02/15 (Simon) - added <section> tags
                    - changed expected data type to dict from list
+2019/03/07 (Simon) - Added clubID column
 </%doc>
 
 
@@ -40,6 +41,7 @@ Mako variables:
                 <tr>
                     <th></th>
                     <th></th>
+                    <th>club ID</th>
                     <th>club name</th>
                     <th>school</th>
                     <th>level</th>
@@ -56,6 +58,7 @@ Mako variables:
                 <tr>
                     <td><a href="${record['clubID']}?q=${q}">view</a></td>
                     <td>edit</td>
+                    <td>${record['clubID']}</td>
                     <td>${record['clubName']}</td>
                     <td>${record['school']}</td>
                     <td>${record['level']}</td>
