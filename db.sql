@@ -9,6 +9,7 @@
 -- 2019/02/27 (Nathan) - Added table for affiliation application
 -- 2019/02/27 (Simon) - Cleanup & additional documentation
 -- 2019/03/02 (Simon) - Added command to drop database every time this file is sourced
+-- 2019/03/07 (Simon) - Fixed data types
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
@@ -26,8 +27,8 @@ USE `mydb` ;
 DROP TABLE IF EXISTS `AffiliationRecordsTable`;
 CREATE TABLE IF NOT EXISTS `AffiliationRecordsTable` (
   `clubID` VARCHAR(50) NOT NULL,    -- record-unique id
-  `dateUpdated` DATE NOT NULL,      -- record last modification date
-  `region` TINYINT(1) NULL,        -- school's regional PSGC: 1 to 17
+  `dateUpdated` DATETIME NOT NULL,      -- record last modification date
+  `region` TINYINT(1) NULL,         -- school's regional PSGC: 1 to 17
                                     -- https://psa.gov.ph/classification/psgc/downloads/SUMWEBPROV-DEC2018-CODED-HUC-FINAL.pdf
   `level` TINYINT(1) NULL,          -- 1: elementary
                                     -- 2: high school
@@ -37,11 +38,11 @@ CREATE TABLE IF NOT EXISTS `AffiliationRecordsTable` (
   `school` VARCHAR(100) NULL,       -- name of school
   `clubName` VARCHAR(100) NULL,     -- name of club
   `address` VARCHAR(200) NULL,      -- school's address
-  `city` VARCHAR(45) NULL,          -- school's city
-  `province` VARCHAR(45) NULL,      -- school's province
+  `city` VARCHAR(100) NULL,          -- school's city
+  `province` VARCHAR(100) NULL,      -- school's province
   `adviserName` VARCHAR(100) NULL,  -- club adviser/s' name
-  `contact` VARCHAR(45) NULL,       -- club contact no.
-  `email` VARCHAR(45) NULL,         -- club email
+  `contact` VARCHAR(100) NULL,       -- club contact no.
+  `email` VARCHAR(100) NULL,         -- club email
   PRIMARY KEY (`clubID`))
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -58,13 +59,13 @@ CREATE TABLE IF NOT EXISTS `AffiliationTable` (
   `benefits` VARCHAR(200) NULL,             -- any discounts/sponsorships/scholarships/etc.
   `remarks` VARCHAR(200) NULL,              -- extra remarks
   `schoolYear` YEAR(4) NULL,                -- if s.y. 2018-2019, store 2019
-  `yearsAffiliated` INT NULL,               -- duration of affiliation
+  `yearsAffiliated` INT(11) NULL,               -- duration of affiliation
   `SCA` SMALLINT(10) NULL,                  -- # of club advisers
   `SCM` SMALLINT(10) NULL,                  -- # of club members
   `paymentMode` VARCHAR(200) NULL,          -- means of payment (deposit/check/etc.)
-  `paymentDate` DATE NULL,                  -- date paid
+  `paymentDate` DATETIME NULL,                  -- date paid
   `paymentID` VARCHAR(200) NULL,            -- identifier for payment
-  `paymentAmount` INT NULL,                 -- amount paid
+  `paymentAmount` INT(11) NULL,                 -- amount paid
   `receiptNumber` VARCHAR(200) NULL,        -- payment receipt number
   `paymentSendMode` VARCHAR(200) NULL,      -- means of sending payment (delivery/in-person/etc.)
   `AffiliationRecordsTable_clubID` VARCHAR(50) NOT NULL,    -- affiliation under which club?
@@ -83,21 +84,22 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `AffiliationApplicationsTable`;
 CREATE TABLE `AffiliationApplicationsTable` (
-  `appID` SMALLINT(6) NOT NULL,         -- application-unique ID
-  `hasRecord` TINYINT(4) NULL,  -- is this application for an existing record? 0:no, 1:yes
-  `clubID` VARCHAR(45) NULL,    -- (only used if hasRecord is 1) for which club?
-  `dateCreated` DATE NOT NULL,          -- date application is created
+  `appID` VARCHAR(50) NOT NULL,     -- application-unique ID
+  `hasRecord` TINYINT(4) NULL,      -- is this application for an existing record? 0:no, 1:yes
+  `clubID` VARCHAR(50) NULL,        -- (only used if hasRecord is 1) for which club?
+  `dateCreated` DATETIME NOT NULL,  -- date application is created
   /* same fields as in AffiliationTable & AffiliationRecordsTable */
-  `region` TINYINT(1) NULL,
-  `level` TINYINT(4) NULL,
-  `type` TINYINT(4) NULL,
-  `school` VARCHAR(200) NULL,
-  `clubName` VARCHAR(200) NULL,
-  `address` VARCHAR(500) NULL,
-  `city` VARCHAR(100) NULL,
-  `adviserName` VARCHAR(100) NULL,
-  `contact` VARCHAR(100) NULL,
-  `email` VARCHAR(100) NULL,
+  `region` TINYINT(1) NULL,         -- (only used if hasRecord is 0)
+  `level` TINYINT(1) NULL,          -- (only used if hasRecord is 0)
+  `type` TINYINT(1) NULL,           -- (only used if hasRecord is 0)
+  `school` VARCHAR(200) NULL,       -- (only used if hasRecord is 0)
+  `clubName` VARCHAR(200) NULL,     -- (only used if hasRecord is 0)
+  `address` VARCHAR(500) NULL,      -- (only used if hasRecord is 0)
+  `city` VARCHAR(100) NULL,         -- (only used if hasRecord is 0)
+  `province` VARCHAR(100) NULL,     -- (only used if hasRecord is 0)
+  `adviserName` VARCHAR(100) NULL,  -- (only used if hasRecord is 0)
+  `contact` VARCHAR(100) NULL,      -- (only used if hasRecord is 0)
+  `email` VARCHAR(100) NULL,        -- (only used if hasRecord is 0)
   `schoolYear` YEAR(4) NULL,
   `yearsAffiliated` INT(11) NULL,
   `SCA` SMALLINT(10) NULL,

@@ -1,0 +1,9 @@
+@import url("main.css");
+
+form#apply-form {
+    display:block;
+    position:relative;
+    height:auto;
+    margin:0px;
+    text-align:center;
+}
