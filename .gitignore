@@ -1,6 +1,7 @@
 # ignore temporary file folder
 tmp/
-*.cnf
+*.conf
+*.txt
 *.db
 *.csv
 *.log
