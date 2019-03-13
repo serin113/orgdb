@@ -8,13 +8,15 @@ Code History:
 2019/02/13 (Simon) - added initial template
 2019/02/15 (Simon) - added basic navbar
 2019/03/07 (Simon) - added /apply link
+2019/03/12 (Simon) - added /applications link
 </%doc>
 
 <h1 class="center"><a href="/">PSYSC</a></h1>
 <nav class="center">
     <ul>
         <li><a href="/add">Add Record</a></li>
-        <li><a href="/view">View Record</a></li>
+        <li><a href="/view">View Records</a></li>
         <li><a href="/apply">Create Application</a></li>
+        <li><a href="/applications">View Applications</a></li>
     </ul>
 </nav>

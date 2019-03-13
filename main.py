@@ -17,7 +17,10 @@
 #                    - Connecting to the database retries 3 times by default
 # 2019/03/06 (Simon) - Added InputValidator and ContentRenderer helper classes
 #                    - Added error logging to separate file
-# 2019/03/07 (Simon) - Added class AddApplication for handling /apply
+# 2019/03/07 (Simon) - Added class ViewApplication for handling /applications
+# 2019/03/13 (Simon) - Methods approve+reject+view implemented in ViewApplication
+#                    - Split affiliation input validation in AddRecord.insert() to be used by other methods
+#                    - Program reads db.conf for the SQL server settings by default
 
 
 import os                               # for accessing the filesystem
@@ -100,7 +103,7 @@ class DBConnection(object):
         # keep trying to connect
         while (self.connection is None) and (ctr <= retries):
             try:
-                self.connection = mysql.connector.connect(**self.config)
+                self.connection = mysql.connector.connect(option_files=self.config)
                 if self.is_connected():
                     # return object for interacting with the SQL database
                     cherrypy.log.error("Connected to SQL database")
@@ -306,6 +309,8 @@ class Root(object):
         self.add = AddRecord(DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /apply
         self.apply = AddApplication(DBC=DBC, Renderer=Renderer, Validator=Validator)
+        # class handling /applications
+        self.applications = ViewApplication(DBC=DBC, Renderer=Renderer, Validator=Validator)
     
     @cherrypy.expose
     # CherryPy method handling /
@@ -421,13 +426,7 @@ class AddRecord(object):
             "(clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email) "
             "VALUES (%(clubID)s, %(dateUpdated)s, %(region)s, %(level)s, %(type)s, %(school)s, %(clubName)s, %(address)s, %(city)s, %(province)s, %(adviserName)s, %(contact)s, %(email)s)"
         )
-        # string format for inserting affiliation_data into SQL database
-        # table structure is defined in db.sql
-        add_affiliation = (
-            "INSERT INTO AffiliationTable "
-            "(affiliationID, affiliated, status, hasAffiliationForms, benefits, remarks, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode, AffiliationRecordsTable_clubID) "
-            "VALUES (%(affiliationID)s, %(affiliated)s, %(status)s, %(hasAffiliationForms)s, %(benefits)s, %(remarks)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s, %(AffiliationRecordsTable_clubID)s)"
-        )
+        
         sqlcnx = self.DBC.connect()                     # connect to SQL server
         cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
         id = newID()    # generate new unique ID for record_data
@@ -446,6 +445,56 @@ class AddRecord(object):
             'contact':      contact,
             'email':        email
         }
+        
+        # input validation
+        self.validator.setLimits("record")
+        errors = self.validator.validate(record_data)
+        # display errors, if any
+        if len(errors) > 0:
+            cur.close() # close database cursor
+            errortext = ""
+            for e in errors:
+                errortext += "["+str(e[0])+"] '"+str(e[1])+"': "+str(e[2])+"<br>"
+            return self.renderer.render("dialog.mako", {
+                'title': "Error!",
+                'message': "Invalid affiliation record data:<br>"+errortext,
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
+        # checking for preexisting record
+        collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
+        cur.execute(collision_query, {'school': school, 'clubName': clubname})
+        if cur.rowcount > 0:
+            cur.close() # close database cursor
+            return self.renderer.render("dialog.mako", {
+                'title': "Error!",
+                'message': "A matching record already exists in the database.",
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
+        res = self.validate_affiliation(id, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode)
+        if len(res) > 0:
+            cur.close() # close database cursor
+            errortext = ""
+            for e in res:
+                errortext += "["+str(e[0])+"] '"+str(e[1])+"': "+str(e[2])+"<br>"
+            return self.renderer.render("dialog.mako", {
+                'title': "Error!",
+                'message': "Invalid affiliation record data:<br>"+errortext,
+                'linkaddr': "javascript:history.back();",
+                'linktext': "&gt; Back"
+            })
+        cur.execute(add_record, record_data)            # insert record_data to database
+        sqlcnx.commit()                                 # commit changes to database
+        cur.close() # close database cursor
+        self.insert_affiliation(id, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode)
+        return self.renderer.render("dialog.mako", {           # return insertion success HTML
+            'title': "Affiliation record added.",
+            'linkaddr': "/add",
+            'linktext': "Add another record"
+        })
+            
+    def validate_affiliation(self, clubid, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode):
         affiliation_data = {
             'affiliationID':                    newID(),    # generate new unique ID for affiliation_data
             'affiliated':                       toInt(affiliated),
@@ -463,40 +512,44 @@ class AddRecord(object):
             'paymentAmount':                    toInt(paymentamount),
             'receiptNumber':                    receiptnumber,
             'paymentSendMode':                  paymentsendmode,
-            'AffiliationRecordsTable_clubID':   id
+            'AffiliationRecordsTable_clubID':   clubid
         }
         # input validation
-        self.validator.setLimits("record")
-        errors = self.validator.validate({**record_data, **affiliation_data})
-        # display errors, if any
-        if len(errors) > 0:
-            errortext = ""
-            for e in errors:
-                errortext += "["+str(e[0])+"] '"+str(e[1])+"': "+str(e[2])+"<br>"
-            return self.renderer.render("dialog.mako", {
-                'title': "Error!",
-                'message': "Invalid affiliation record data:<br>"+errortext,
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
-        # checking for preexisting record
-        collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
-        cur.execute(collision_query, {'school': school, 'clubName': clubname})
-        if cur.rowcount > 0:
-            return self.renderer.render("dialog.mako", {
-                'title': "Error!",
-                'message': "A matching record already exists in the database.",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
-        cur.execute(add_record, record_data)            # insert record_data to database
+        self.validator.setLimits("affiliation")
+        errors = self.validator.validate(affiliation_data)
+        return errors
+        
+    def insert_affiliation(self, clubid, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode):
+        # string format for inserting affiliation_data into SQL database
+        # table structure is defined in db.sql
+        add_affiliation = (
+            "INSERT INTO AffiliationTable "
+            "(affiliationID, affiliated, status, hasAffiliationForms, benefits, remarks, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode, AffiliationRecordsTable_clubID) "
+            "VALUES (%(affiliationID)s, %(affiliated)s, %(status)s, %(hasAffiliationForms)s, %(benefits)s, %(remarks)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s, %(AffiliationRecordsTable_clubID)s)"
+        )
+        affiliation_data = {
+            'affiliationID':                    newID(),    # generate new unique ID for affiliation_data
+            'affiliated':                       toInt(affiliated),
+            'status':                           status,
+            'hasAffiliationForms':              toInt(hasaffiliationforms),
+            'benefits':                         benefits,
+            'remarks':                          remarks,
+            'schoolYear':                       toInt(schoolyear),
+            'yearsAffiliated':                  toInt(yearsaffiliated),
+            'SCA':                              toInt(sca),
+            'SCM':                              toInt(scm),
+            'paymentMode':                      paymentmode,
+            'paymentDate':                      paymentdate,
+            'paymentID':                        paymentid,
+            'paymentAmount':                    toInt(paymentamount),
+            'receiptNumber':                    receiptnumber,
+            'paymentSendMode':                  paymentsendmode,
+            'AffiliationRecordsTable_clubID':   clubid
+        }
+        sqlcnx = self.DBC.connect()                     # connect to SQL server
+        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
         cur.execute(add_affiliation, affiliation_data)  # insert affiliation_data to database
         sqlcnx.commit()                                 # commit changes to database
-        return self.renderer.render("dialog.mako", {           # return insertion success HTML
-            'title': "Affiliation record added.",
-            'linkaddr': "/add",
-            'linktext': "Add another record"
-        })
         cur.close() # close database cursor
 
 # class used by CherryPy for handling /apply
@@ -626,6 +679,179 @@ class AddApplication(object):
         })
         cur.close() # close database cursor
 
+# class used by CherryPy for handling /applications
+class ViewApplication(object):
+    def __init__(self, DBC=None, Renderer=None, Validator=None):
+        if DBC is not None:
+            self.DBC = DBC
+        else:
+            self.DBC = DBConnection()
+        if Renderer is not None:
+            self.renderer = Renderer
+        else:
+            self.renderer = ContentRenderer()
+        if Validator is not None:
+            self.validator = Validator
+        else:
+            self.validator = InputValidator()
+        
+    @cherrypy.expose
+    # CherryPy method handling /applications
+    def index(self, q=""):
+        sqlcnx = self.DBC.connect()                     # connect to SQL server
+        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
+        # fetch all columns from all rows in AffiliationApplicationsTable
+        if (len(q) == 0):
+            cur.execute(
+                "SELECT appID, hasRecord, clubID, dateCreated, region, level, type, school, clubName, address, city, province, adviserName, contact, email, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode "
+                "FROM AffiliationApplicationsTable"
+            )
+        # fetch all columns from rows matching a query(filter) in AffiliationApplicationsTable
+        else:
+            cur.execute(
+                "SELECT appID, hasRecord, clubID, dateCreated, region, level, type, school, clubName, address, city, province, adviserName, contact, email, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode "
+                "FROM AffiliationApplicationsTable "
+                "WHERE LOWER(school) LIKE %(query)s or "
+                "LOWER(clubName) LIKE %(query)s or "
+                "LOWER(address) LIKE %(query)s or "
+                "LOWER(city) LIKE %(query)s or "
+                "LOWER(province) LIKE %(query)s or "
+                "LOWER(adviserName) LIKE %(query)s", {"query":"%"+q+"%"}
+            )
+        res = cur.fetchall()
+        # close database cursor
+        cur.close()
+        # create (list of dicts) data_list from (list of tuples) res
+        data_list = []
+        for app in res:
+            app_dict = {
+                "appID"             :app[0], 
+                "hasRecord"         :app[1], 
+                "clubID"            :app[2], 
+                "dateCreated"       :app[3], 
+                "region"            :app[4], 
+                "level"             :app[5], 
+                "type"              :app[6], 
+                "school"            :app[7], 
+                "clubName"          :app[8], 
+                "address"           :app[9], 
+                "city"              :app[10], 
+                "province"          :app[11], 
+                "adviserName"       :app[12], 
+                "contact"           :app[13], 
+                "email"             :app[14], 
+                "schoolYear"        :app[15], 
+                "yearsAffiliated"   :app[16], 
+                "SCA"               :app[17], 
+                "SCM"               :app[18], 
+                "paymentMode"       :app[19], 
+                "paymentDate"       :app[20], 
+                "paymentID"         :app[21], 
+                "paymentAmount"     :app[22], 
+                "receiptNumber"     :app[23], 
+                "paymentSendMode"   :app[24]
+            }
+            data_list.append(app_dict)
+        # returns Mako-rendered view page HTML
+        # (control ViewAffiliationApplicationList)
+        return self.renderer.render("approve.mako", {"data":data_list, "q":q})
+        
+    # Handles /applications/view/<application_id>/
+    # should return details about the affiliation application
+    @cherrypy.expose
+    def view(self, application_id):
+        return "app id: %s" % application_id
+    
+    # Handles /applications/approve/<application_id>/
+    # creates a record from an affiliation application
+    @cherrypy.expose
+    def approve(self, application_id):
+        a = AddRecord(DBC=self.DBC, Renderer=self.renderer, Validator=self.validator)
+        sqlcnx = self.DBC.connect()                     # connect to SQL server
+        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
+        cur.execute(
+            "SELECT appID, hasRecord, clubID, dateCreated, region, level, type, school, clubName, address, city, province, adviserName, contact, email, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode "
+            "FROM AffiliationApplicationsTable "
+            "WHERE appID = %(appID)s", {"appID":application_id}
+        )
+        app = cur.fetchone()
+        cur.close()
+        apd = {
+            "appID"             :app[0], 
+            "hasRecord"         :app[1], 
+            "clubID"            :app[2],
+            "dateCreated"       :app[3], 
+            "region"            :app[4], 
+            "level"             :app[5], 
+            "type"              :app[6], 
+            "school"            :app[7], 
+            "clubName"          :app[8], 
+            "address"           :app[9], 
+            "city"              :app[10], 
+            "province"          :app[11], 
+            "adviserName"       :app[12], 
+            "contact"           :app[13], 
+            "email"             :app[14], 
+            "schoolYear"        :app[15], 
+            "yearsAffiliated"   :app[16], 
+            "SCA"               :app[17], 
+            "SCM"               :app[18], 
+            "paymentMode"       :app[19], 
+            "paymentDate"       :app[20], 
+            "paymentID"         :app[21], 
+            "paymentAmount"     :app[22], 
+            "receiptNumber"     :app[23], 
+            "paymentSendMode"   :app[24]
+        }
+        if toInt(apd["hasRecord"]) == 0:
+            a.insert(apd["region"], apd["level"], apd["type"], apd["school"], apd["clubName"], apd["address"], apd["city"], apd["province"], apd["adviserName"], apd["contact"], apd["email"], "1", "", "1", "", "", apd["schoolYear"], apd["yearsAffiliated"], apd["SCA"], apd["SCM"], apd["paymentMode"], apd["paymentDate"], apd["paymentID"], apd["paymentAmount"], apd["receiptNumber"], apd["paymentSendMode"])
+            cur = sqlcnx.cursor(buffered=True)
+            cur.execute("SELECT clubID FROM AffiliationRecordsTable WHERE "
+                "school = %(school)s AND clubName = %(clubName)s AND "
+                "address = %(address)s AND region = %(region)s",
+                {
+                    "school":   apd["school"],
+                    "clubName": apd["clubName"],
+                    "address":  apd["address"],
+                    "region":   apd["region"]
+                }
+            )
+            apd["clubID"] = cur.fetchone()
+            cur.close()
+        else:
+            a.insert_affiliation(apd["clubID"], "1", "", "1", "", "", apd["schoolYear"], apd["yearsAffiliated"], apd["SCA"], apd["SCM"], apd["paymentMode"], apd["paymentDate"], apd["paymentID"], apd["paymentAmount"], apd["receiptNumber"], apd["paymentSendMode"])
+        cur = sqlcnx.cursor(buffered=True)
+        cur.execute(
+            "DELETE FROM AffiliationApplicationsTable "
+            "WHERE appID = %(appID)s", {"appID":apd["appID"]}
+        )
+        sqlcnx.commit()
+        cur.close()
+        return self.renderer.render("dialog.mako", {           # return deletion success HTML
+            'title': "Approved application.",
+            'message': "",
+            'linkaddr': "/applications",
+            'linktext': "&lt; Back to pending applications"
+        })
+    
+    # Handles /applications/reject/<application_id>/
+    # deletes an affiliation application
+    @cherrypy.expose
+    def reject(self, application_id=None):
+        sqlcnx = self.DBC.connect()                     # connect to SQL server
+        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
+        cur.execute(
+            "DELETE FROM AffiliationApplicationsTable "
+            "WHERE appID = %(appID)s", {"appID":application_id}
+        )
+        sqlcnx.commit()
+        cur.close()
+        return self.renderer.render("dialog.mako", {           # return deletion success HTML
+            'title': "Rejected application.",
+            'message': "",
+        })
+
+
 
 
 #
@@ -641,7 +867,7 @@ def main():
             'server.socket_port': 8080,
             'log.screen': False,
             'log.error_file': 'error.log',
-            'log.access_file': '',
+            'log.access_file': 'access.log',
             'tools.gzip.on': True
         })
         
@@ -650,7 +876,7 @@ def main():
         validator = InputValidator()
         
         # start a persistent connection to the SQL database
-        dbc = DBConnection()
+        dbc = DBConnection("db.conf")
         dbc.connect()
         
         # disconnect from SQL database on exit
