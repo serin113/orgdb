@@ -113,6 +113,10 @@ Mako variables:
                                       </div><br><br>
 
                                       <div class="ui input">
+                                        <input type="text" placeholder="City" name="city" required>
+                                      </div><br><br>
+
+                                      <div class="ui input">
                                         <input type="text" placeholder="Province" name="province" required>
                                       </div><br><br>
 
@@ -245,7 +249,6 @@ Mako variables:
                 </div>
                 <button class='ui primary button' type="submit">INSERT</button>
             </form>
-            
         </section>
         <footer>
             <%include file="footer.mako"/>
