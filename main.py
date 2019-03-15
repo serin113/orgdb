@@ -75,8 +75,8 @@ class DBConnection(object):
         # default configuration for connecting to a MySQL server
         if arg is None:
             self.config = {
-              'user': 'orgdb',
-              'password': 'orgdb',
+              'user': 'cs192',
+              'password': 'cs192',
               'host': '127.0.0.1',
               'database': 'mydb',
               'raise_on_warnings': True
