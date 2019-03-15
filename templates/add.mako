@@ -9,6 +9,7 @@ Code History:
 2019/02/13 (Simon) - Added Mako templating
 2019/02/14 (Simon) - renamed to add.mako
 2019/02/15 (Simon) - added <section> tags
+2019/03/15 (Nathan)- finished adding semantic-ui
 </%doc>
 
 

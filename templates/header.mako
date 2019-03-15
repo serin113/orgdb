@@ -21,9 +21,10 @@ Code History:
 <h1 class="center"><a href="/">PSYSC</a></h1>
 
 <div class="ui five item menu">
-  <a class="item active" href="/index">Home</a>
+  
   <a class="item" href="/add">Add Record</a>
   <a class="item" href="/view">View Records</a>
+  <a class="active item" href="/index">Home</a>
   <a class="item" href="/apply">Create Application</a>
   <a class="item" href="/applications">View Applications</a>
   
