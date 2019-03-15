@@ -19,7 +19,7 @@ Code History:
 
 </head>
 <h1 class="center"><a href="/">PSYSC</a></h1>
-<<<<<<< HEAD
+
 <div class="ui five item menu">
   <a class="item active" href="/index">Home</a>
   <a class="item" href="/add">Add Record</a>
@@ -28,14 +28,3 @@ Code History:
   <a class="item" href="/applications">View Applications</a>
   
 </div>
-=======
-<nav class="center">
-    <ul>
-        <li><a href="/add">Add Record</a></li>
-        <li><a href="/view">View Records</a></li>
-        <li><a href="/apply">Create Application</a></li>
-        <li><a href="/applications">View Applications</a></li>
-        <li><a href="/summary">Summary</a></li>
-    </ul>
-</nav>
->>>>>>> 93dc623add334ad1daf2394aa6ee0a232733c00e
