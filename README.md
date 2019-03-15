@@ -21,3 +21,5 @@ This project (Org Affiliations Database) is licensed under the [MIT License](htt
 The [CherryPy library](https://cherrypy.org), used here for the web-serving code, is licensed under the [BSD 3-Clause "New" or "Revised" License](https://opensource.org/licenses/BSD-3-Clause).
 
 The [Mako library](https://www.makotemplates.org), used here for templating, is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+The [Semantic UI framework](https://github.com/Semantic-Org/Semantic-UI), used here for designing the UI, is licensed under the [MIT License](https://opensource.org/licenses/MIT).
