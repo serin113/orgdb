@@ -18,5 +18,6 @@ Code History:
         <li><a href="/view">View Records</a></li>
         <li><a href="/apply">Create Application</a></li>
         <li><a href="/applications">View Applications</a></li>
+        <li><a href="/summary">Summary</a></li>
     </ul>
 </nav>

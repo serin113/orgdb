@@ -21,6 +21,7 @@
 # 2019/03/13 (Simon) - Methods approve+reject+view implemented in ViewApplication
 #                    - Split affiliation input validation in AddRecord.insert() to be used by other methods
 #                    - Program reads db.conf for the SQL server settings by default
+# 2019/03/15 (Simon) - Started implementing Summary class for database summary
 
 
 import os                               # for accessing the filesystem
@@ -311,6 +312,8 @@ class Root(object):
         self.apply = AddApplication(DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /applications
         self.applications = ViewApplication(DBC=DBC, Renderer=Renderer, Validator=Validator)
+        # class handling /summary
+        self.summary = Summary(DBC=DBC, Renderer=Renderer)
     
     @cherrypy.expose
     # CherryPy method handling /
@@ -851,6 +854,34 @@ class ViewApplication(object):
             'message': "",
         })
 
+# class used by CherryPy for handling /summary
+# [still under construction]
+class Summary(object):
+    def __init__(self, DBC=None, Renderer=None, Validator=None):
+        if DBC is not None:
+            self.DBC = DBC
+        else:
+            self.DBC = DBConnection()
+        if Renderer is not None:
+            self.renderer = Renderer
+        else:
+            self.renderer = ContentRenderer()
+            
+    @cherrypy.expose
+    def index(self, q=None):
+        sqlcnx = self.DBC.connect()
+        cur = sqlcnx.cursor(buffered=True)
+        if q is None:
+            cur.execute("SELECT DISTINCT(schoolYear) FROM AffiliationTable")
+            x = cur.fetchall()
+            x = [i[0] for i in x]
+            y = []
+            for year in x:
+                cur.execute(
+                    "SELECT * FROM AffiliationRecordsTable WHERE clubID IN "
+                    "(SELECT AffiliationRecordsTable_clubID FROM AffiliationTable WHERE schoolYear = %(schoolYear)s)", {"schoolYear":year})
+                y.append(cur.fetchall())
+            return self.renderer.render("summary.mako", {"data":y})
 
 
 
