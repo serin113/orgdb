@@ -49,7 +49,7 @@ Mako variables:
                 <button class ="ui secondary button" type="submit">Search</button>
 
             </form>
-            <table>
+            <table class="ui celled padded table">
                 <tr>
                     <th></th>
                     <th></th>
@@ -68,7 +68,10 @@ Mako variables:
                 </tr>
                 % for record in data:
                 <tr>
-                    <td><a href="${record['clubID']}?q=${q}">view</a></td>
+                    <td><a href="${record['clubID']}?q=${q}" class=" ui secondary button" id="view">view</a></td>
+                    
+                      
+                    </div>
                     <td>edit</td>
                     <td>${record['clubID']}</td>
                     <td>${record['clubName']}</td>
