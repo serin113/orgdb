@@ -18,12 +18,9 @@ Mako variables:
 <html>
     <head>
         <link rel="stylesheet" href="/styles/apply.css"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-        <script
-          src="https://code.jquery.com/jquery-3.1.1.min.js"
-          integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-          crossorigin="anonymous"></script>
-        <script src="semantic/dist/semantic.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
+        <script src="/scripts/jquery-3.3.1.min.js"></script>
+        <script src="/scripts/semantic.min.js"></script>
 
     </head>
     <body>
@@ -68,7 +65,7 @@ Mako variables:
                     <option value="3">Elementary & High School</>
                     <option value="4">College</>
                 </select><br><br>
-                type<br><input type="radio" name="type" value="1" id="type-public" checked><label for="type-public">Public</label> <input type="radio" name="type" value="2" id="type-private"><label for="type-private">Private</label><br><br>
+                type<br><input type="radio" name="type" value="1" id="type-public" checked><label for="type-public">Public</label> <input type="radio" name="type" value="2" id="type-private"><label for="type-private">Private</label> <input type="radio" name="type" value="3" id="type-scu"><label for="type-scu">State College/University</label><br><br>
                 address<br><input type="text" name="address"/><br><br>
                 city<br><input type="text" name="city"/><br><br>
                 province<br><input type="text" name="province"/><br><br>

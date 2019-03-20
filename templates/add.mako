@@ -22,11 +22,9 @@ Mako variables:
 <html>
     <head>
        <link rel="stylesheet" href="/styles/add.css"/>
-       <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.7.2/semantic.min.css">
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.7.2/semantic.min.js"></script>
-
+       <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
+       <script src="/scripts/jquery-3.3.1.min.js"></script>
+       <script src="/scripts/semantic.min.js"></script>
     </head>
     <body>
         <header>
@@ -107,6 +105,12 @@ Mako variables:
                                               <label for="type-private">Private</label>
                                             </div>
                                           </div>
+                                          <div class="field">
+                                            <div class="ui radio checkbox">
+                                              <input type="radio" name="type" value="3" id="type-scu" required>
+                                              <label for="type-private">State College/University</label>
+                                            </div>
+                                          </div>
                                       </div><br><br>
 
                                       <div class="ui input">
@@ -166,7 +170,7 @@ Mako variables:
                                           </div>
                                           <div class="field">
                                             <div class="ui radio checkbox">
-                                              <input type="radio" name="status" value="O" id="status-o" required>
+                                              <input type="radio" name="status" value="O" id="status-o">
                                               <label for="affiliated-no">O</label>
                                             </div>
                                           </div>
@@ -209,7 +213,7 @@ Mako variables:
                                       </div><br><br>
 
                                       <div class="ui input">
-                                        <input type="text" placeholder="Payment Mode" name="paymentmode" required>
+                                        <input type="text" placeholder="Payment Mode" name="paymentmode">
                                       </div><br><br>
 
                                       <div class="ui input">
@@ -217,17 +221,17 @@ Mako variables:
                                       </div><br><br>
 
                                       <div class="ui input">
-                                        <input type="text" placeholder="Payment ID" name="paymentid" required>
+                                        <input type="text" placeholder="Payment ID" name="paymentid">
                                       </div><br><br>
 
                                       
 
                                       <div class="ui input">
-                                        <input type="text" placeholder="Receipt #" name="receiptnumber" required>
+                                        <input type="text" placeholder="Receipt #" name="receiptnumber">
                                       </div><br><br>
 
                                       <div class="ui input">
-                                        <input type="text" placeholder="Payment Send Mode" name="paymentsendmode" required>
+                                        <input type="text" placeholder="Payment Send Mode" name="paymentsendmode">
                                       </div><br><br>
 
                                       <div class="ui form">

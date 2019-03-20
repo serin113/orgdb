@@ -161,7 +161,7 @@ class InputValidator(object):
     record_dict = {
         'region':       (1,17,True),
         'level':        (1,4,True),
-        'type':         (1,2,True),
+        'type':         (1,3,True),
         'school':       (2,100,True),
         'clubName':     (2,100,True),
         'address':      (2,200,True),
@@ -628,11 +628,11 @@ class AddApplication(object):
         errors = []
         check_error = None
         if toInt(hasrecord) is 1:
-            collision_query = (
+            club_query = (
                 "SELECT clubID, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
                 "FROM AffiliationRecordsTable WHERE clubID = %(clubID)s"
             )
-            cur.execute(collision_query, {'clubID': clubid})
+            cur.execute(club_query, {'clubID': clubid})
             if cur.rowcount == 1:
                 skip_record_check = True
                 record = cur.fetchone()
@@ -654,6 +654,18 @@ class AddApplication(object):
                 check_error = ("Club with ID does not exist", "clubID", clubid)
             else:
                 check_error = ("More than one club with same ID", "clubID", clubid)
+        else:
+            # checking for preexisting record
+            collision_query = 'SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s'
+            cur.execute(collision_query, {'school': school, 'clubName': clubname})
+            if cur.rowcount > 0:
+                cur.close() # close database cursor
+                return self.renderer.render("dialog.mako", {
+                    'title': "Error!",
+                    'message': "A matching record already exists in the database.",
+                    'linkaddr': "javascript:history.back();",
+                    'linktext': "&gt; Back"
+                })
                 
         if skip_record_check:
             errors = self.validator.validate(application_data, [*self.validator.record_dict])
@@ -872,16 +884,23 @@ class Summary(object):
         sqlcnx = self.DBC.connect()
         cur = sqlcnx.cursor(buffered=True)
         if q is None:
+            # get data per school year
             cur.execute("SELECT DISTINCT(schoolYear) FROM AffiliationTable")
-            x = cur.fetchall()
-            x = [i[0] for i in x]
-            y = []
-            for year in x:
+            res = cur.fetchall()
+            data = {}
+            for year in [i[0] for i in res]:
+                print(year)
                 cur.execute(
-                    "SELECT * FROM AffiliationRecordsTable WHERE clubID IN "
-                    "(SELECT AffiliationRecordsTable_clubID FROM AffiliationTable WHERE schoolYear = %(schoolYear)s)", {"schoolYear":year})
-                y.append(cur.fetchall())
-            return self.renderer.render("summary.mako", {"data":y})
+                    "SELECT region, level, type FROM AffiliationRecordsTable WHERE clubID IN "
+                    "(SELECT AffiliationRecordsTable_clubID FROM AffiliationTable WHERE "
+                    "schoolYear BETWEEN %(schoolYear)s-1 AND %(schoolYear)s+yearsAffiliated)", {"schoolYear":year})
+                res2 = cur.fetchall()
+                #print(res2, "\n")
+                #for record in res2:
+                #    if record[]
+                data[year] = res2
+            return self.renderer.render("summary.mako", {"data":data})
+        cur.close()
 
 
 
