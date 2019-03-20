@@ -11,21 +11,12 @@ Code History:
 2019/03/12 (Simon) - added /applications link
 </%doc>
 
-<head>
-       <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.7.2/semantic.min.css">
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.7.2/semantic.min.js"></script>
-
-</head>
 <h1 class="center"><a href="/">PSYSC</a></h1>
 
 <div class="ui five item menu">
-  
-  <a class="item" href="/add">Add Record</a>
-  <a class="item" href="/view">View Records</a>
-  <a class="active item" href="/index">Home</a>
-  <a class="item" href="/apply">Create Application</a>
-  <a class="item" href="/applications">View Applications</a>
-  
+      <a class="item" href="/add">Add Record</a>
+      <a class="item" href="/view">View Records</a>
+      <a class="active item" href="/index">Home</a>
+      <a class="item" href="/apply">Create Application</a>
+      <a class="item" href="/applications">View Applications</a>
 </div>

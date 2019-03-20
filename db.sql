@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `AffiliationRecordsTable` (
                                     -- 2: high school
                                     -- 3: elementary + high school
                                     -- 4: college
-  `type` TINYINT(1) NULL,           -- 1: public, 2: private
+  `type` TINYINT(1) NULL,           -- 1: public, 2: private, 3: SCU (state college/uni)
   `school` VARCHAR(100) NULL,       -- name of school
   `clubName` VARCHAR(100) NULL,     -- name of club
   `address` VARCHAR(200) NULL,      -- school's address

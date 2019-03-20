@@ -22,6 +22,9 @@ Mako variables:
 <html>
     <head>
         <link rel="stylesheet" href="/styles/approve.css"/>
+        <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
+        <script src="/scripts/jquery-3.3.1.min.js"></script>
+        <script src="/scripts/semantic.min.js"></script>
     </head>
     <body>
         <header>
