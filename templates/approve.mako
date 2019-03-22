@@ -35,7 +35,12 @@ Mako variables:
             <hr>
             % if (data is not None) and (len(data) > 0):
             <form method="get" action="" id="filter-form">
-                <input type="text" name="q" value="${q}"/><button type="submit">search</button>
+                <div class="ui icon input">
+                  <input type="text" name="q" value="${q}"/ style="width:800px">
+                  <i class="search icon"></i>
+                </div>
+                <button class ="ui secondary button" type="submit">Search</button>
+
             </form>
             <table>
                 <tr>
@@ -53,7 +58,7 @@ Mako variables:
                 </tr>
                 % for app in data:
                 <tr>
-                    <td><a href="view/${app['appID']}">view</a></td>
+                    <td><a href="view/${app['appID']}" class="ui secondary button">view</a></td>
                     <td><a href="approve/${app['appID']}">approve</a>/<a href="reject/${app['appID']}">reject</a></td>
                     <td>${app['appID']}</td>
                     <td>${app['clubName']}</td>

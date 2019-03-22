@@ -31,60 +31,183 @@ Mako variables:
             <h1 class="center title">Application Form</h1>
             <hr>
             <form method="post" action="insert" id="apply-form">
-                has existing record?<br><input type="radio" name="hasrecord" value="1" id="hasrecord-yes" required><label for="hasrecord-yes">Yes</label> <input type="radio" name="hasrecord" value="0" id="hasrecord-no" checked required><label for="hasrecord-no">No</label><br><br>
+                
+                <div class="ui form">
+                    <label>Has existing record?</label>
+                    <div class="field">
+                      <div class="ui radio checkbox">
+                        <input type="radio" name="hasrecord" value="1" id="hasrecord-yes" required>
+                        <label for="hasrecord-yes">Yes</label>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <div class="ui radio checkbox">
+                        <input type="radio" name="hasrecord" value="0" id="hasrecord-no" required>
+                        <label for="hasrecord-no">No</label>
+                      </div>
+                    </div>
+                </div><br>
+
                 <hr>
-                (this section only required if there's an existing record)<br><br>
-                club ID<br><input type="text" name="clubid" value=""/><br><br>
+                (this section only required if there's an existing record)<br>
+                <div class="ui input">
+                    <input type="text" name="clubid" placeholder="Club ID">
+                </div>
                 <hr>
+                
                 (this section only required if there's no existing record)<br><br>
-                club name<br><input type="text" name="clubname"/><br><br>
-                school<br><input type="text" name="school"/><br><br>
-                region<br>
-                <select name="region" id="region">
-                    <option value="1" checked>I (Ilocos)</option>
-                    <option value="2">II (Cagayan Valley)</option>
-                    <option value="3">III (Central Luzon)</option>
-                    <option value="4">IV-A (CALABARZON)</option>
-                    <option value="5">V (Bicol)</option>
-                    <option value="6">VI (Western Visayas)</option>
-                    <option value="7">VII (Central Visayas)</option>
-                    <option value="8">VIII (Eastern Visayas)</option>
-                    <option value="9">IX (Zamboanga Peninsula)</option>
-                    <option value="10">X (Northern Mindanao)</option>
-                    <option value="11">XI (Davao)</option>
-                    <option value="12">XII (SOCCSKSARGEN)</option>
-                    <option value="13">XIV (NCR)</option>
-                    <option value="14">XV (CAR)</option>
-                    <option value="15">XVI (ARMM)</option>
-                    <option value="16">XII (CARAGA)</option>
-                    <option value="17">XVII (MIMAROPA)</option>
-                </select><br><br>
-                level<br><select name="level" id="level">
-                    <option value="1" checked>Elementary</>
-                    <option value="2">High School</>
-                    <option value="3">Elementary & High School</>
-                    <option value="4">College</>
-                </select><br><br>
-                type<br><input type="radio" name="type" value="1" id="type-public" checked><label for="type-public">Public</label> <input type="radio" name="type" value="2" id="type-private"><label for="type-private">Private</label> <input type="radio" name="type" value="3" id="type-scu"><label for="type-scu">State College/University</label><br><br>
-                address<br><input type="text" name="address"/><br><br>
-                city<br><input type="text" name="city"/><br><br>
-                province<br><input type="text" name="province"/><br><br>
-                adviser name/s<br><input type="text" name="advisername"/><br><br>
-                contact number<br><input type="text" name="contact"/><br><br>
-                email<br><input type="email" name="email" /><br><br>
+                <div class="ui input">
+                <input type="text" placeholder="Club Name" name="clubname"/ placeholder="Club Name">
+              </div><br><br>
+
+              <div class="ui input">
+                <input type="text" name="school"/ placeholder="School Name">
+              </div>
+              <br><br>
+
+              <div class="ui selection dropdown">
+                <input type="hidden" name="region" id="region">
+                <i class="dropdown icon"></i>
+                <div class="default text">Region</div>
+                <div class="menu">
+                  <script>
+                      $('.ui.dropdown')
+                        .dropdown();
+                  </script>
+                  <div class="item" data-value="1">I (Ilocos)</div>
+                  <div class="item" data-value="2">II (Cagayan Valley)</div>
+                  <div class="item" data-value="3">III (Central Luzon)</div>
+                  <div class="item" data-value="4">IV-A (CALABARZON)</div>
+                  <div class="item" data-value="5">V (Bicol)</div>
+                  <div class="item" data-value="6">VI (Western Visayas)</div>
+                  <div class="item" data-value="7">VII (Central Visayas)</div>
+                  <div class="item" data-value="8">VIII (Eastern Visayas)</div>
+                  <div class="item" data-value="9">IX (Zamboanga Peninsula)</div>
+                  <div class="item" data-value="10">X (Northern Mindanao)</div>
+                  <div class="item" data-value="11">XI (Davao)</div>
+                  <div class="item" data-value="12">XII (SOCCSKSARGEN)</div>
+                  <div class="item" data-value="13">XIV (NCR)</div>
+                  <div class="item" data-value="14">XV (CAR)</div>
+                  <div class="item" data-value="15">XVI (ARMM)</div>
+                  <div class="item" data-value="16">XII (CARAGA)</div>
+                  <div class="item" data-value="17">XVII (MIMAROPA)</div>
+                </div>
+              </div><br><br>
+              
+              <div class="ui selection dropdown">
+                <input type="hidden" name="level" id="level">
+                <i class="dropdown icon"></i>
+                <div class="default text">Level</div>
+                <div class="menu">
+                  <script>
+                      $('.ui.dropdown')
+                        .dropdown();
+                  </script>
+                  <div class="item" data-value="1">Elementary</div>
+                  <div class="item" data-value="2">High School</div>
+                  <div class="item" data-value="3">Elementary & High School</div>
+                  <div class="item" data-value="4">College</div>
+                </div>
+              </div><br><br>                
+              
+              <div class="ui form">
+                  <label>Type</label>
+                  <div class="field">
+                    <div class="ui radio checkbox">
+                      <input type="radio" name="type" value="1" id="type-public" >
+                      <label for="type-public">Public</label>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="ui radio checkbox">
+                      <input type="radio" name="type" value="2" id="type-private">
+                      <label for="type-private">Private</label>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="ui radio checkbox">
+                      <input type="radio" name="type" value="3" id="type-scu">
+                      <label for="type-private">State College/University</label>
+                    </div>
+                  </div>
+              </div><br><br>
+
+              <div class="ui input">
+                <input type="text" placeholder="Address" name="address">
+              </div><br><br>
+
+              <div class="ui input">
+                <input type="text" placeholder="City" name="city">
+              </div><br><br>
+
+              <div class="ui input">
+                <input type="text" placeholder="Province" name="province">
+              </div><br><br>
+
+              <div class="ui input">
+                <input type="text" placeholder="Adviser Name" name="advisername">
+              </div><br><br>
+
+              <div class="ui input">
+                <input type="text" placeholder="Contact No." name="contact">
+              </div><br><br>
+
+              <div class="ui input">
+                <input type="text" placeholder="Email Address" name="email">
+              </div><br><br>
+
                 <hr>
-                schoolyear<br><input type="number" name="schoolyear" min="2007" max="2050" required/><br><br>
-                number of years paid<br><input type="number" name="yearsaffiliated" min="1" value="1" required/><br><br>
-                number of club advisers<br><input type="number" name="sca" min="1" required/><br><br>
-                number of club members<br><input type="number" name="scm" min="1" required/><br><br>
-                payment mode<br><input type="text" name="paymentmode" /><br><br>
-                payment date<br><input type="date" name="paymentdate" /><br><br>
-                payment id<br><input type="text" name="paymentid" /><br><br>
-                payment amount<br><input type="number" name="paymentamount" min="0"><br><br>
-                receipt number<br><input type="text" name="receiptnumber" /><br><br>
-                payment sendmode<br><input type="text" name="paymentsendmode" /><br><br>
+               <label>School Year: </label> &nbsp&nbsp
+                                         <div class="ui input">
+                                           <input type="number"  name="schoolyear" min="2007" max="3050" value = "2007" required style="width: 100px;">
+                                         </div><br><br>
+
+                                         <label>Number of years paid: </label> &nbsp&nbsp
+                                         <div class="ui input">
+                                           <input type="number"  name="yearsaffiliated" min="1" value = "1" required style="width: 100px;">
+                                         </div><br><br>
+
+                                         <label>Number of club advisers: </label> &nbsp&nbsp
+                                         <div class="ui input">
+                                           <input type="number" name="sca" min="1"required style="width: 100px;">
+                                         </div><br><br>
+
+                                         <label>Number of club members: </label> &nbsp&nbsp
+                                         <div class="ui input">
+                                           <input type="number"  name="scm" min="1" required style="width: 100px;">
+                                         </div><br><br>
+
+                                         <label>Payment Amount: </label> &nbsp&nbsp
+                                         <div class="ui input">
+                                           <input type="number"  name="paymentamount" min="0" style="width: 100px;">
+                                         </div><br><br>
+
+                                         <div class="ui input">
+                                           <input type="text" placeholder="Payment Mode" name="paymentmode">
+                                         </div><br><br>
+
+                                         <div class="ui input">
+                                           <input type="date" name="paymentdate" required>
+                                         </div><br><br>
+
+                                         <div class="ui input">
+                                           <input type="text" placeholder="Payment ID" name="paymentid">
+                                         </div><br><br>
+
+                                         
+
+                                         <div class="ui input">
+                                           <input type="text" placeholder="Receipt #" name="receiptnumber">
+                                         </div><br><br>
+
+                                         <div class="ui input">
+                                           <input type="text" placeholder="Payment Send Mode" name="paymentsendmode">
+                                         </div><br><br>
+
+
+
                 <hr>
-                <button type="submit">insert</button>
+                <button class="ui primary button" type="submit">INSERT</button>
             </form>
         </section>
         <footer>
