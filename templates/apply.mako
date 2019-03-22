@@ -21,7 +21,6 @@ Mako variables:
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
-
     </head>
     <body>
         <header>
@@ -57,7 +56,7 @@ Mako variables:
                 
                 (this section only required if there's no existing record)<br><br>
                 <div class="ui input">
-                <input type="text" placeholder="Club Name" name="clubname" placeholder="Club Name">
+                <input type="text" placeholder="Club Name" name="clubname">
               </div><br><br>
 
               <div class="ui input">
@@ -157,27 +156,27 @@ Mako variables:
                 </div><br><br>
 
                 <hr>
-                <label>School Year: </label> &nbsp&nbsp
+                <label>School Year: </label> &nbsp;&nbsp;
                 <div class="ui input">
                     <input type="number"  name="schoolyear" min="2007" max="3050" value = "2007" required style="width: 100px;">
                 </div><br><br>
 
-                <label>Number of years paid: </label> &nbsp&nbsp
+                <label>Number of years paid: </label> &nbsp;&nbsp;
                 <div class="ui input">
                     <input type="number"  name="yearsaffiliated" min="1" value = "1" required style="width: 100px;">
                 </div><br><br>
 
-                <label>Number of club advisers: </label> &nbsp&nbsp
+                <label>Number of club advisers: </label> &nbsp;&nbsp;
                 <div class="ui input">
-                    <input type="number" name="sca" min="1"required style="width: 100px;">
+                    <input type="number" name="sca" min="1" required style="width: 100px;">
                 </div><br><br>
 
-                <label>Number of club members: </label> &nbsp&nbsp
+                <label>Number of club members: </label> &nbsp;&nbsp;
                 <div class="ui input">
                     <input type="number"  name="scm" min="1" required style="width: 100px;">
                 </div><br><br>
 
-                <label>Payment Amount: </label> &nbsp&nbsp
+                <label>Payment Amount: </label> &nbsp;&nbsp;
                 <div class="ui input">
                     <input type="number"  name="paymentamount" min="0" style="width: 100px;">
                 </div><br><br>

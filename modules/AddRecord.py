@@ -6,8 +6,8 @@
 # Code History:
 # 2019/03/22 (Simon)- Moved class to this file
 
-
 from ._helpers import *
+
 
 # class used by CherryPy for handling /add
 class AddRecord(object):
@@ -24,17 +24,21 @@ class AddRecord(object):
             self.renderer = Renderer
         else:
             self.renderer = ContentRenderer()
-    
+
     @cherrypy.expose
     # CherryPy method handling /add/
     def index(self):
         # returns Mako-rendered add page HTML
         return self.renderer.render("add.mako")
-    
+
     @cherrypy.expose
     # CherryPy method handling /add/insert with incoming POST/GET data
     # every argument in the method (except for self) is defined in db.sql
-    def insert(self, region, level, type, school, clubname, address, city, province, advisername, contact, email, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode):
+    def insert(self, region, level, type, school, clubname, address, city,
+               province, advisername, contact, email, affiliated, status,
+               hasaffiliationforms, benefits, remarks, schoolyear,
+               yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid,
+               paymentamount, receiptnumber, paymentsendmode):
         # string format for inserting record_data into SQL database
         # table structure is defined in db.sql
         add_record = (
@@ -42,100 +46,130 @@ class AddRecord(object):
             "(clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email) "
             "VALUES (%(clubID)s, %(dateUpdated)s, %(region)s, %(level)s, %(type)s, %(school)s, %(clubName)s, %(address)s, %(city)s, %(province)s, %(adviserName)s, %(contact)s, %(email)s)"
         )
-        
-        sqlcnx = self.DBC.connect()                     # connect to SQL server
-        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
-        id = newID()    # generate new unique ID for record_data
+
+        sqlcnx = self.DBC.connect()  # connect to SQL server
+        cur = sqlcnx.cursor(
+            buffered=True)  # create an SQL cursor to the database
+        id = newID()  # generate new unique ID for record_data
         record_data = {
-            'clubID':       id,
-            'dateUpdated':  today(),
-            'region':       toInt(region),
-            'level':        toInt(level),
-            'type':         toInt(type),
-            'school':       school,
-            'clubName':     clubname,
-            'address':      address,
-            'city':         city,
-            'province':     province,
-            'adviserName':  advisername,
-            'contact':      contact,
-            'email':        email
+            'clubID': id,
+            'dateUpdated': today(),
+            'region': toInt(region),
+            'level': toInt(level),
+            'type': toInt(type),
+            'school': school,
+            'clubName': clubname,
+            'address': address,
+            'city': city,
+            'province': province,
+            'adviserName': advisername,
+            'contact': contact,
+            'email': email
         }
-        
+
         # input validation
         self.validator.setLimits("record")
         errors = self.validator.validate(record_data)
         # display errors, if any
         if len(errors) > 0:
-            cur.close() # close database cursor
+            cur.close()  # close database cursor
             errortext = ""
             for e in errors:
-                errortext += "["+str(e[0])+"] '"+str(e[1])+"': "+str(e[2])+"<br>"
-            return self.renderer.render("dialog.mako", {
-                'title': "Error!",
-                'message': "Invalid affiliation record data:<br>"+errortext,
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
+                errortext += "[" + str(e[0]) + "] '" + str(e[1]) + "': " + str(
+                    e[2]) + "<br>"
+            return self.renderer.render(
+                "dialog.mako", {
+                    'title': "Error!",
+                    'message':
+                    "Invalid affiliation record data:<br>" + errortext,
+                    'linkaddr': "javascript:history.back();",
+                    'linktext': "&gt; Back"
+                })
         # checking for preexisting record
         collision_query = "SELECT school, clubName, schoolYear FROM (AffiliationRecordsTable INNER JOIN AffiliationTable ON AffiliationRecordsTable.clubID = AffiliationTable.AffiliationRecordsTable_clubID) WHERE school = %(school)s AND clubName = %(clubName)s AND schoolYear = %(schoolYear)s"
-        cur.execute(collision_query, {'school': school, 'clubName': clubname, 'schoolYear': schoolyear})
+        cur.execute(collision_query, {
+            'school': school,
+            'clubName': clubname,
+            'schoolYear': schoolyear
+        })
         if cur.rowcount > 0:
-            cur.close() # close database cursor
-            return self.renderer.render("dialog.mako", {
-                'title': "Error!",
-                'message': "A matching record already exists in the database.",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
-            })
-        res = self.validate_affiliation(id, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode)
+            cur.close()  # close database cursor
+            return self.renderer.render(
+                "dialog.mako", {
+                    'title': "Error!",
+                    'message':
+                    "A matching record already exists in the database.",
+                    'linkaddr': "javascript:history.back();",
+                    'linktext': "&gt; Back"
+                })
+        res = self.validate_affiliation(
+            id, affiliated, status, hasaffiliationforms, benefits, remarks,
+            schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate,
+            paymentid, paymentamount, receiptnumber, paymentsendmode)
         if len(res) > 0:
-            cur.close() # close database cursor
+            cur.close()  # close database cursor
             errortext = ""
             for e in res:
-                errortext += "["+str(e[0])+"] '"+str(e[1])+"': "+str(e[2])+"<br>"
-            return self.renderer.render("dialog.mako", {
-                'title': "Error!",
-                'message': "Invalid affiliation record data:<br>"+errortext,
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back"
+                errortext += "[" + str(e[0]) + "] '" + str(e[1]) + "': " + str(
+                    e[2]) + "<br>"
+            return self.renderer.render(
+                "dialog.mako", {
+                    'title': "Error!",
+                    'message':
+                    "Invalid affiliation record data:<br>" + errortext,
+                    'linkaddr': "javascript:history.back();",
+                    'linktext': "&gt; Back"
+                })
+        cur.execute(add_record, record_data)  # insert record_data to database
+        sqlcnx.commit()  # commit changes to database
+        cur.close()  # close database cursor
+        self.insert_affiliation(id, affiliated, status, hasaffiliationforms,
+                                benefits, remarks, schoolyear, yearsaffiliated,
+                                sca, scm, paymentmode, paymentdate, paymentid,
+                                paymentamount, receiptnumber, paymentsendmode)
+        return self.renderer.render(
+            "dialog.mako",
+            {  # return insertion success HTML
+                'title': "Affiliation record added.",
+                'linkaddr': "/add",
+                'linktext': "Add another record"
             })
-        cur.execute(add_record, record_data)            # insert record_data to database
-        sqlcnx.commit()                                 # commit changes to database
-        cur.close() # close database cursor
-        self.insert_affiliation(id, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode)
-        return self.renderer.render("dialog.mako", {           # return insertion success HTML
-            'title': "Affiliation record added.",
-            'linkaddr': "/add",
-            'linktext': "Add another record"
-        })
-            
-    def validate_affiliation(self, clubid, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode):
+
+    def validate_affiliation(self, clubid, affiliated, status,
+                             hasaffiliationforms, benefits, remarks,
+                             schoolyear, yearsaffiliated, sca, scm,
+                             paymentmode, paymentdate, paymentid,
+                             paymentamount, receiptnumber, paymentsendmode):
         affiliation_data = {
-            'affiliationID':                    newID(),    # generate new unique ID for affiliation_data
-            'affiliated':                       toInt(affiliated),
-            'status':                           status,
-            'hasAffiliationForms':              toInt(hasaffiliationforms),
-            'benefits':                         benefits,
-            'remarks':                          remarks,
-            'schoolYear':                       toInt(schoolyear),
-            'yearsAffiliated':                  toInt(yearsaffiliated),
-            'SCA':                              toInt(sca),
-            'SCM':                              toInt(scm),
-            'paymentMode':                      paymentmode,
-            'paymentDate':                      paymentdate,
-            'paymentID':                        paymentid,
-            'paymentAmount':                    toInt(paymentamount),
-            'receiptNumber':                    receiptnumber,
-            'paymentSendMode':                  paymentsendmode,
-            'AffiliationRecordsTable_clubID':   clubid
+            'affiliationID':
+            newID(),  # generate new unique ID for affiliation_data
+            'affiliated': toInt(affiliated),
+            'status': status,
+            'hasAffiliationForms': toInt(hasaffiliationforms),
+            'benefits': benefits,
+            'remarks': remarks,
+            'schoolYear': toInt(schoolyear),
+            'yearsAffiliated': toInt(yearsaffiliated),
+            'SCA': toInt(sca),
+            'SCM': toInt(scm),
+            'paymentMode': paymentmode,
+            'paymentDate': paymentdate,
+            'paymentID': paymentid,
+            'paymentAmount': toInt(paymentamount),
+            'receiptNumber': receiptnumber,
+            'paymentSendMode': paymentsendmode,
+            'AffiliationRecordsTable_clubID': clubid
         }
         # input validation
         self.validator.setLimits("affiliation")
         errors = self.validator.validate(affiliation_data)
         return errors
-        
-    def insert_affiliation(self, clubid, affiliated, status, hasaffiliationforms, benefits, remarks, schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid, paymentamount, receiptnumber, paymentsendmode):
+
+    def insert_affiliation(self, clubid, affiliated, status,
+                           hasaffiliationforms, benefits, remarks, schoolyear,
+                           yearsaffiliated, sca, scm, paymentmode, paymentdate,
+                           paymentid, paymentamount, receiptnumber,
+                           paymentsendmode):
         # string format for inserting affiliation_data into SQL database
         # table structure is defined in db.sql
         add_affiliation = (
@@ -144,26 +178,29 @@ class AddRecord(object):
             "VALUES (%(affiliationID)s, %(affiliated)s, %(status)s, %(hasAffiliationForms)s, %(benefits)s, %(remarks)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s, %(AffiliationRecordsTable_clubID)s)"
         )
         affiliation_data = {
-            'affiliationID':                    newID(),    # generate new unique ID for affiliation_data
-            'affiliated':                       toInt(affiliated),
-            'status':                           status,
-            'hasAffiliationForms':              toInt(hasaffiliationforms),
-            'benefits':                         benefits,
-            'remarks':                          remarks,
-            'schoolYear':                       toInt(schoolyear),
-            'yearsAffiliated':                  toInt(yearsaffiliated),
-            'SCA':                              toInt(sca),
-            'SCM':                              toInt(scm),
-            'paymentMode':                      paymentmode,
-            'paymentDate':                      paymentdate,
-            'paymentID':                        paymentid,
-            'paymentAmount':                    toInt(paymentamount),
-            'receiptNumber':                    receiptnumber,
-            'paymentSendMode':                  paymentsendmode,
-            'AffiliationRecordsTable_clubID':   clubid
+            'affiliationID':
+            newID(),  # generate new unique ID for affiliation_data
+            'affiliated': toInt(affiliated),
+            'status': status,
+            'hasAffiliationForms': toInt(hasaffiliationforms),
+            'benefits': benefits,
+            'remarks': remarks,
+            'schoolYear': toInt(schoolyear),
+            'yearsAffiliated': toInt(yearsaffiliated),
+            'SCA': toInt(sca),
+            'SCM': toInt(scm),
+            'paymentMode': paymentmode,
+            'paymentDate': paymentdate,
+            'paymentID': paymentid,
+            'paymentAmount': toInt(paymentamount),
+            'receiptNumber': receiptnumber,
+            'paymentSendMode': paymentsendmode,
+            'AffiliationRecordsTable_clubID': clubid
         }
-        sqlcnx = self.DBC.connect()                     # connect to SQL server
-        cur = sqlcnx.cursor(buffered=True)              # create an SQL cursor to the database
-        cur.execute(add_affiliation, affiliation_data)  # insert affiliation_data to database
-        sqlcnx.commit()                                 # commit changes to database
-        cur.close() # close database cursor
+        sqlcnx = self.DBC.connect()  # connect to SQL server
+        cur = sqlcnx.cursor(
+            buffered=True)  # create an SQL cursor to the database
+        cur.execute(add_affiliation,
+                    affiliation_data)  # insert affiliation_data to database
+        sqlcnx.commit()  # commit changes to database
+        cur.close()  # close database cursor

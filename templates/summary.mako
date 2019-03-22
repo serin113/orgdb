@@ -55,12 +55,10 @@ typeName = {
     3: "State College/University"
 }
 %>
-
-
 <html>
     <head>
-        <link rel="stylesheet" href="/styles/index.css"/>
-        <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
+        <link href="/styles/index.css" rel="stylesheet"/>
+        <link href="/styles/semantic.min.css" rel="stylesheet" type="text/css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
     </head>

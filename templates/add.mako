@@ -38,11 +38,11 @@ Mako variables:
                     <div class="ui two column very relaxed stackable grid">
                         <div class="column">
                           <div class="ui input">
-                            <input type="text" placeholder="Club Name" name="clubname" required/ placeholder="Club Name">
+                            <input type="text" placeholder="Club Name" name="clubname" required>
                           </div><br><br>
 
                           <div class="ui input">
-                            <input type="text" name="school" required/ placeholder="School Name">
+                            <input type="text" name="school" required placeholder="School Name">
                           </div>
                           <br><br>
 
@@ -138,7 +138,7 @@ Mako variables:
                           </div><br><br>
                         </div>
                         <div class="column">
-                          <label>School Year: </label> &nbsp&nbsp
+                          <label>School Year: </label> &nbsp;&nbsp;
                           <div class="ui input">
                             <input type="number"  name="schoolyear" min="2007" max="3050" value = "2007" required style="width: 100px;">
                           </div><br><br>
@@ -192,22 +192,22 @@ Mako variables:
                               </div>
                           </div><br><br>
 
-                          <label>Number of years paid: </label> &nbsp&nbsp
+                          <label>Number of years paid: </label> &nbsp;&nbsp;
                           <div class="ui input">
                             <input type="number"  name="yearsaffiliated" min="1" value = "1" required style="width: 100px;">
                           </div><br><br>
 
-                          <label>Number of club advisers: </label> &nbsp&nbsp
+                          <label>Number of club advisers: </label> &nbsp;&nbsp;
                           <div class="ui input">
-                            <input type="number" name="sca" min="1"required style="width: 100px;">
+                            <input type="number" name="sca" min="1" required style="width: 100px;">
                           </div><br><br>
 
-                          <label>Number of club members: </label> &nbsp&nbsp
+                          <label>Number of club members: </label> &nbsp;&nbsp;
                           <div class="ui input">
                             <input type="number"  name="scm" min="1" required style="width: 100px;">
                           </div><br><br>
 
-                          <label>Payment Amount: </label> &nbsp&nbsp
+                          <label>Payment Amount: </label> &nbsp;&nbsp;
                           <div class="ui input">
                             <input type="number"  name="paymentamount" min="0" style="width: 100px;">
                           </div><br><br>

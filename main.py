@@ -25,12 +25,11 @@
 # 2019/03/22 (Simon) - Moved helper classes & methods to modules/_helpers.py
 #                    - Moved CherryPy-exposed classes to individual files in modules/
 
+import os  # for resolving filesystem paths
+import atexit  # for handling server exit condition
 
-import os       # for resolving filesystem paths
-import atexit   # for handling server exit condition
-
-import modules as pm
-import modules._helpers as helper
+from modules import Root  # import CherryPy-exposed Root class
+import modules._helpers as helper  # import helper classes
 
 # configuration of CherryPy webserver
 if __name__ == '__main__':
@@ -43,18 +42,18 @@ if __name__ == '__main__':
         'log.access_file': 'access.log',
         'tools.gzip.on': True
     })
-    
+
     # initialize persistent renderer & validator classes
     renderer = helper.ContentRenderer()
     validator = helper.InputValidator()
-    
+
     # start a persistent connection to the SQL database
     dbc = helper.DBConnection("db.conf")
     dbc.connect()
-    
+
     # disconnect from SQL database on exit
     atexit.register(lambda d: d.disconnect(), dbc)
-    
+
     conf = {
         '/': {
             'tools.sessions.on': True,
@@ -72,11 +71,11 @@ if __name__ == '__main__':
             'tools.staticdir.on': True,
             'tools.staticdir.dir': './scripts'
         },
-        '/favicon.ico':{
+        '/favicon.ico': {
             'tools.staticfile.on': True,
             'tools.staticfile.filename': os.path.abspath("static/favicon.ico")
         }
     }
     # start the webserver
-    helper.cherrypy.quickstart(pm.Root(dbc, renderer, validator), '/', conf)
+    helper.cherrypy.quickstart(Root(dbc, renderer, validator), '/', conf)
     print("\nServer exited")

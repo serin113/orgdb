@@ -6,14 +6,13 @@
 # Code History:
 # 2019/03/22 (Simon) - Moved class to this file
 
-
-
 from ._helpers import *
 from .Summary import *
 from .ViewApplication import *
 from .ViewRecord import *
 from .AddApplication import *
 from .AddRecord import *
+
 
 # class used by CherryPy to handle HTTP requests for /
 class Root(object):
@@ -24,12 +23,14 @@ class Root(object):
         # class handling /add
         self.add = AddRecord(DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /apply
-        self.apply = AddApplication(DBC=DBC, Renderer=Renderer, Validator=Validator)
+        self.apply = AddApplication(
+            DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /applications
-        self.applications = ViewApplication(DBC=DBC, Renderer=Renderer, Validator=Validator)
+        self.applications = ViewApplication(
+            DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /summary
         self.summary = Summary(DBC=DBC, Renderer=Renderer)
-    
+
     @cherrypy.expose
     # CherryPy method handling /
     def index(self):
