@@ -6,6 +6,7 @@
 # Code History:
 # 2019/03/22 (Simon) - Moved class to this file
 #                    - Uses a dictionary for passing data to the template
+# 2019/03/23 (Simon) - Added (int) overallTotal to data sent to template
 
 from ._helpers import *
 
@@ -53,8 +54,9 @@ class Summary(object):
                             region_total[record[0]] += 1
                             level_total[record[1]] += 1
                             type_total[record[2]] += 1
+                        overall_total = len(res)
                         # save data for specific year
-                        data[year] = (region_total, level_total, type_total)
+                        data[year] = (region_total, level_total, type_total, overall_total)
                 else:
                     data = None
             else:

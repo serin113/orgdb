@@ -6,6 +6,7 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 
 Code History:
 2019/03/06 (Simon) - Initial working code and documentation
+2019/03/23 (Simon) - Changed region numbers from Roman to Arabic
 </%doc>
 
 
@@ -73,23 +74,23 @@ Mako variables:
                       $('.ui.dropdown')
                         .dropdown();
                   </script>
-                  <div class="item" data-value="1">I (Ilocos)</div>
-                  <div class="item" data-value="2">II (Cagayan Valley)</div>
-                  <div class="item" data-value="3">III (Central Luzon)</div>
-                  <div class="item" data-value="4">IV-A (CALABARZON)</div>
-                  <div class="item" data-value="5">V (Bicol)</div>
-                  <div class="item" data-value="6">VI (Western Visayas)</div>
-                  <div class="item" data-value="7">VII (Central Visayas)</div>
-                  <div class="item" data-value="8">VIII (Eastern Visayas)</div>
-                  <div class="item" data-value="9">IX (Zamboanga Peninsula)</div>
-                  <div class="item" data-value="10">X (Northern Mindanao)</div>
-                  <div class="item" data-value="11">XI (Davao)</div>
-                  <div class="item" data-value="12">XII (SOCCSKSARGEN)</div>
-                  <div class="item" data-value="13">XIV (NCR)</div>
-                  <div class="item" data-value="14">XV (CAR)</div>
-                  <div class="item" data-value="15">XVI (ARMM)</div>
-                  <div class="item" data-value="16">XII (CARAGA)</div>
-                  <div class="item" data-value="17">XVII (MIMAROPA)</div>
+                  <div class="item" data-value="1">1 (Ilocos)</div>
+                  <div class="item" data-value="2">2 (Cagayan Valley)</div>
+                  <div class="item" data-value="3">3 (Central Luzon)</div>
+                  <div class="item" data-value="4">4A (CALABARZON)</div>
+                  <div class="item" data-value="5">5 (Bicol)</div>
+                  <div class="item" data-value="6">6 (Western Visayas)</div>
+                  <div class="item" data-value="7">7 (Central Visayas)</div>
+                  <div class="item" data-value="8">8 (Eastern Visayas)</div>
+                  <div class="item" data-value="9">9 (Zamboanga Peninsula)</div>
+                  <div class="item" data-value="10">10 (Northern Mindanao)</div>
+                  <div class="item" data-value="11">11 (Davao)</div>
+                  <div class="item" data-value="12">12 (SOCCSKSARGEN)</div>
+                  <div class="item" data-value="13">13 (NCR)</div>
+                  <div class="item" data-value="14">14 (CAR)</div>
+                  <div class="item" data-value="15">15 (ARMM)</div>
+                  <div class="item" data-value="16">16 (CARAGA)</div>
+                  <div class="item" data-value="17">17 (MIMAROPA)</div>
                 </div>
               </div><br><br>
               

@@ -10,6 +10,7 @@ Code History:
 2019/03/07 (Simon) - added /apply link
 2019/03/12 (Simon) - added /applications link
 2019/03/21 (Simon) - added /summary link
+2019/03/22 (Simon) - added active page indication
 </%doc>
 
 <%page args="current=None"/>
