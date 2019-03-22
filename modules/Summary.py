@@ -31,8 +31,9 @@ class Summary(object):
             # get school year range
             cur.execute("SELECT MIN(schoolYear), MAX(schoolYear-1+yearsAffiliated) FROM AffiliationTable ORDER BY schoolYear")
             res = cur.fetchall()
+            
             if len(res) > 0:
-                if len(res[0]) > 0:
+                if res[0][0] is not None or res[0][1] is not None:
                     # for every year within the range
                     for year in range(res[0][0], res[0][1]+1):
                         region_total = defaultdict(lambda:0)
