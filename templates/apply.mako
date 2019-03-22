@@ -24,7 +24,7 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako"/>
+            <%include file="header.mako" args="current='apply'"/>
         </header>
         <section>
             <h1 class="center title">Application Form</h1>

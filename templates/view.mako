@@ -31,7 +31,7 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako"/>
+            <%include file="header.mako" args="current='view'"/>
         </header>
         <section>
             <h1 class="center title">View All Affiliation Records</h1>

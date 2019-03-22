@@ -85,7 +85,7 @@ class ViewApplication(object):
             data_list.append(app_dict)
         # returns Mako-rendered view page HTML
         # (control ViewAffiliationApplicationList)
-        return self.renderer.render("approve.mako", {
+        return self.renderer.render("applications.mako", {
             "data": data_list,
             "q": q
         })

@@ -64,7 +64,7 @@ typeName = {
     </head>
     <body>
         <header>
-            <%include file="header.mako"/>
+            <%include file="header.mako" args="current='summary'"/>
         </header>
         <section>
             <h1>Affiliated clubs per school year</h1>

@@ -12,13 +12,21 @@ Code History:
 2019/03/21 (Simon) - added /summary link
 </%doc>
 
+<%page args="current=None"/>
+
 <h1 class="center"><a href="/">PSYSC</a></h1>
 
+<%
+from collections import defaultdict
+is_active = defaultdict(lambda:"")
+is_active[current] = "active"
+%>
+
 <div class="ui six item menu">
-      <a class="item" href="/add">Add Record</a>
-      <a class="item" href="/view">View Records</a>
-      <a class="active item" href="/index">Home</a>
-      <a class="item" href="/apply">Create Application</a>
-      <a class="item" href="/applications">View Applications</a>
-      <a class="item" href="/summary">View Summary</a>
+    <a class="${is_active['index']} item" href="/index">Home</a>
+    <a class="${is_active['add']} item" href="/add">Add Record</a>
+    <a class="${is_active['view']} item" href="/view">View Records</a>
+    <a class="${is_active['apply']} item" href="/apply">Create Application</a>
+    <a class="${is_active['applications']} item" href="/applications">View Applications</a>
+    <a class="${is_active['summary']} item" href="/summary">View Summary</a>
 </div>

@@ -28,7 +28,7 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako"/>
+            <%include file="header.mako" args="current='applications'"/>
         </header>
         <section>
             <h1 class="center title">Pending Applications</h1>

@@ -28,7 +28,7 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako"/>
+            <%include file="header.mako" args="current='add'"/>
         </header>
         <section>
             <h1 class="center title">Add Affiliation Record</h1>
