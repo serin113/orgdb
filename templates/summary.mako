@@ -114,6 +114,8 @@ typeName = {
                 % endfor
             </table>
             % endfor
+            % else
+            <p class="center">Database is empty</p>
             % endif
         </section>
         <footer>
