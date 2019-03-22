@@ -9,6 +9,8 @@
 
 
 from ._helpers import *
+from .AddRecord import *
+
 
 # class used by CherryPy for handling /applications
 class ViewApplication(object):
@@ -158,7 +160,7 @@ class ViewApplication(object):
         # if application indicates an existing record with clubID
         else:
             # insert data into AffiliationTable
-            a.insert_affiliation(apd["clubID"], "1", "", "1", "", "", apd["schoolYear"], apd["yearsAffiliated"], apd["SCA"], apd["SCM"], apd["paymentMode"], apd["paymentDate"], apd["paymentID"], apd["paymentAmount"], apd["receiptNumber"], apd["paymentSendMode"])
+            addrecord.insert_affiliation(apd["clubID"], "1", "", "1", "", "", apd["schoolYear"], apd["yearsAffiliated"], apd["SCA"], apd["SCM"], apd["paymentMode"], apd["paymentDate"], apd["paymentID"], apd["paymentAmount"], apd["receiptNumber"], apd["paymentSendMode"])
         cur = sqlcnx.cursor(buffered=True)  # create SQL database cursor
         # delete application from AffiliationApplicationsTable (it's already approved)
         cur.execute(

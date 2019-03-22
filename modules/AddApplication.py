@@ -89,6 +89,7 @@ class AddApplication(object):
                 "FROM AffiliationRecordsTable WHERE clubID = %(clubID)s"
             )
             cur.execute(club_query, {'clubID': clubid})
+            print(cur.rowcount)
             if cur.rowcount == 1:
                 # don't check record again (valid one is already fetched)
                 skip_record_check = True
@@ -123,9 +124,7 @@ class AddApplication(object):
         if application_data['clubID'] is not None:
             # check for preexisting affiliation (same clubID & overlapping school year range)
             collision2_query = 'SELECT affiliationID FROM AffiliationTable WHERE AffiliationRecordsTable_clubID = %(clubID)s AND (%(schoolYear)s BETWEEN schoolYear AND schoolYear-1+yearsAffiliated OR %(schoolYear)s-1+%(yearsAffiliated)s BETWEEN schoolYear AND schoolYear-1+yearsAffiliated)'
-            print("coll: ", schoolyear, " ", yearsaffiliated)
             cur.execute(collision2_query, {'schoolYear': schoolyear, 'clubID': clubid, 'yearsAffiliated':yearsaffiliated})
-            print(cur.rowcount)
             if cur.rowcount > 0:
                 errors.append(("Matching affiliation already exists in the database", "clubID/school year/years affiliated", (clubid, schoolyear, yearsaffiliated)))
         

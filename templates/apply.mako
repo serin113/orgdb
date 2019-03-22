@@ -57,16 +57,16 @@ Mako variables:
                 
                 (this section only required if there's no existing record)<br><br>
                 <div class="ui input">
-                <input type="text" placeholder="Club Name" name="clubname"/ placeholder="Club Name">
+                <input type="text" placeholder="Club Name" name="clubname" placeholder="Club Name">
               </div><br><br>
 
               <div class="ui input">
-                <input type="text" name="school"/ placeholder="School Name">
+                <input type="text" name="school" placeholder="School Name">
               </div>
               <br><br>
 
               <div class="ui selection dropdown">
-                <input type="hidden" name="region" id="region">
+                <input type="hidden" name="region" id="region" value="1">
                 <i class="dropdown icon"></i>
                 <div class="default text">Region</div>
                 <div class="menu">
@@ -95,7 +95,7 @@ Mako variables:
               </div><br><br>
               
               <div class="ui selection dropdown">
-                <input type="hidden" name="level" id="level">
+                <input type="hidden" name="level" id="level" value="1">
                 <i class="dropdown icon"></i>
                 <div class="default text">Level</div>
                 <div class="menu">
@@ -114,7 +114,7 @@ Mako variables:
                   <label>Type</label>
                   <div class="field">
                     <div class="ui radio checkbox">
-                      <input type="radio" name="type" value="1" id="type-public" >
+                      <input type="radio" name="type" value="1" id="type-public" checked>
                       <label for="type-public">Public</label>
                     </div>
                   </div>
@@ -132,80 +132,75 @@ Mako variables:
                   </div>
               </div><br><br>
 
-              <div class="ui input">
-                <input type="text" placeholder="Address" name="address">
-              </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="Address" name="address">
+                </div><br><br>
 
-              <div class="ui input">
-                <input type="text" placeholder="City" name="city">
-              </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="City" name="city">
+                </div><br><br>
 
-              <div class="ui input">
-                <input type="text" placeholder="Province" name="province">
-              </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="Province" name="province">
+                </div><br><br>
 
-              <div class="ui input">
-                <input type="text" placeholder="Adviser Name" name="advisername">
-              </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="Adviser Name" name="advisername">
+                </div><br><br>
 
-              <div class="ui input">
-                <input type="text" placeholder="Contact No." name="contact">
-              </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="Contact No." name="contact">
+                </div><br><br>
 
-              <div class="ui input">
-                <input type="text" placeholder="Email Address" name="email">
-              </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="Email Address" name="email">
+                </div><br><br>
 
                 <hr>
-               <label>School Year: </label> &nbsp&nbsp
-                                         <div class="ui input">
-                                           <input type="number"  name="schoolyear" min="2007" max="3050" value = "2007" required style="width: 100px;">
-                                         </div><br><br>
+                <label>School Year: </label> &nbsp&nbsp
+                <div class="ui input">
+                    <input type="number"  name="schoolyear" min="2007" max="3050" value = "2007" required style="width: 100px;">
+                </div><br><br>
 
-                                         <label>Number of years paid: </label> &nbsp&nbsp
-                                         <div class="ui input">
-                                           <input type="number"  name="yearsaffiliated" min="1" value = "1" required style="width: 100px;">
-                                         </div><br><br>
+                <label>Number of years paid: </label> &nbsp&nbsp
+                <div class="ui input">
+                    <input type="number"  name="yearsaffiliated" min="1" value = "1" required style="width: 100px;">
+                </div><br><br>
 
-                                         <label>Number of club advisers: </label> &nbsp&nbsp
-                                         <div class="ui input">
-                                           <input type="number" name="sca" min="1"required style="width: 100px;">
-                                         </div><br><br>
+                <label>Number of club advisers: </label> &nbsp&nbsp
+                <div class="ui input">
+                    <input type="number" name="sca" min="1"required style="width: 100px;">
+                </div><br><br>
 
-                                         <label>Number of club members: </label> &nbsp&nbsp
-                                         <div class="ui input">
-                                           <input type="number"  name="scm" min="1" required style="width: 100px;">
-                                         </div><br><br>
+                <label>Number of club members: </label> &nbsp&nbsp
+                <div class="ui input">
+                    <input type="number"  name="scm" min="1" required style="width: 100px;">
+                </div><br><br>
 
-                                         <label>Payment Amount: </label> &nbsp&nbsp
-                                         <div class="ui input">
-                                           <input type="number"  name="paymentamount" min="0" style="width: 100px;">
-                                         </div><br><br>
+                <label>Payment Amount: </label> &nbsp&nbsp
+                <div class="ui input">
+                    <input type="number"  name="paymentamount" min="0" style="width: 100px;">
+                </div><br><br>
 
-                                         <div class="ui input">
-                                           <input type="text" placeholder="Payment Mode" name="paymentmode">
-                                         </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="Payment Mode" name="paymentmode">
+                </div><br><br>
 
-                                         <div class="ui input">
-                                           <input type="date" name="paymentdate" required>
-                                         </div><br><br>
+                <div class="ui input">
+                    <input type="date" name="paymentdate" required>
+                </div><br><br>
 
-                                         <div class="ui input">
-                                           <input type="text" placeholder="Payment ID" name="paymentid">
-                                         </div><br><br>
+                <div class="ui input">
+                    <input type="text" placeholder="Payment ID" name="paymentid">
+                </div><br><br>
 
-                                         
+                <div class="ui input">
+                    <input type="text" placeholder="Receipt #" name="receiptnumber">
+                </div><br><br>
 
-                                         <div class="ui input">
-                                           <input type="text" placeholder="Receipt #" name="receiptnumber">
-                                         </div><br><br>
-
-                                         <div class="ui input">
-                                           <input type="text" placeholder="Payment Send Mode" name="paymentsendmode">
-                                         </div><br><br>
-
-
-
+                <div class="ui input">
+                    <input type="text" placeholder="Payment Send Mode" name="paymentsendmode">
+                </div><br><br>
                 <hr>
                 <button class="ui primary button" type="submit">INSERT</button>
             </form>
