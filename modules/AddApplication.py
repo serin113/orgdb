@@ -7,6 +7,7 @@
 # 2019/03/22 (Simon) - Moved class to this file
 # 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
 #                    - Added Login.accessible_by decorators to limit page access to specific users
+#                    - Changed algorithm for generating application IDs
 
 from ._helpers import *
 from .AddRecord import *
@@ -76,11 +77,11 @@ class AddApplication(object):
         sqlcnx = self.DBC.connect()  # connect to SQL server
         cur = sqlcnx.cursor(
             buffered=True)  # create an SQL cursor to the database
+        date_today = today()
         application_data = {
-            'appID': newID(),
             'hasRecord': toInt(hasrecord),
             'clubID': clubid,
-            'dateCreated': today(),
+            'dateCreated': date_today,
             'region': toInt(region),
             'level': toInt(level),
             'type': toInt(type),
@@ -167,6 +168,33 @@ class AddApplication(object):
                     ("Matching affiliation already exists in the database",
                      "clubID/school year/years affiliated",
                      (clubid, schoolyear, yearsaffiliated)))
+                     
+            application_data['appID'] = newID(
+                    str(application_data['hasRecord']) +
+                    str(application_data['clubID']) +
+                    str(application_data['dateCreated']) +
+                    str(application_data['region']) +
+                    str(application_data['level']) +
+                    str(application_data['type']) +
+                    str(application_data['school']) +
+                    str(application_data['clubName']) +
+                    str(application_data['address']) +
+                    str(application_data['city']) +
+                    str(application_data['province']) +
+                    str(application_data['adviserName']) +
+                    str(application_data['contact']) +
+                    str(application_data['email']) +
+                    str(application_data['schoolYear']) +
+                    str(application_data['yearsAffiliated']) +
+                    str(application_data['SCA']) +
+                    str(application_data['SCM']) +
+                    str(application_data['paymentMode']) +
+                    str(application_data['paymentDate']) +
+                    str(application_data['paymentID']) +
+                    str(application_data['paymentAmount']) +
+                    str(application_data['receiptNumber']) +
+                    str(application_data['paymentSendMode'])
+                )
 
             # change validation method if record data is already known to be valid
             if skip_record_check:

@@ -44,7 +44,6 @@ Mako variables:
         </header>
         <h1 class="ui header center title">View All Affiliation Records</h1>
         <div class="ui container">
-            % if (data is not None) and (len(data) > 0):
             <form method="get" action="" id="filter-form">
                 <div class="ui fluid action icon input">
                   <input type="text" name="q" value="${q}" placeholder="Search..."/>
@@ -53,6 +52,7 @@ Mako variables:
                   </button>
                 </div>
             </form>
+            % if (data is not None) and (len(data) > 0):
             <table class="ui selectable stackable striped celled sortable blue small table">
                 <thead>
                     <tr>
@@ -100,7 +100,7 @@ Mako variables:
             </table>
             % else:
             <div class="ui warning message">
-                <i class="warning icon"></i>Database is empty.
+                <i class="warning icon"></i>Zero results.
             </div>
             % endif
         </div>

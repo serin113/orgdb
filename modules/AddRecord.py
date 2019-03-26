@@ -7,6 +7,7 @@
 # 2019/03/22 (Simon) - Moved class to this file
 # 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
 #                    - Added Login.accessible_by decorators to limit page access to specific users
+#                    - Changed algorithm for generating application IDs
 
 from ._helpers import *
 from .Login import *
@@ -78,10 +79,13 @@ class AddRecord(object):
         sqlcnx = self.DBC.connect()  # connect to SQL server
         cur = sqlcnx.cursor(
             buffered=True)  # create an SQL cursor to the database
-        id = newID()  # generate new unique ID for record_data
+        date_today = today()
+        id = newID(
+            region + level + type + school + clubname + address + city + province + advisername + contact + email, length=8
+        )  # generate new unique ID for record_data
         record_data = {
             'clubID': id,
-            'dateUpdated': today(),
+            'dateUpdated': date_today,
             'region': toInt(region),
             'level': toInt(level),
             'type': toInt(type),
@@ -185,8 +189,6 @@ class AddRecord(object):
                              receiptnumber=None,
                              paymentsendmode=None):
         affiliation_data = {
-            'affiliationID':
-            newID(),  # generate new unique ID for affiliation_data
             'affiliated': toInt(affiliated),
             'status': status,
             'hasAffiliationForms': toInt(hasaffiliationforms),
@@ -235,7 +237,9 @@ class AddRecord(object):
         )
         affiliation_data = {
             'affiliationID':
-            newID(),  # generate new unique ID for affiliation_data
+            newID(
+                affiliated + status + hasaffiliationforms + benefits + remarks + schoolyear + yearsaffiliated + sca + scm + paymentmode + paymentdate + paymentid + paymentamount + receiptnumber + paymentsendmode + clubid
+            ),  # generate new unique ID for affiliation_data
             'affiliated': toInt(affiliated),
             'status': status,
             'hasAffiliationForms': toInt(hasaffiliationforms),

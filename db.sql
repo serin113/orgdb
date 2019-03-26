@@ -11,6 +11,7 @@
 -- 2019/03/02 (Simon) - Added command to drop database every time this file is sourced
 -- 2019/03/07 (Simon) - Fixed data types
 -- 2019/03/26 (Simon) - Added LoginCredentialsTable and LoginAccessTable
+--                    - Changed appID and affiliationID lengths to 128 (for SHA-512 hex hash)
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
@@ -53,7 +54,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `AffiliationTable`;
 CREATE TABLE IF NOT EXISTS `AffiliationTable` (
-  `affiliationID` VARCHAR(50) NOT NULL,     -- affiliation-unique id
+  `affiliationID` VARCHAR(128) NOT NULL,     -- affiliation-unique id
   `affiliated` TINYINT(1) NOT NULL,         -- is club affiliated? 0:no, 1:yes
   `status` VARCHAR(45) NULL,                -- "newly affiliated", "renewing", etc.
   `hasAffiliationForms` TINYINT(1) NULL,    -- are forms submitted? 0:no, 1:yes
@@ -85,7 +86,7 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `AffiliationApplicationsTable`;
 CREATE TABLE `AffiliationApplicationsTable` (
-  `appID` VARCHAR(50) NOT NULL,     -- application-unique ID
+  `appID` VARCHAR(128) NOT NULL,     -- application-unique ID
   `hasRecord` TINYINT(4) NULL,      -- is this application for an existing record? 0:no, 1:yes
   `clubID` VARCHAR(50) NULL,        -- (only used if hasRecord is 1) for which club?
   `dateCreated` DATETIME NOT NULL,  -- date application is created

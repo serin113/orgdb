@@ -7,23 +7,34 @@
 # 2019/03/21 (Simon) - Moved helper methods & classes from main.py to this file
 # 2019/03/26 (Simon) - DBConnection.connect & ContentRenderer.render catches more exceptions
 #                    - ContentRenderer.render caught exceptions only shown if debug=True
+#                    - Updated newID
 
-from collections import defaultdict
-import mysql.connector
-import cherrypy
-from mako.lookup import TemplateLookup
+from collections import defaultdict  # for general-purpose dicts with default values
+import mysql.connector  # for handling MySQL database connections
+import cherrypy  # for handling HTTP requests
+from mako.lookup import TemplateLookup  # for template rendering
 import mako.exceptions
 from datetime import date, datetime  # for getting the current date
-from uuid import uuid4  # for creating a unique ID for database insertion
 import re  # for input validation
+from uuid import uuid4  # for creating a unique ID
+from hashlib import sha512  # for creating a unique ID from other data
 
 #
 # HELPER METHODS
 #
 
 
-# returns a string-type unique id
-def newID():
+# returns a string-type unique id from string_base
+def newID(string_base=None, length=None, prefix=None, postfix=None):
+    if string_base is not None:
+        string = sha512(bytes(string_base, "utf8")).hexdigest()
+        if length is not None:
+            string = string[:length]
+        if prefix is not None:
+            string = prefix + string
+        if postfix is not None:
+            string = string + postfix
+        return string
     return str(uuid4())
 
 
