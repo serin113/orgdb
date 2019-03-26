@@ -37,7 +37,7 @@ class ViewRecord(object):
         # create an SQL cursor to the database
         cur = sqlcnx.cursor(buffered=True)
         # if user is logged-in
-        if creds is not None:
+        if usertype is not None:
             # if user is an admin or dev
             if usertype[1] == 1 or usertype[1] == 2:
                 # if no record_id is indicated in the URL
