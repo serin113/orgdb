@@ -7,6 +7,7 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 Code History:
 2019/03/12 (Simon) - Intial template code
 2019/03/13 (Simon) - Updated displayed columns
+2019/03/26 (Simon) - Changed page arguments
 </%doc>
 
 
@@ -16,21 +17,21 @@ Mako variables:
 </%doc>
 
 
-<%page args="data=None, q=''"/>
+<%page args="user=None, data=None, q=''"/>
 
 
 <html>
     <head>
-        <link rel="stylesheet" href="/styles/approve.css"/>
+        <link rel="stylesheet" href="/styles/applications.css"/>
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="current='applications'"/>
+            <%include file="header.mako" args="user=user, current='applications'"/>
         </header>
-        <section>
+        <section class="ui container">
             <h1 class="center title">Pending Applications</h1>
             <hr>
             % if (data is not None) and (len(data) > 0):
@@ -73,7 +74,9 @@ Mako variables:
                 % endfor
             </table>
             % else:
-            <p class="center">Database is empty</p>
+            <div class="ui warning message">
+                <i class="warning icon"></i>Database is empty.
+            </div>
             % endif
         </section>
         <footer>

@@ -6,6 +6,7 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 
 Code History:
 2019/02/20 (Simon) - Initial template
+2019/03/26 (Simon) - Changed page arguments, updated UI
 </%doc>
 
 
@@ -18,7 +19,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="title=None, message=None, linkaddr=None, linktext=None"/>
+<%page args="user=None, title=None, message=None, linkaddr=None, linktext=None"/>
 
 
 <html>
@@ -30,9 +31,9 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako"/>
+            <%include file="header.mako" args="user=user"/>
         </header>
-        <section>
+        <section class="ui container">
             <div class="dialog">
                 % if title is not None:
                 <h1>${title}</h1>

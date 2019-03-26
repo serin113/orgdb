@@ -4,9 +4,12 @@
 # Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for details.
 
 # Code History:
-# 2019/03/22 (Simon)- Moved class to this file
+# 2019/03/22 (Simon) - Moved class to this file
+# 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
+#                    - Added Login.accessible_by decorators to limit page access to specific users
 
 from ._helpers import *
+from .Login import *
 
 
 # class used by CherryPy for handling /add
@@ -26,19 +29,44 @@ class AddRecord(object):
             self.renderer = ContentRenderer()
 
     @cherrypy.expose
+    @accessible_by("admin")
     # CherryPy method handling /add/
     def index(self):
         # returns Mako-rendered add page HTML
-        return self.renderer.render("add.mako")
+        return self.renderer.render("add.mako",
+                                    {'user': getUserType(self.DBC)})
 
     @cherrypy.expose
+    @accessible_by("admin")
     # CherryPy method handling /add/insert with incoming POST/GET data
     # every argument in the method (except for self) is defined in db.sql
-    def insert(self, region, level, type, school, clubname, address, city,
-               province, advisername, contact, email, affiliated, status,
-               hasaffiliationforms, benefits, remarks, schoolyear,
-               yearsaffiliated, sca, scm, paymentmode, paymentdate, paymentid,
-               paymentamount, receiptnumber, paymentsendmode):
+    def insert(self,
+               region=None,
+               level=None,
+               type=None,
+               school=None,
+               clubname=None,
+               address=None,
+               city=None,
+               province=None,
+               advisername=None,
+               contact=None,
+               email=None,
+               affiliated=None,
+               status=None,
+               hasaffiliationforms=None,
+               benefits=None,
+               remarks=None,
+               schoolyear=None,
+               yearsaffiliated=None,
+               sca=None,
+               scm=None,
+               paymentmode=None,
+               paymentdate=None,
+               paymentid=None,
+               paymentamount=None,
+               receiptnumber=None,
+               paymentsendmode=None):
         # string format for inserting record_data into SQL database
         # table structure is defined in db.sql
         add_record = (
@@ -83,7 +111,8 @@ class AddRecord(object):
                     'message':
                     "Invalid affiliation record data:<br>" + errortext,
                     'linkaddr': "javascript:history.back();",
-                    'linktext': "&gt; Back"
+                    'linktext': "&gt; Back",
+                    'user': getUserType(self.DBC)
                 })
         # checking for preexisting record
         collision_query = "SELECT school, clubName, schoolYear FROM (AffiliationRecordsTable INNER JOIN AffiliationTable ON AffiliationRecordsTable.clubID = AffiliationTable.AffiliationRecordsTable_clubID) WHERE school = %(school)s AND clubName = %(clubName)s AND schoolYear = %(schoolYear)s"
@@ -100,7 +129,8 @@ class AddRecord(object):
                     'message':
                     "A matching record already exists in the database.",
                     'linkaddr': "javascript:history.back();",
-                    'linktext': "&gt; Back"
+                    'linktext': "&gt; Back",
+                    'user': getUserType(self.DBC)
                 })
         res = self.validate_affiliation(
             id, affiliated, status, hasaffiliationforms, benefits, remarks,
@@ -118,7 +148,8 @@ class AddRecord(object):
                     'message':
                     "Invalid affiliation record data:<br>" + errortext,
                     'linkaddr': "javascript:history.back();",
-                    'linktext': "&gt; Back"
+                    'linktext': "&gt; Back",
+                    'user': getUserType(self.DBC)
                 })
         cur.execute(add_record, record_data)  # insert record_data to database
         sqlcnx.commit()  # commit changes to database
@@ -132,14 +163,27 @@ class AddRecord(object):
             {  # return insertion success HTML
                 'title': "Affiliation record added.",
                 'linkaddr': "/add",
-                'linktext': "Add another record"
+                'linktext': "Add another record",
+                'user': getUserType(self.DBC)
             })
 
-    def validate_affiliation(self, clubid, affiliated, status,
-                             hasaffiliationforms, benefits, remarks,
-                             schoolyear, yearsaffiliated, sca, scm,
-                             paymentmode, paymentdate, paymentid,
-                             paymentamount, receiptnumber, paymentsendmode):
+    def validate_affiliation(self,
+                             clubid=None,
+                             affiliated=None,
+                             status=None,
+                             hasaffiliationforms=None,
+                             benefits=None,
+                             remarks=None,
+                             schoolyear=None,
+                             yearsaffiliated=None,
+                             sca=None,
+                             scm=None,
+                             paymentmode=None,
+                             paymentdate=None,
+                             paymentid=None,
+                             paymentamount=None,
+                             receiptnumber=None,
+                             paymentsendmode=None):
         affiliation_data = {
             'affiliationID':
             newID(),  # generate new unique ID for affiliation_data
@@ -165,11 +209,23 @@ class AddRecord(object):
         errors = self.validator.validate(affiliation_data)
         return errors
 
-    def insert_affiliation(self, clubid, affiliated, status,
-                           hasaffiliationforms, benefits, remarks, schoolyear,
-                           yearsaffiliated, sca, scm, paymentmode, paymentdate,
-                           paymentid, paymentamount, receiptnumber,
-                           paymentsendmode):
+    def insert_affiliation(self,
+                           clubid=None,
+                           affiliated=None,
+                           status=None,
+                           hasaffiliationforms=None,
+                           benefits=None,
+                           remarks=None,
+                           schoolyear=None,
+                           yearsaffiliated=None,
+                           sca=None,
+                           scm=None,
+                           paymentmode=None,
+                           paymentdate=None,
+                           paymentid=None,
+                           paymentamount=None,
+                           receiptnumber=None,
+                           paymentsendmode=None):
         # string format for inserting affiliation_data into SQL database
         # table structure is defined in db.sql
         add_affiliation = (

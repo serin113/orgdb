@@ -5,6 +5,7 @@
 
 # Code History:
 # 2019/03/22 (Simon) - Moved class to this file
+# 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
 
 from ._helpers import *
 from .Summary import *
@@ -12,19 +13,34 @@ from .ViewApplication import *
 from .ViewRecord import *
 from .AddApplication import *
 from .AddRecord import *
+from .Login import *
 
 
 # class used by CherryPy to handle HTTP requests for /
 class Root(object):
     def __init__(self, DBC=None, Renderer=None, Validator=None):
-        self.renderer = Renderer
+        if DBC is not None:
+            self.DBC = DBC
+        else:
+            self.DBC = DBConnection()
+        if Renderer is not None:
+            self.renderer = Renderer
+        else:
+            self.renderer = ContentRenderer()
+        if Validator is not None:
+            self.validator = Validator
+        else:
+            self.validator = InputValidator()
+
+        # class handling /login
+        self.login = Login(DBC=DBC, Renderer=Renderer)
+        # class handling /apply
+        self.apply = AddApplication(
+            DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /view
         self.view = ViewRecord(DBC=DBC, Renderer=Renderer)
         # class handling /add
         self.add = AddRecord(DBC=DBC, Renderer=Renderer, Validator=Validator)
-        # class handling /apply
-        self.apply = AddApplication(
-            DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /applications
         self.applications = ViewApplication(
             DBC=DBC, Renderer=Renderer, Validator=Validator)
@@ -35,4 +51,9 @@ class Root(object):
     # CherryPy method handling /
     def index(self):
         # returns Mako-rendered homepage HTML
-        return self.renderer.render("index.mako")
+        return self.renderer.render("index.mako",
+                                    {'user': getUserType(self.DBC)})
+
+    @cherrypy.expose
+    def logout(self):
+        self.login.logout()

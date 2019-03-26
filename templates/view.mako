@@ -12,6 +12,7 @@ Code History:
 2019/03/07 (Simon) - Added clubID column
 2019/03/23 (Simon) - Added table sorting
                    - Updated styling
+2019/03/26 (Simon) - Changed page arguments, updated UI
 </%doc>
 
 
@@ -21,7 +22,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="data=None, q=''"/>
+<%page args="user=None, data=None, q=''"/>
 
 
 <html>
@@ -39,22 +40,20 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="current='view'"/>
+            <%include file="header.mako" args="user=user, current='view'"/>
         </header>
-        <section>
-            <h1 class="center title">View All Affiliation Records</h1>
-            
+        <h1 class="ui header center title">View All Affiliation Records</h1>
+        <div class="ui container">
             % if (data is not None) and (len(data) > 0):
             <form method="get" action="" id="filter-form">
-                <div class="ui action link icon input">
-                  <input type="text" name="q" value="${q}"/ style="width:800px">
+                <div class="ui fluid action icon input">
+                  <input type="text" name="q" value="${q}" placeholder="Search..."/>
                   <button class="ui icon button" type="submit">
                       <i class="search icon"></i>
                   </button>
                 </div>
-
             </form>
-            <table class="ui compact unstackable selectable striped celled sortable blue table">
+            <table class="ui selectable stackable striped celled sortable blue small table">
                 <thead>
                     <tr>
                         <th data-vivaldi-spatnav-clickable="0"></th>
@@ -76,7 +75,11 @@ Mako variables:
                     % for record in data:
                     <tr>
                         <td>
+                            % if len(q) > 0:
                             <a href="${record['clubID']}?q=${q}" class="ui basic button" id="view" style="margin:0">View</a>
+                            % else:
+                            <a href="${record['clubID']}" class="ui basic button" id="view" style="margin:0">View</a>
+                            % endif
                             <a href="/edit/${record['clubID']}" class="ui basic button" id="edit" style="margin:0">Edit</a>
                         </td>
                         <td>${record['clubID']}</td>
@@ -96,9 +99,11 @@ Mako variables:
                 </tbody>
             </table>
             % else:
-            <p class="center">Database is empty</p>
+            <div class="ui warning message">
+                <i class="warning icon"></i>Database is empty.
+            </div>
             % endif
-        </section>
+        </div>
         <footer>
             <%include file="footer.mako"/>
         </footer>

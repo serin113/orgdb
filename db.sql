@@ -10,6 +10,7 @@
 -- 2019/02/27 (Simon) - Cleanup & additional documentation
 -- 2019/03/02 (Simon) - Added command to drop database every time this file is sourced
 -- 2019/03/07 (Simon) - Fixed data types
+-- 2019/03/26 (Simon) - Added LoginCredentialsTable and LoginAccessTable
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
@@ -111,6 +112,30 @@ CREATE TABLE `AffiliationApplicationsTable` (
   `receiptNumber` VARCHAR(200) NULL,
   `paymentSendMode` VARCHAR(200) NULL,
   PRIMARY KEY (`appID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- -----------------------------------------------------
+-- Table `LoginCredentialsTable`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `LoginCredentialsTable`;
+CREATE TABLE `LoginCredentialsTable` (
+  `ID` VARCHAR(50) NOT NULL,        -- login ID
+  `PINHash` VARCHAR(128) NOT NULL,  -- (assumes 512-bit hash in hex) (hashed as <password><salt>)
+  `PINSalt` VARCHAR(64) NOT NULL,   -- (assumes 256-bit salt in hex)
+  `Type` TINYINT(1) NOT NULL,       -- 0 if Club, 1 if Admin
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- -----------------------------------------------------
+-- Table `LoginAccessTable`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `LoginAccessTable`;
+CREATE TABLE `LoginAccessTable` (
+  `ID` VARCHAR(50) NOT NULL,        -- login ID
+  `Token` VARCHAR(128) NOT NULL,    -- (assumes 512-bit access token in hex)
+  `Expires` DATETIME NOT NULL       -- datetime of expiry of token (YYYY-MM-DD HH:MM:SS)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

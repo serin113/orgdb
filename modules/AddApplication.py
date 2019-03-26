@@ -5,9 +5,12 @@
 
 # Code History:
 # 2019/03/22 (Simon) - Moved class to this file
+# 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
+#                    - Added Login.accessible_by decorators to limit page access to specific users
 
 from ._helpers import *
 from .AddRecord import *
+from .Login import *
 
 
 # class used by CherryPy for handling /apply
@@ -27,18 +30,41 @@ class AddApplication(object):
             self.renderer = ContentRenderer()
 
     @cherrypy.expose
+    @accessible_by(["default", "club"])
     # CherryPy method handling /add/
     def index(self):
         # returns Mako-rendered add page HTML
-        return self.renderer.render("apply.mako")
+        return self.renderer.render("apply.mako",
+                                    {'user': getUserType(self.DBC)})
 
     @cherrypy.expose
+    @accessible_by(["default", "club"])
     # CherryPy method handling /apply/insert with incoming POST/GET data
     # every argument in the method (except for self) is defined in db.sql
-    def insert(self, hasrecord, clubid, region, level, type, school, clubname,
-               address, city, province, advisername, contact, email,
-               schoolyear, yearsaffiliated, sca, scm, paymentmode, paymentdate,
-               paymentid, paymentamount, receiptnumber, paymentsendmode):
+    def insert(self,
+               hasrecord=None,
+               clubid=None,
+               region=None,
+               level=None,
+               type=None,
+               school=None,
+               clubname=None,
+               address=None,
+               city=None,
+               province=None,
+               advisername=None,
+               contact=None,
+               email=None,
+               schoolyear=None,
+               yearsaffiliated=None,
+               sca=None,
+               scm=None,
+               paymentmode=None,
+               paymentdate=None,
+               paymentid=None,
+               paymentamount=None,
+               receiptnumber=None,
+               paymentsendmode=None):
         # string format for inserting record_data into SQL database
         # table structure is defined in db.sql
         add_application = (
@@ -90,7 +116,6 @@ class AddApplication(object):
                 "SELECT clubID, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
                 "FROM AffiliationRecordsTable WHERE clubID = %(clubID)s")
             cur.execute(club_query, {'clubID': clubid})
-            print(cur.rowcount)
             if cur.rowcount == 1:
                 # don't check record again (valid one is already fetched)
                 skip_record_check = True
@@ -110,8 +135,7 @@ class AddApplication(object):
                     'email': record[11]
                 })
             elif cur.rowcount == 0:
-                errors.append(("Club with ID does not exist", "clubID",
-                               clubid))
+                errors.append(("Invalid club ID", "clubID", clubid))
                 application_data['clubID'] = None
             else:
                 errors.append(("More than one club with same ID", "clubID",
@@ -144,12 +168,12 @@ class AddApplication(object):
                      "clubID/school year/years affiliated",
                      (clubid, schoolyear, yearsaffiliated)))
 
-        # change validation method if record data is already known to be valid
-        if skip_record_check:
-            errors += self.validator.validate(application_data,
-                                              [*self.validator.record_dict])
-        else:
-            errors += self.validator.validate(application_data)
+            # change validation method if record data is already known to be valid
+            if skip_record_check:
+                errors += self.validator.validate(
+                    application_data, [*self.validator.record_dict])
+            else:
+                errors += self.validator.validate(application_data)
 
         # display errors, if any
         if len(errors) > 0:
@@ -160,16 +184,20 @@ class AddApplication(object):
                     e[2]) + "<br>"
             return self.renderer.render(
                 "dialog.mako", {
-                    'title': "Error!",
-                    'message': "Invalid inputs:<br>" + errortext,
+                    'title': "Error",
+                    'message': errortext,
                     'linkaddr': "javascript:history.back();",
-                    'linktext': "&lt; Back"
+                    'linktext': "&lt; Back",
+                    'user': getUserType(self.DBC)
                 })
         cur.execute(add_application,
                     application_data)  # insert application_data to database
         sqlcnx.commit()  # commit changes to database
         cur.close()  # close database cursor
-        return self.renderer.render("dialog.mako", {           # return insertion success HTML
-            'title': "Sent an application.",
-            'message': "",
-        })
+        return self.renderer.render(
+            "dialog.mako",
+            {  # return insertion success HTML
+                'title': "Sent an application.",
+                'message': "",
+                'user': getUserType(self.DBC)
+            })

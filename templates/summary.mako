@@ -9,6 +9,7 @@ Code History:
 2019/03/23 (Simon) - Added tables per school year
                    - Added table sorting
                    - Updated styling
+2019/03/26 (Simon) - Changed page arguments, updated UI
 </%doc>
 
 
@@ -23,7 +24,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="data=None"/>
+<%page args="user=None, data=None"/>
 
 
 <%
@@ -74,89 +75,89 @@ typeName = {
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="current='summary'"/>
+            <%include file="header.mako" args="user=user, current='summary'"/>
         </header>
-        <section>
+        <section class="ui container">
             <h1 class="center title">Affiliated clubs per school year</h1>
             % if data is not None:
-            <div class="ui container">
-                % for year, totals in data.items():
-                <div class="ui horizontal divider"></div>
-                <div class="ui raised segments">
-                    <div class="ui horizontal segments">
-                        <div class="ui right aligned inverted blue segment">
-                            <h1 class="ui header">${year-1}-${year}</h1>
-                        </div>
-                        <div class="ui left aligned inverted blue secondary segment">
-                            <div class="ui tiny horizontal inverted statistic">
-                                <div class="value">${totals[3]}</div>
-                                <div class="label">Affiliated Club/s</div>
-                            </div>
+            % for year, totals in data.items():
+            <div class="ui horizontal divider"></div>
+            <div class="ui raised segments">
+                <div class="ui horizontal segments">
+                    <div class="ui right aligned inverted blue segment">
+                        <h1 class="ui header">${year-1}-${year}</h1>
+                    </div>
+                    <div class="ui left aligned inverted blue secondary segment">
+                        <div class="ui tiny horizontal inverted statistic">
+                            <div class="value">${totals[3]}</div>
+                            <div class="label">Affiliated Club/s</div>
                         </div>
                     </div>
-                    % if totals[3] > 0:
-                    <div class="ui horizontal segments">
-                        <div class="ui segment">
-                            <table class="ui single line striped sortable fixed unstackable compact blue table">
-                                <thead>
-                                    <tr>
-                                        <th data-vivaldi-spatnav-clickable="1">region</th>
-                                        <th data-vivaldi-spatnav-clickable="1">total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    % for region, total in totals[0].items():
-                                    <tr>
-                                        <td data-label="region">${regionName[region]}</td>
-                                        <td data-label="total">${total}</td>
-                                    </tr>
-                                    % endfor
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="ui segment">
-                            <table class="ui single line striped sortable fixed unstackable compact blue table">
-                                <thead>
-                                    <tr>
-                                        <th data-vivaldi-spatnav-clickable="1">level</th>
-                                        <th data-vivaldi-spatnav-clickable="1">total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    % for level, total in totals[1].items():
-                                    <tr>
-                                        <td data-label="level">${levelName[level]}</td>
-                                        <td data-label="total">${total}</td>
-                                    </tr>
-                                    % endfor
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="ui segment">
-                            <table class="ui single line striped sortable fixed unstackable compact blue table">
-                                <thead>
-                                    <tr>
-                                        <th data-vivaldi-spatnav-clickable="1">type</th>
-                                        <th data-vivaldi-spatnav-clickable="1">total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    % for type, total in totals[2].items():
-                                    <tr>
-                                        <td data-label="type">${typeName[type]}</td>
-                                        <td data-label="total">${total}</td>
-                                    </tr>
-                                    % endfor
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    % endif
                 </div>
-                % endfor
+                % if totals[3] > 0:
+                <div class="ui horizontal segments">
+                    <div class="ui segment">
+                        <table class="ui single line striped sortable fixed unstackable compact blue table">
+                            <thead>
+                                <tr>
+                                    <th data-vivaldi-spatnav-clickable="1">region</th>
+                                    <th data-vivaldi-spatnav-clickable="1">total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for region, total in totals[0].items():
+                                <tr>
+                                    <td data-label="region">${regionName[region]}</td>
+                                    <td data-label="total">${total}</td>
+                                </tr>
+                                % endfor
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="ui segment">
+                        <table class="ui single line striped sortable fixed unstackable compact blue table">
+                            <thead>
+                                <tr>
+                                    <th data-vivaldi-spatnav-clickable="1">level</th>
+                                    <th data-vivaldi-spatnav-clickable="1">total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for level, total in totals[1].items():
+                                <tr>
+                                    <td data-label="level">${levelName[level]}</td>
+                                    <td data-label="total">${total}</td>
+                                </tr>
+                                % endfor
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="ui segment">
+                        <table class="ui single line striped sortable fixed unstackable compact blue table">
+                            <thead>
+                                <tr>
+                                    <th data-vivaldi-spatnav-clickable="1">type</th>
+                                    <th data-vivaldi-spatnav-clickable="1">total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for type, total in totals[2].items():
+                                <tr>
+                                    <td data-label="type">${typeName[type]}</td>
+                                    <td data-label="total">${total}</td>
+                                </tr>
+                                % endfor
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                % endif
             </div>
+            % endfor
             % else:
-            <p class="center">Database is empty</p>
+            <div class="ui warning message">
+                <i class="warning icon"></i>Database is empty.
+            </div>
             % endif
         </section>
         <footer>

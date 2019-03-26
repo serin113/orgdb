@@ -11,13 +11,11 @@ Code History:
 2019/02/15 (Simon) - added <section> tags
 2019/03/15 (Nathan)- finished adding semantic-ui
 2019/03/23 (Simon) - Changed region numbers from Roman to Arabic
+2019/03/26 (Simon) - Changed page arguments, updated UI
 </%doc>
 
 
-<%doc>
-Mako variables:
-    none
-</%doc>
+<%page args="user=None"/>
 
 
 <html>
@@ -29,11 +27,10 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="current='add'"/>
+            <%include file="header.mako" args="user=user, current='add'"/>
         </header>
-        <section>
-            <h1 class="center title">Add Affiliation Record</h1>
-
+        <section class="ui container">
+            <h1 class="ui header center title">Add Affiliation Record</h1>
             <form method="post" action="insert" id="add-form"><br>
                 <div class="ui placeholder segment">
                     <div class="ui two column very relaxed stackable grid">
@@ -48,7 +45,7 @@ Mako variables:
                           <br><br>
 
                           <div class="ui selection dropdown">
-                            <input type="hidden" name="region" id="region required">
+                            <input type="hidden" name="region" id="region" required>
                             <i class="dropdown icon"></i>
                             <div class="default text">Region</div>
                             <div class="menu">
@@ -90,28 +87,21 @@ Mako variables:
                               <div class="item" data-value="3">Elementary & High School</div>
                               <div class="item" data-value="4">College</div>
                             </div>
-                          </div><br><br>                
+                          </div><br><br>
                           
-                          <div class="ui form">
-                              <label>Type</label>
-                              <div class="field">
-                                <div class="ui radio checkbox">
-                                  <input type="radio" name="type" value="1" id="type-public"  required>
-                                  <label for="type-public">Public</label>
-                                </div>
-                              </div>
-                              <div class="field">
-                                <div class="ui radio checkbox">
-                                  <input type="radio" name="type" value="2" id="type-private" required>
-                                  <label for="type-private">Private</label>
-                                </div>
-                              </div>
-                              <div class="field">
-                                <div class="ui radio checkbox">
-                                  <input type="radio" name="type" value="3" id="type-scu" required>
-                                  <label for="type-private">State College/University</label>
-                                </div>
-                              </div>
+                          <div class="ui selection dropdown">
+                            <input type="hidden" name="type" id="type" required>
+                            <i class="dropdown icon"></i>
+                            <div class="default text">Type</div>
+                            <div class="menu">
+                              <script>
+                                  $('.ui.dropdown')
+                                    .dropdown();
+                              </script>
+                              <div class="item" data-value="1">Public</div>
+                              <div class="item" data-value="2">Private</div>
+                              <div class="item" data-value="3">State College/University</div>
+                            </div>
                           </div><br><br>
 
                           <div class="ui input">

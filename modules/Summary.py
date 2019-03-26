@@ -7,8 +7,11 @@
 # 2019/03/22 (Simon) - Moved class to this file
 #                    - Uses a dictionary for passing data to the template
 # 2019/03/23 (Simon) - Added (int) overallTotal to data sent to template
+# 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
+#                    - Added Login.accessible_by decorators to limit page access to specific users
 
 from ._helpers import *
+from .Login import *
 
 
 # class used by CherryPy for handling /summary
@@ -24,6 +27,7 @@ class Summary(object):
             self.renderer = ContentRenderer()
 
     @cherrypy.expose
+    @accessible_by("admin")
     def index(self, q=None):
         sqlcnx = self.DBC.connect()  # connect to SQL database
         cur = sqlcnx.cursor(buffered=True)  # create SQL database cursor
@@ -56,7 +60,8 @@ class Summary(object):
                             type_total[record[2]] += 1
                         overall_total = len(res)
                         # save data for specific year
-                        data[year] = (region_total, level_total, type_total, overall_total)
+                        data[year] = (region_total, level_total, type_total,
+                                      overall_total)
                 else:
                     data = None
             else:
@@ -65,5 +70,7 @@ class Summary(object):
             # handle case for filtering summary results accdg. to query
             pass
         cur.close()
-        return self.renderer.render("summary.mako",
-                                    {"data": data})  # display summary data
+        return self.renderer.render("summary.mako", {
+            "data": data,
+            'user': getUserType(self.DBC)
+        })  # display summary data

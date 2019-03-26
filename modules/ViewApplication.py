@@ -6,9 +6,12 @@
 # Code History:
 # 2019/03/22 (Simon) - Moved class to this file
 #                    - Fixed misplaced cur.close() statement
+# 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
+#                    - Added Login.accessible_by decorators to limit page access to specific users
 
 from ._helpers import *
 from .AddRecord import *
+from .Login import *
 
 
 # class used by CherryPy for handling /applications
@@ -28,6 +31,8 @@ class ViewApplication(object):
             self.validator = InputValidator()
 
     @cherrypy.expose
+    @cherrypy.tools.gzip()
+    @accessible_by("admin")
     # CherryPy method handling /applications
     def index(self, q=""):
         sqlcnx = self.DBC.connect()  # connect to SQL server
@@ -87,18 +92,21 @@ class ViewApplication(object):
         # (control ViewAffiliationApplicationList)
         return self.renderer.render("applications.mako", {
             "data": data_list,
-            "q": q
+            "q": q,
+            'user': getUserType(self.DBC)
         })
 
     # Handles /applications/view/<application_id>/
     # should return details about the affiliation application
     @cherrypy.expose
+    @accessible_by("admin")
     def view(self, application_id):
         return "app id: %s" % application_id
 
     # Handles /applications/approve/<application_id>/
     # creates a record from an affiliation application
     @cherrypy.expose
+    @accessible_by("admin")
     def approve(self, application_id):
         # create instance of AddRecord for insertion
         addrecord = AddRecord(
@@ -186,12 +194,14 @@ class ViewApplication(object):
                 'title': "Approved application.",
                 'message': "",
                 'linkaddr': "/applications",
-                'linktext': "&lt; Back to pending applications"
+                'linktext': "&lt; Back to pending applications",
+                'user': getUserType(self.DBC)
             })
 
     # Handles /applications/reject/<application_id>/
     # deletes an affiliation application
     @cherrypy.expose
+    @accessible_by("admin")
     def reject(self, application_id=None):
         sqlcnx = self.DBC.connect()  # connect to SQL server
         cur = sqlcnx.cursor(
@@ -202,7 +212,10 @@ class ViewApplication(object):
             "WHERE appID = %(appID)s", {"appID": application_id})
         sqlcnx.commit()  # commit changes to database
         cur.close()  # close database cursor
-        return self.renderer.render("dialog.mako", {    # return deletion success HTML
-            'title': "Rejected application.",
-            'message': "",
-        })
+        return self.renderer.render(
+            "dialog.mako",
+            {  # return deletion success HTML
+                'title': "Rejected application.",
+                'message': "",
+                'user': getUserType(self.DBC)
+            })

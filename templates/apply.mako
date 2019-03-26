@@ -7,13 +7,11 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 Code History:
 2019/03/06 (Simon) - Initial working code and documentation
 2019/03/23 (Simon) - Changed region numbers from Roman to Arabic
+2019/03/26 (Simon) - Changed page arguments, updated UI
 </%doc>
 
 
-<%doc>
-Mako variables:
-    none
-</%doc>
+<%page args="user=None"/>
 
 
 <html>
@@ -25,9 +23,9 @@ Mako variables:
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="current='apply'"/>
+            <%include file="header.mako" args="user=user, current='apply'"/>
         </header>
-        <section>
+        <section class="ui container">
             <h1 class="center title">Application Form</h1>
             <hr>
             <form method="post" action="insert" id="apply-form">

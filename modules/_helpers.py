@@ -5,11 +5,14 @@
 
 # Code History:
 # 2019/03/21 (Simon) - Moved helper methods & classes from main.py to this file
+# 2019/03/26 (Simon) - DBConnection.connect & ContentRenderer.render catches more exceptions
+#                    - ContentRenderer.render caught exceptions only shown if debug=True
 
 from collections import defaultdict
 import mysql.connector
 import cherrypy
 from mako.lookup import TemplateLookup
+import mako.exceptions
 from datetime import date, datetime  # for getting the current date
 from uuid import uuid4  # for creating a unique ID for database insertion
 import re  # for input validation
@@ -96,17 +99,25 @@ class DBConnection(object):
                     return self.connection
             except mysql.connector.Error as err:
                 if ctr == retries:
-                    # wrong database user+password
-                    if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
+                    # unreachable server
+                    if err.errno == mysql.connector.errorcode.CR_CONN_HOST_ERROR:
                         cherrypy.log.error(
-                            "Error: Something is wrong with your user name or password"
+                            "Error (DBConnection.connect): SQL server is unreachable (2003)"
+                        )
+                    # wrong database user+password
+                    elif err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
+                        cherrypy.log.error(
+                            "Error (DBConnection.connect): Something is wrong with your user name or password (1045)"
                         )
                     # non-existent database
                     elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
-                        cherrypy.log.error("Error: Database does not exist")
+                        cherrypy.log.error(
+                            "Error (DBConnection.connect): Database does not exist (1049)"
+                        )
                     # everything else
                     else:
-                        cherrypy.log.error("Error: ", err)
+                        cherrypy.log.error("Error (DBConnection.connect): " +
+                                           str(err) + " (" + err.errno + ")")
                 self.connection = None
                 ctr += 1
         # check if previous SQL connection is still connected
@@ -115,7 +126,8 @@ class DBConnection(object):
                 # return object for interacting with the SQL database
                 return self.connection
         # only executes if not yet connected for the first time
-        cherrypy.log.error("Error: Cannot connect to SQL database")
+        cherrypy.log.error(
+            "Error (DBConnection.connect): Cannot connect to SQL database")
         return None
 
     # disconnects from the database
@@ -228,27 +240,30 @@ class InputValidator(object):
             # get limits
             min, max, required = self.limits[key]
             # check if item is None or an empty string
+            isMissing = False
             if required:
                 if val is None:
                     errors.append(("Missing input", key, val))
+                    isMissing = True
                 elif type(val) is str:
                     if len(val) == 0:
                         errors.append(("Missing input", key, val))
+                        isMissing = True
             # check if item is within limits
-            if type(val) is int:
+            if type(val) is int and not isMissing:
                 if not (min <= val <= max):
                     errors.append(("Invalid length", key, val))
-            elif type(val) is str:
+            elif type(val) is str and not isMissing:
                 if not (min <= len(val) <= max):
                     errors.append(("Invalid length", key, val))
             # if current field item is "email", check if it has a valid format
-            if key is "email":
+            if key is "email" and not isMissing:
                 email_pattern = r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$'
                 email_match = re.match(email_pattern, val, re.M)
                 if not email_match:
                     errors.append(("Invalid email address", key, val))
             # if current field item is "paymentDate", check if it has a valid format and is a valid past date
-            elif key is "paymentDate":
+            elif key is "paymentDate" and not isMissing:
                 # date comparison assumes ISO format: yyyy-mm-dd
                 date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
                 date_match = re.match(date_pattern, val, re.M)
@@ -267,7 +282,11 @@ class InputValidator(object):
 #       (string type) templatefile (required) - name of template file
 #       (dict type) templatevars - dict of variables ("name":"value") to pass to Mako
 class ContentRenderer(object):
-    def __init__(self):
+    def __init__(self, debug=None):
+        if debug is None:
+            self.debug = False
+        else:
+            self.debug = debug
         self.lookup = TemplateLookup(
             directories=["templates/"],
             collection_size=100,
@@ -275,7 +294,13 @@ class ContentRenderer(object):
             module_directory="tmp/mako_modules")
 
     def render(self, templatefile, templatevars=None):
-        t = self.lookup.get_template(templatefile)
-        if (templatevars is None):
-            return t.render()
-        return t.render(**templatevars)
+        try:
+            t = self.lookup.get_template(templatefile)
+            if (templatevars is None):
+                return t.render()
+            return t.render(**templatevars)
+        except mako.exceptions.MakoException as err:
+            cherrypy.log.error("Error (ContentRenderer.render): " + str(err))
+            if self.debug:
+                return str(err)
+            return "<html><body>Sorry, an error occured</body></html>"

@@ -24,32 +24,57 @@
 # 2019/03/15 (Simon) - Started implementing Summary class for database summary
 # 2019/03/22 (Simon) - Moved helper classes & methods to modules/_helpers.py
 #                    - Moved CherryPy-exposed classes to individual files in modules/
+# 2019/03/26 (Simon) - Added debug & clearLogs boolean options
+#                    - Added error handling
 
 import os  # for resolving filesystem paths
 import atexit  # for handling server exit condition
-
+import cherrypy  # import CherryPy library
 from modules import Root  # import CherryPy-exposed Root class
 import modules._helpers as helper  # import helper classes
+
+
+def handle_error():
+    cherrypy.response.status = 500
+    cherrypy.response.body = [
+        "<html><body>Sorry, an error occured</body></html>"
+    ]
+    print(cherrypy._cperror.format_exc())
+
+
+debug = False
+clearLogs = False
 
 # configuration of CherryPy webserver
 if __name__ == '__main__':
     print("Running server")
-    helper.cherrypy.config.update({
+    if clearLogs:
+        try:
+            os.remove("access.log")
+        except:
+            pass
+        try:
+            os.remove("error.log")
+        except:
+            pass
+    cherrypy.config.update({
         'server.socket_host': '127.0.0.1',
         'server.socket_port': 8080,
         'log.screen': False,
         'log.error_file': 'error.log',
-        'log.access_file': 'access.log',
-        'tools.gzip.on': True
+        'log.access_file': 'access.log' if debug else "",
+        'error_page.404': os.path.abspath("static/404.html"),
+        'request.error_response': handle_error,
+        'request.show_tracebacks': debug
     })
-
-    # initialize persistent renderer & validator classes
-    renderer = helper.ContentRenderer()
-    validator = helper.InputValidator()
 
     # start a persistent connection to the SQL database
     dbc = helper.DBConnection("db.conf")
     dbc.connect()
+
+    # initialize persistent renderer & validator classes
+    renderer = helper.ContentRenderer(debug=debug)
+    validator = helper.InputValidator()
 
     # disconnect from SQL database on exit
     atexit.register(lambda d: d.disconnect(), dbc)
@@ -77,5 +102,5 @@ if __name__ == '__main__':
         }
     }
     # start the webserver
-    helper.cherrypy.quickstart(Root(dbc, renderer, validator), '/', conf)
+    cherrypy.quickstart(Root(dbc, renderer, validator), '/', conf)
     print("\nServer exited")
