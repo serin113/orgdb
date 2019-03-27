@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Created in 2019-01-31 for PSYSC as part of a system for managing science club affiliations.
 
 # Copyright (c) 2019 Nathankissam Roy Tubis & Elfren Simon Clemente.
