@@ -45,11 +45,14 @@ def handle_error():
 
 
 debug = False
-clearLogs = False
+clearLogs = True
+reload = False
 
 # configuration of CherryPy webserver
 if __name__ == '__main__':
     print("Running server")
+    if debug:
+        print("Debug messages enabled")
     if clearLogs:
         try:
             os.remove("access.log")
@@ -63,11 +66,12 @@ if __name__ == '__main__':
         'server.socket_host': '127.0.0.1',
         'server.socket_port': 8080,
         'log.screen': False,
-        'log.error_file': 'error.log',
+        'log.error_file': 'error.log' if debug else "",
         'log.access_file': 'access.log' if debug else "",
         'error_page.404': os.path.abspath("static/404.html"),
         'request.error_response': handle_error,
-        'request.show_tracebacks': debug
+        'request.show_tracebacks': debug,
+        'engine.autoreload.on': reload
     })
 
     # start a persistent connection to the SQL database
