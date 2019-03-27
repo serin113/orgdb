@@ -12,6 +12,7 @@ Code History:
 2019/03/21 (Simon) - added /summary link
 2019/03/22 (Simon) - added active page indication
 2019/03/26 (Simon) - changed page arguments, updated UI
+2019/03/27 (Simon) - slightly updated UI
 </%doc>
 
 
@@ -32,6 +33,7 @@ ID, type = user
 %>
 
 <div class="ui container">
+    <div class="ui hidden fitted horizontal divider"></div>
     <h1 class="ui image header">
         <img src="/static/psysc.png" class="ui image" style="margin:0">
         <div class="content">
@@ -41,7 +43,7 @@ ID, type = user
     </h1>
 </div>
 <div class="ui fluid container">
-    <div class="ui stackable inverted secondary blue menu" style="margin:0 0 2rem 0">
+    <div class="ui stackable secondary inverted blue menu" style="margin:0 0 2rem 0">
         <div class="ui container">
             <a class="${is_active['index']} item" href="/index">Home</a>
             % if type == -1:
@@ -63,20 +65,20 @@ ID, type = user
             % endif
             <div class="right menu">
                 % if ID is not None:
-                <div class="ui item">
+                <i class="ui item">
                     % if type is not 2:
-                    <p><i>Logged in as <b>${ID}</b></i></p>
+                    <b>${ID}</b>
                     % else:
-                    <p><i>Logged in as <i class="inverted red circular bug icon"></i><b>${ID}</b></i></p>
+                    <i class="inverted small red circular bug icon"></i><b>${ID}</b>
                     % endif
-                </div>
+                </i>
                 % endif
                 % if type == -1:
-                <a href="/login" class="ui item">Sign in</a>
+                <a href="/login" class="ui item"><b>Sign in</b></a>
                 % else:
-                <a href="/logout" class="ui item">Sign out</a>
+                <a href="/logout" class="ui item"><b>Sign out</b></a>
                 % endif
-            </div>
+                </div>
         </div>
     </div>
 </div>

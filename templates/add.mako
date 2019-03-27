@@ -12,6 +12,7 @@ Code History:
 2019/03/15 (Nathan)- finished adding semantic-ui
 2019/03/23 (Simon) - Changed region numbers from Roman to Arabic
 2019/03/26 (Simon) - Changed page arguments, updated UI
+2019/03/27 (Simon) - Changed max value for "schoolyear" to 2050
 </%doc>
 
 
@@ -131,7 +132,7 @@ Code History:
                         <div class="column">
                           <label>School Year: </label> &nbsp;&nbsp;
                           <div class="ui input">
-                            <input type="number"  name="schoolyear" min="2007" max="3050" value = "2007" required style="width: 100px;">
+                            <input type="number"  name="schoolyear" min="2007" max="2050" value = "2007" required style="width: 100px;">
                           </div><br><br>
                           
 

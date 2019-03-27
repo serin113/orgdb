@@ -8,6 +8,7 @@
 # 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
 #                    - Added Login.accessible_by decorators to limit page access to specific users
 #                    - Changed algorithm for generating application IDs
+# 2019/02/27 (Simon) - Fixed non-conversion to string fro newID() calls
 
 from ._helpers import *
 from .Login import *
@@ -81,7 +82,7 @@ class AddRecord(object):
             buffered=True)  # create an SQL cursor to the database
         date_today = today()
         id = newID(
-            region + level + type + school + clubname + address + city + province + advisername + contact + email, length=8
+            str(region) + str(level) + str(type) + str(school) + str(clubname) + str(address) + str(city) + str(province) + str(advisername) + str(contact) + str(email), length=8
         )  # generate new unique ID for record_data
         record_data = {
             'clubID': id,
@@ -238,7 +239,7 @@ class AddRecord(object):
         affiliation_data = {
             'affiliationID':
             newID(
-                affiliated + status + hasaffiliationforms + benefits + remarks + schoolyear + yearsaffiliated + sca + scm + paymentmode + paymentdate + paymentid + paymentamount + receiptnumber + paymentsendmode + clubid
+                str(affiliated) + str(status) + str(hasaffiliationforms) + str(benefits) + str(remarks) + str(schoolyear) + str(yearsaffiliated) + str(sca) + str(scm) + str(paymentmode) + str(paymentdate) + str(paymentid) + str(paymentamount) + str(receiptnumber) + str(paymentsendmode) + str(clubid)
             ),  # generate new unique ID for affiliation_data
             'affiliated': toInt(affiliated),
             'status': status,

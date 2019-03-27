@@ -13,6 +13,7 @@ Code History:
 2019/03/23 (Simon) - Added table sorting
                    - Updated styling
 2019/03/26 (Simon) - Changed page arguments, updated UI
+2019/03/27 (Simon) - Added reset button for search bar
 </%doc>
 
 
@@ -47,6 +48,9 @@ Mako variables:
             <form method="get" action="" id="filter-form">
                 <div class="ui fluid action icon input">
                   <input type="text" name="q" value="${q}" placeholder="Search..."/>
+                  % if len(q) > 0:
+                  <a href="/view" class="ui button">Reset</a>
+                  % endif
                   <button class="ui icon button" type="submit">
                       <i class="search icon"></i>
                   </button>

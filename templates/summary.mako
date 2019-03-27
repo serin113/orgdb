@@ -10,6 +10,7 @@ Code History:
                    - Added table sorting
                    - Updated styling
 2019/03/26 (Simon) - Changed page arguments, updated UI
+2019/03/27 (Simon) - Added filter bar
 </%doc>
 
 
@@ -24,7 +25,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="user=None, data=None"/>
+<%page args="user=None, data=None, q=''"/>
 
 
 <%
@@ -79,9 +80,19 @@ typeName = {
         </header>
         <section class="ui container">
             <h1 class="center title">Affiliated clubs per school year</h1>
+            <form method="get" action="" id="filter-form">
+                <div class="ui fluid action icon input">
+                  <input type="number"  name="q" min="2007" max="2050" value = "${q}"/>
+                  % if len(q) > 0:
+                  <a href="/summary" class="ui button">Reset</a>
+                  % endif
+                  <button class="ui icon button" type="submit">
+                      <i class="search icon"></i>
+                  </button>
+                </div>
+            </form>
             % if data is not None:
             % for year, totals in data.items():
-            <div class="ui horizontal divider"></div>
             <div class="ui raised segments">
                 <div class="ui horizontal segments">
                     <div class="ui right aligned inverted blue segment">

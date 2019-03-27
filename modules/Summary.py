@@ -9,6 +9,7 @@
 # 2019/03/23 (Simon) - Added (int) overallTotal to data sent to template
 # 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
 #                    - Added Login.accessible_by decorators to limit page access to specific users
+# 2019/03/27 (Simon) - Added filtering functionality
 
 from ._helpers import *
 from .Login import *
@@ -16,7 +17,7 @@ from .Login import *
 
 # class used by CherryPy for handling /summary
 class Summary(object):
-    def __init__(self, DBC=None, Renderer=None, Validator=None):
+    def __init__(self, DBC=None, Renderer=None):
         if DBC is not None:
             self.DBC = DBC
         else:
@@ -28,49 +29,55 @@ class Summary(object):
 
     @cherrypy.expose
     @accessible_by("admin")
-    def index(self, q=None):
+    def index(self, q=""):
         sqlcnx = self.DBC.connect()  # connect to SQL database
         cur = sqlcnx.cursor(buffered=True)  # create SQL database cursor
         data = {}
-        if q is None:
+        if (len(q) == 0):
             # get school year range
             cur.execute(
                 "SELECT MIN(schoolYear), MAX(schoolYear-1+yearsAffiliated) FROM AffiliationTable ORDER BY schoolYear"
             )
             res = cur.fetchall()
+        else:
+            qi = toInt(q)
+            if qi:
+                if qi in range(2007, 2051):
+                    res = [(qi,qi+1)]
+            else:
+                res = []
 
-            if len(res) > 0:
-                if res[0][0] is not None or res[0][1] is not None:
-                    # for every year within the range
-                    for year in range(res[0][0], res[0][1] + 1):
-                        region_total = defaultdict(lambda: 0)
-                        level_total = defaultdict(lambda: 0)
-                        type_total = defaultdict(lambda: 0)
-                        # fetch all affiliated clubs for a specific year
-                        cur.execute(
-                            "SELECT region, level, type "
-                            "FROM (AffiliationRecordsTable INNER JOIN AffiliationTable ON AffiliationRecordsTable.clubID = AffiliationTable.AffiliationRecordsTable_clubID)"
-                            "WHERE %(schoolYear)s BETWEEN schoolYear AND schoolYear-1+yearsAffiliated "
-                            "AND affiliated = 1 ", {"schoolYear": year})
-                        res = cur.fetchall()
-                        # count totals per region/level/type
-                        for record in res:
-                            region_total[record[0]] += 1
-                            level_total[record[1]] += 1
-                            type_total[record[2]] += 1
-                        overall_total = len(res)
-                        # save data for specific year
-                        data[year] = (region_total, level_total, type_total,
-                                      overall_total)
-                else:
-                    data = None
+        if len(res) > 0:
+            if res[0][0] is not None or res[0][1] is not None:
+                # for every year within the range
+                for year in range(res[0][0], res[0][1] + 1):
+                    region_total = defaultdict(lambda: 0)
+                    level_total = defaultdict(lambda: 0)
+                    type_total = defaultdict(lambda: 0)
+                    # fetch all affiliated clubs for a specific year
+                    cur.execute(
+                        "SELECT region, level, type "
+                        "FROM (AffiliationRecordsTable INNER JOIN AffiliationTable ON AffiliationRecordsTable.clubID = AffiliationTable.AffiliationRecordsTable_clubID)"
+                        "WHERE %(schoolYear)s BETWEEN schoolYear AND schoolYear-1+yearsAffiliated "
+                        "AND affiliated = 1 ", {"schoolYear": year})
+                    res = cur.fetchall()
+                    # count totals per region/level/type
+                    for record in res:
+                        region_total[record[0]] += 1
+                        level_total[record[1]] += 1
+                        type_total[record[2]] += 1
+                    overall_total = len(res)
+                    # save data for specific year
+                    data[year] = (region_total, level_total, type_total,
+                                  overall_total)
             else:
                 data = None
         else:
-            # handle case for filtering summary results accdg. to query
-            pass
+            data = None
+            
         cur.close()
         return self.renderer.render("summary.mako", {
             "data": data,
-            'user': getUserType(self.DBC)
+            'user': getUserType(self.DBC),
+            'q': q
         })  # display summary data
