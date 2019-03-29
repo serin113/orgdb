@@ -12,6 +12,7 @@ Code History:
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/27 (Simon) - Added filter bar
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
+                   - Updated table styling
 </%doc>
 
 
@@ -108,60 +109,62 @@ typeName = {
                     </div>
                 </div>
                 % if totals[3] > 0:
-                <div class="ui horizontal segments">
-                    <div class="ui segment">
-                        <table class="ui single line striped sortable fixed unstackable compact blue table">
-                            <thead>
-                                <tr>
-                                    <th data-vivaldi-spatnav-clickable="1">region</th>
-                                    <th data-vivaldi-spatnav-clickable="1">total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                % for region, total in totals[0].items():
-                                <tr>
-                                    <td data-label="region">${regionName[region]}</td>
-                                    <td data-label="total">${total}</td>
-                                </tr>
-                                % endfor
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="ui segment">
-                        <table class="ui single line striped sortable fixed unstackable compact blue table">
-                            <thead>
-                                <tr>
-                                    <th data-vivaldi-spatnav-clickable="1">level</th>
-                                    <th data-vivaldi-spatnav-clickable="1">total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                % for level, total in totals[1].items():
-                                <tr>
-                                    <td data-label="level">${levelName[level]}</td>
-                                    <td data-label="total">${total}</td>
-                                </tr>
-                                % endfor
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="ui segment">
-                        <table class="ui single line striped sortable fixed unstackable compact blue table">
-                            <thead>
-                                <tr>
-                                    <th data-vivaldi-spatnav-clickable="1">type</th>
-                                    <th data-vivaldi-spatnav-clickable="1">total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                % for type, total in totals[2].items():
-                                <tr>
-                                    <td data-label="type">${typeName[type]}</td>
-                                    <td data-label="total">${total}</td>
-                                </tr>
-                                % endfor
-                            </tbody>
-                        </table>
+                <div class="ui padded stackable grid">
+                    <div class="three column row">
+                        <div class="column">
+                            <table class="ui striped sortable unstackable compact table">
+                                <thead>
+                                    <tr>
+                                        <th data-vivaldi-spatnav-clickable="1">region</th>
+                                        <th data-vivaldi-spatnav-clickable="1">total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    % for region, total in totals[0].items():
+                                    <tr>
+                                        <td data-label="region">${regionName[region]}</td>
+                                        <td data-label="total">${total}</td>
+                                    </tr>
+                                    % endfor
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="column">
+                            <table class="ui striped sortable unstackable compact table">
+                                <thead>
+                                    <tr>
+                                        <th data-vivaldi-spatnav-clickable="1">level</th>
+                                        <th data-vivaldi-spatnav-clickable="1">total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    % for level, total in totals[1].items():
+                                    <tr>
+                                        <td data-label="level">${levelName[level]}</td>
+                                        <td data-label="total">${total}</td>
+                                    </tr>
+                                    % endfor
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="column">
+                            <table class="ui striped sortable unstackable compact table">
+                                <thead>
+                                    <tr>
+                                        <th data-vivaldi-spatnav-clickable="1">type</th>
+                                        <th data-vivaldi-spatnav-clickable="1">total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    % for type, total in totals[2].items():
+                                    <tr>
+                                        <td data-label="type">${typeName[type]}</td>
+                                        <td data-label="total">${total}</td>
+                                    </tr>
+                                    % endfor
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 % endif

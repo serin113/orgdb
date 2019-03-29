@@ -10,6 +10,7 @@ Code History:
 2019/03/26 (Simon) - Changed page arguments
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
                    - Removed appID column
+                   - Updated table styling, added sorting
 </%doc>
 
 
@@ -29,57 +30,78 @@ Mako variables:
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
+        <script src="/scripts/tablesort.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('table').tablesort();
+            });
+        </script>
     </head>
     <body>
         <header>
             <%include file="header.mako" args="user=user, current='applications'"/>
         </header>
-        <section class="ui container">
+        <div class="ui container">
             <h1 class="center title">Pending Applications</h1>
             <hr>
-            % if (data is not None) and (len(data) > 0):
             <form method="get" action="" id="filter-form">
-                <div class="ui icon input">
-                  <input type="text" name="q" value="${q}"/ style="width:800px">
-                  <i class="search icon"></i>
+                <div class="ui fluid action icon input">
+                  <input type="text" name="q" value="${q}" placeholder="Search..."/>
+                    % if len(q) > 0:
+                    <a href="/applications" class="ui button" tabindex="0">Reset</a>
+                    % endif
+                    <button class ="ui icon button" type="submit"><i class="search icon"></i></button>
                 </div>
-                <button class ="ui secondary button" type="submit">Search</button>
-
             </form>
-            <table>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th>club name</th>
-                    <th>school</th>
-                    <th>adviser/s</th>
-                    <th>payment amount</th>
-                    <th>payment date</th>
-                    <th>contact</th>
-                    <th>email</th>
-                    <th>last updated</th>
-                </tr>
-                % for app in data:
-                <tr>
-                    <td><a href="view/${app['appID']}" class="ui secondary button">view</a></td>
-                    <td><a href="approve/${app['appID']}">approve</a>/<a href="reject/${app['appID']}">reject</a></td>
-                    <td>${app['clubName']}</td>
-                    <td>${app['school']}</td>
-                    <td>${app['adviserName']}</td>
-                    <td>${app['paymentAmount']}</td>
-                    <td>${app['paymentDate']}</td>
-                    <td>${app['contact']}</td>
-                    <td><a href="mailto:${app['email']}">${app['email']}</a></td>
-                    <td>${app['dateCreated']}</td>
-                </tr>
-                % endfor
-            </table>
+            % if (data is not None) and (len(data) > 0):
+            <div class="ui container" style="overflow-x:auto">
+                <table class="ui selectable stackable compact striped celled sortable blue small table">
+                    <thead class="full-width">
+                        <tr>
+                            <th data-vivaldi-spatnav-clickable="0"></th>
+                            <th data-vivaldi-spatnav-clickable="1">club name</th>
+                            <th data-vivaldi-spatnav-clickable="1">school</th>
+                            <th data-vivaldi-spatnav-clickable="1">adviser/s</th>
+                            <th data-vivaldi-spatnav-clickable="1">payment amount</th>
+                            <th data-vivaldi-spatnav-clickable="1">payment date</th>
+                            <th data-vivaldi-spatnav-clickable="1">contact</th>
+                            <th data-vivaldi-spatnav-clickable="1">email</th>
+                            <th data-vivaldi-spatnav-clickable="1">last updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        % for app in data:
+                        <tr>
+                            <td class="collapsing center aligned">
+                                <div class="ui small buttons">
+                                    <a href="view/${app['appID']}" class="ui icon button"><i class="eye icon"></i></a>
+                                    <a href="approve/${app['appID']}" class="ui positive icon button">
+                                        <i class="check icon"></i> approve
+                                    </a>
+                                    <a href="reject/${app['appID']}" class="ui negative icon button">
+                                        <i class="close icon"></i> reject
+                                    </a>
+                                </div>
+                            </td>
+                            <td class="collapsing">${app['clubName']}</td>
+                            <td class="collapsing">${app['school']}</td>
+                            <td>${app['adviserName']}</td>
+                            <td class="collapsing">${app['paymentAmount']}</td>
+                            <td class="collapsing">${app['paymentDate']}</td>
+                            <td class="collapsing">${app['contact']}</td>
+                            <td><a href="mailto:${app['email']}">${app['email']}</a></td>
+                            <td>${app['dateCreated']}</td>
+                        </tr>
+                        % endfor
+                    </tbody>
+                </table>
+            </div>
             % else:
             <div class="ui warning message">
                 <i class="warning icon"></i>Database is empty.
             </div>
             % endif
-        </section>
+        </div>
         <footer>
             <%include file="footer.mako"/>
         </footer>

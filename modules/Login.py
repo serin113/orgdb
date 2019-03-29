@@ -8,6 +8,7 @@
 # 2019/03/26 (Simon) - Added helper functions accessible_by & getUserType
 # 2019/03/29 (Simon) - Database connection now handled using a with statement
 #                    - Improved handling of existing database connections (avoids redundancy)
+#                    - Redirect to homepage on logout
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -394,4 +395,4 @@ class Login(object):
 
     def logout(self):
         logout(self.DBC)
-        raise cherrypy.HTTPRedirect("/login")
+        raise cherrypy.HTTPRedirect("/")

@@ -15,6 +15,8 @@ Code History:
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/27 (Simon) - Added reset button for search bar
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
+                   - Updated table styling
+                   - Translates region/level/type numbers to readable strings
 </%doc>
 
 
@@ -25,6 +27,40 @@ Mako variables:
 
 
 <%page args="user=None, data=None, q=''"/>
+
+
+<%
+regionName = {
+    1: "1 (Ilocos)",
+	2: "2 (Cagayan Valley)",
+	3: "3 (Central Luzon)",
+	4: "4A (CALABARZON)",
+	5: "5 (Bicol)",
+	6: "6 (W. Visayas)",
+	7: "7 (C. Visayas)",
+	8: "8 (E. Visayas)",
+	9: "9 (Zamboanga Peninsula)",
+	10: "10 (N. Mindanao)",
+	11: "11 (Davao)",
+	12: "12 (SOCCSKSARGEN)",
+	13: "13 (NCR)",
+	14: "14 (CAR)",
+	15: "15 (ARMM)",
+	16: "16 (CARAGA)",
+	17: "17 (MIMAROPA)"
+}
+levelName = {
+    1: "Elementary",
+    2: "High School",
+    3: "Elementary & H.S.",
+    4: "College"
+}
+typeName = {
+    1: "Public",
+    2: "Private",
+    3: "State College/University"
+}
+%>
 
 
 <html>
@@ -51,7 +87,7 @@ Mako variables:
                 <div class="ui fluid action icon input">
                   <input type="text" name="q" value="${q}" placeholder="Search..."/>
                   % if len(q) > 0:
-                  <a href="/view" class="ui button">Reset</a>
+                  <a href="/view" class="ui button" tabindex="0">Reset</a>
                   % endif
                   <button class="ui icon button" type="submit">
                       <i class="search icon"></i>
@@ -59,51 +95,61 @@ Mako variables:
                 </div>
             </form>
             % if (data is not None) and (len(data) > 0):
-            <table class="ui selectable stackable striped celled sortable blue small table">
-                <thead>
-                    <tr>
-                        <th data-vivaldi-spatnav-clickable="0"></th>
-                        <th data-vivaldi-spatnav-clickable="1">club ID</th>
-                        <th data-vivaldi-spatnav-clickable="1">club name</th>
-                        <th data-vivaldi-spatnav-clickable="1">school</th>
-                        <th data-vivaldi-spatnav-clickable="1">level</th>
-                        <th data-vivaldi-spatnav-clickable="1">type</th>
-                        <th data-vivaldi-spatnav-clickable="1">region</th>
-                        <th data-vivaldi-spatnav-clickable="1">province</th>
-                        <th data-vivaldi-spatnav-clickable="1">city</th>
-                        <th data-vivaldi-spatnav-clickable="1">adviser/s</th>
-                        <th data-vivaldi-spatnav-clickable="1">contact</th>
-                        <th data-vivaldi-spatnav-clickable="1">email</th>
-                        <th data-vivaldi-spatnav-clickable="1">last updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    % for record in data:
-                    <tr>
-                        <td>
-                            % if len(q) > 0:
-                            <a href="${record['clubID']}?q=${q}" class="ui basic button" id="view" style="margin:0">View</a>
-                            % else:
-                            <a href="${record['clubID']}" class="ui basic button" id="view" style="margin:0">View</a>
-                            % endif
-                            <a href="/edit/${record['clubID']}" class="ui basic button" id="edit" style="margin:0">Edit</a>
-                        </td>
-                        <td>${record['clubID']}</td>
-                        <td>${record['clubName']}</td>
-                        <td>${record['school']}</td>
-                        <td>${record['level']}</td>
-                        <td>${record['type']}</td>
-                        <td>${record['region']}</td>
-                        <td>${record['province']}</td>
-                        <td>${record['city']}</td>
-                        <td>${record['adviserName']}</td>
-                        <td>${record['contact']}</td>
-                        <td><a href="mailto:${record['email']}">${record['email']}</a></td>
-                        <td>${record['dateUpdated']}</td>
-                    </tr>
-                    % endfor
-                </tbody>
-            </table>
+            <div class="ui container" style="overflow-x:auto">
+                <table class="ui selectable stackable compact striped celled sortable blue small table">
+                    <thead class="full-width">
+                        <tr>
+                            <th data-vivaldi-spatnav-clickable="0"></th>
+                            <th data-vivaldi-spatnav-clickable="1">club ID</th>
+                            <th data-vivaldi-spatnav-clickable="1">club name</th>
+                            <th data-vivaldi-spatnav-clickable="1">school</th>
+                            <th data-vivaldi-spatnav-clickable="1">level</th>
+                            <th data-vivaldi-spatnav-clickable="1">type</th>
+                            <th data-vivaldi-spatnav-clickable="1">region</th>
+                            <th data-vivaldi-spatnav-clickable="1">province</th>
+                            <th data-vivaldi-spatnav-clickable="1">city</th>
+                            <th data-vivaldi-spatnav-clickable="1">adviser/s</th>
+                            <th data-vivaldi-spatnav-clickable="1">contact</th>
+                            <th data-vivaldi-spatnav-clickable="1">email</th>
+                            <th data-vivaldi-spatnav-clickable="1">last updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        % for record in data:
+                        <tr>
+                            <td class="collapsing center aligned">
+                                <div class="ui two small icon buttons">
+                                    % if len(q) > 0:
+                                    <a href="${record['clubID']}?q=${q}" class="ui button" tabindex="0">
+                                        <i class="eye icon"></i>
+                                    </a>
+                                    % else:
+                                    <a href="${record['clubID']}" class="ui button" tabindex="0">
+                                        <i class="eye icon"></i>
+                                    </a>
+                                    % endif
+                                    <a href="/edit/${record['clubID']}" class="ui button" tabindex="0">
+                                        <i class="edit icon"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            <td>${record['clubID']}</td>
+                            <td class="collapsing">${record['clubName']}</td>
+                            <td class="collapsing">${record['school']}</td>
+                            <td class="collapsing">${levelName[record['level']]}</td>
+                            <td class="collapsing">${typeName[record['type']]}</td>
+                            <td class="collapsing">${regionName[record['region']]}</td>
+                            <td>${record['province']}</td>
+                            <td>${record['city']}</td>
+                            <td>${record['adviserName']}</td>
+                            <td class="collapsing">${record['contact']}</td>
+                            <td class="collapsing"><a href="mailto:${record['email']}">${record['email']}</a></td>
+                            <td class="right aligned collapsing">${record['dateUpdated']}</td>
+                        </tr>
+                        % endfor
+                    </tbody>
+                </table>
+            </div>
             % else:
             <div class="ui warning message">
                 <i class="warning icon"></i>Zero results.

@@ -13,6 +13,7 @@ Code History:
 2019/03/22 (Simon) - added active page indication
 2019/03/26 (Simon) - changed page arguments, updated UI
 2019/03/27 (Simon) - slightly updated UI
+2019/03/29 (Simon) - home and login/logout icons added
 </%doc>
 
 
@@ -45,7 +46,7 @@ ID, type = user
 <div class="ui fluid container">
     <div class="ui stackable secondary inverted blue menu" style="margin:0 0 2rem 0">
         <div class="ui container">
-            <a class="${is_active['index']} item" href="/index">Home</a>
+            <a class="${is_active['index']} item" href="/index"><i class="home icon"></i></a>
             % if type == -1:
             <a class="${is_active['apply']} item" href="/apply">Application form</a>
             % elif type == 0:
@@ -74,9 +75,9 @@ ID, type = user
                 </i>
                 % endif
                 % if type == -1:
-                <a href="/login" class="ui item"><b>Sign in</b></a>
+                <a href="/login" class="ui item"><i class="sign-in icon"></i></a>
                 % else:
-                <a href="/logout" class="ui item"><b>Sign out</b></a>
+                <a href="/logout" class="ui item"><i class="sign-out icon"></i></a>
                 % endif
                 </div>
         </div>
