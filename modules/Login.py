@@ -68,7 +68,7 @@ def getUserType(DBConnection=None):
     # if user has existing ID cookie
     if "orgdb.ID" in requestCookie.keys():
         # get user credentials
-        type = checkCredentials(DBC)
+        type = checkCredentials(DBConnection)
         # if user is logged-in
         if type != -1:
             # return ID and usertype
