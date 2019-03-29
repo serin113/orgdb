@@ -14,6 +14,7 @@ Code History:
                    - Updated styling
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/27 (Simon) - Added reset button for search bar
+2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
 </%doc>
 
 
@@ -28,6 +29,7 @@ Mako variables:
 
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <link rel="stylesheet" href="/styles/view.css"/>
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>

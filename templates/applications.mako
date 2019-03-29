@@ -8,6 +8,8 @@ Code History:
 2019/03/12 (Simon) - Intial template code
 2019/03/13 (Simon) - Updated displayed columns
 2019/03/26 (Simon) - Changed page arguments
+2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
+                   - Removed appID column
 </%doc>
 
 
@@ -22,6 +24,7 @@ Mako variables:
 
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <link rel="stylesheet" href="/styles/applications.css"/>
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
@@ -47,7 +50,6 @@ Mako variables:
                 <tr>
                     <th></th>
                     <th></th>
-                    <th>application ID</th>
                     <th>club name</th>
                     <th>school</th>
                     <th>adviser/s</th>
@@ -61,7 +63,6 @@ Mako variables:
                 <tr>
                     <td><a href="view/${app['appID']}" class="ui secondary button">view</a></td>
                     <td><a href="approve/${app['appID']}">approve</a>/<a href="reject/${app['appID']}">reject</a></td>
-                    <td>${app['appID']}</td>
                     <td>${app['clubName']}</td>
                     <td>${app['school']}</td>
                     <td>${app['adviserName']}</td>

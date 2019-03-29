@@ -8,6 +8,7 @@ Code History:
 2019/03/06 (Simon) - Initial working code and documentation
 2019/03/23 (Simon) - Changed region numbers from Roman to Arabic
 2019/03/26 (Simon) - Changed page arguments, updated UI
+2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
 </%doc>
 
 
@@ -16,6 +17,7 @@ Code History:
 
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <link rel="stylesheet" href="/styles/apply.css"/>
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>

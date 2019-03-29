@@ -11,6 +11,7 @@ Code History:
                    - Updated styling
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/27 (Simon) - Added filter bar
+2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
 </%doc>
 
 
@@ -63,6 +64,7 @@ typeName = {
 
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <link href="/styles/index.css" rel="stylesheet"/>
         <link href="/styles/semantic.min.css" rel="stylesheet" type="text/css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>

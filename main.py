@@ -28,25 +28,30 @@
 #                    - Moved CherryPy-exposed classes to individual files in modules/
 # 2019/03/26 (Simon) - Added debug & clearLogs boolean options
 #                    - Added error handling
+# 2019/03/29 (Simon) - Fixed handle_error not displaying an error page
+#                    - Removed persistent DBConnection (classes create a new one instead)
+#                    - Added debug options
+#                    - Webserver now open to localhost & LAN
 
 import os  # for resolving filesystem paths
-import atexit  # for handling server exit condition
+
 import cherrypy  # import CherryPy library
-from modules import Root  # import CherryPy-exposed Root class
+
 import modules._helpers as helper  # import helper classes
+from modules import Root  # import CherryPy-exposed Root class
 
 
 def handle_error():
     cherrypy.response.status = 500
     cherrypy.response.body = [
-        "<html><body>Sorry, an error occured</body></html>"
+        bytes("<html><body>Sorry, an error occured</body></html>", "utf8")
     ]
     print(cherrypy._cperror.format_exc())
 
 
-debug = False
+debug = True
 clearLogs = True
-reload = False
+reload = True
 
 # configuration of CherryPy webserver
 if __name__ == '__main__':
@@ -63,7 +68,7 @@ if __name__ == '__main__':
         except:
             pass
     cherrypy.config.update({
-        'server.socket_host': '127.0.0.1',
+        'server.socket_host': '0.0.0.0',
         'server.socket_port': 8080,
         'log.screen': False,
         'log.error_file': 'error.log' if debug else "",
@@ -74,16 +79,9 @@ if __name__ == '__main__':
         'engine.autoreload.on': reload
     })
 
-    # start a persistent connection to the SQL database
-    dbc = helper.DBConnection("db.conf")
-    dbc.connect()
-
     # initialize persistent renderer & validator classes
     renderer = helper.ContentRenderer(debug=debug)
     validator = helper.InputValidator()
-
-    # disconnect from SQL database on exit
-    atexit.register(lambda d: d.disconnect(), dbc)
 
     conf = {
         '/': {
@@ -108,5 +106,5 @@ if __name__ == '__main__':
         }
     }
     # start the webserver
-    cherrypy.quickstart(Root(dbc, renderer, validator), '/', conf)
+    cherrypy.quickstart(Root("db.conf", renderer, validator), '/', conf)
     print("\nServer exited")

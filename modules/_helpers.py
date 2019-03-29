@@ -8,16 +8,20 @@
 # 2019/03/26 (Simon) - DBConnection.connect & ContentRenderer.render catches more exceptions
 #                    - ContentRenderer.render caught exceptions only shown if debug=True
 #                    - Updated newID
+# 2019/03/29 (Simon) - DBConnection can be used in "with-as" statements to handle connecting,
+#                           disconnecting, and exception handling automatically
 
-from collections import defaultdict  # for general-purpose dicts with default values
-import mysql.connector  # for handling MySQL database connections
-import cherrypy  # for handling HTTP requests
-from mako.lookup import TemplateLookup  # for template rendering
-import mako.exceptions
-from datetime import date, datetime  # for getting the current date
 import re  # for input validation
-from uuid import uuid4  # for creating a unique ID
+from collections import \
+    defaultdict  # for general-purpose dicts with default values
+from datetime import date, datetime  # for getting the current date
 from hashlib import sha512  # for creating a unique ID from other data
+from uuid import uuid4  # for creating a unique ID
+
+import cherrypy  # for handling HTTP requests
+import mako.exceptions
+import mysql.connector  # for handling MySQL database connections
+from mako.lookup import TemplateLookup  # for template rendering
 
 #
 # HELPER METHODS
@@ -72,8 +76,12 @@ def today(hasTime=True):
 #   connect(retries=0)     - connects to an SQL database using the config
 #   disconnect()           - disconnects previous connection, if any
 class DBConnection(object):
-    def __init__(self, arg=None):
+    def __init__(self, arg=None, persistent=None):
         self.connection = None
+        if persistent is None:
+            self.persistent = False
+        else:
+            self.persistent = True
         # default configuration for connecting to a MySQL server
         if arg is None:
             self.config = {
@@ -87,6 +95,24 @@ class DBConnection(object):
         else:
             self.config = arg
 
+    # method executed when DBConnection is created in a with statement
+    def __enter__(self):
+        if not self.is_connected():
+            conn = self.connect()
+            return conn
+        return self.connection
+
+    # method executed when DBConnection is destroyed in a with statement
+    def __exit__(self, type, value, traceback):
+        if type is None:
+            if not self.persistent:
+                if self.is_connected():
+                    self.disconnect()
+        else:
+            cherrypy.log.error(
+                msg="Error: DBConnection encountered an exception",
+                traceback=True)
+
     # for checking if there is still a connection to the database
     # returns True if connected, False otherwise
     def is_connected(self):
@@ -97,18 +123,24 @@ class DBConnection(object):
     # handles connecting to the database
     # returns the connection object, or None if it failed to connect
     def connect(self, retries=3):
-        # try connecting to the SQL server if not yet connected, handling any exceptions
         ctr = 0
         # keep trying to connect
-        while (self.connection is None) and (ctr <= retries):
+        while (ctr <= retries):
+            if ctr > 0:
+                cherrypy.log.error("Retrying... (" + str(ctr + 1) + "/" +
+                                   str(retries) + ")")
+            # try connecting to the SQL server if not yet connected, handling any exceptions
             try:
-                self.connection = mysql.connector.connect(
-                    option_files=self.config)
-                if self.is_connected():
+                # check if previous SQL connection is still connected
+                if not self.is_connected():
+                    self.connection = mysql.connector.connect(
+                        option_files=self.config)
+                else:
+                    # cherrypy.log.error("Connected to SQL database")
                     # return object for interacting with the SQL database
-                    cherrypy.log.error("Connected to SQL database")
                     return self.connection
             except mysql.connector.Error as err:
+                cherrypy.log.error(str(err))
                 if ctr == retries:
                     # unreachable server
                     if err.errno == mysql.connector.errorcode.CR_CONN_HOST_ERROR:
@@ -131,11 +163,6 @@ class DBConnection(object):
                                            str(err) + " (" + err.errno + ")")
                 self.connection = None
                 ctr += 1
-        # check if previous SQL connection is still connected
-        if self.connection is not None:
-            if self.connection.is_connected():
-                # return object for interacting with the SQL database
-                return self.connection
         # only executes if not yet connected for the first time
         cherrypy.log.error(
             "Error (DBConnection.connect): Cannot connect to SQL database")
@@ -143,10 +170,10 @@ class DBConnection(object):
 
     # disconnects from the database
     def disconnect(self):
-        if self.connection is not None:
+        self.persistent = False
+        if self.is_connected():
             self.connection.close()
-        cherrypy.log.error("Disconnected from SQL database")
-        return
+        #cherrypy.log.error("Disconnected from SQL database")
 
 
 # class handling input validation

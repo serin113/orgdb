@@ -6,11 +6,14 @@
 # Code History:
 # 2019/03/23 (Simon) - Initial login code
 # 2019/03/26 (Simon) - Added helper functions accessible_by & getUserType
+# 2019/03/29 (Simon) - Database connection now handled using a with statement
+#                    - Improved handling of existing database connections (avoids redundancy)
+
+from functools import wraps
+from hashlib import pbkdf2_hmac
+from os import urandom
 
 from ._helpers import *
-from os import urandom
-from hashlib import pbkdf2_hmac
-from functools import wraps
 
 
 # (decorator to be used in CherryPy page handler methods)
@@ -59,7 +62,7 @@ def accessible_by(usertype):
 
 # (to be used for passing user info to header.mako)
 # returns None or a tuple: (ID, type)
-def getUserType(DBC=None):
+def getUserType(DBConnection=None):
     # get user's request cookies
     requestCookie = cherrypy.request.cookie
     # if user has existing ID cookie
@@ -76,20 +79,25 @@ def getUserType(DBC=None):
 
 # for checking the credentials of a logged-in user
 # returns -1 if invalid/logged-out, type (0:Club, 1:Admin, 2:Dev) otherwise
-def checkCredentials(DBC=None):
-    # connect to database if not already connected
-    if DBC is None:
-        DBC = DBConnection()
-    sqlcnx = DBC.connect()
-    # create database cursor
-    cur = sqlcnx.cursor(buffered=True)
-    # initialize usertype to -1 (not logged-in)
-    type = -1
+def checkCredentials(DBConnection=None):
     # get user's request cookies
     requestCookie = cherrypy.request.cookie
-    # if user has existing ID & Token cookies
-    if "orgdb.ID" in requestCookie.keys(
-    ) and "orgdb.Token" in requestCookie.keys():
+    # initialize usertype to -1 (not logged-in)
+    type = -1
+    # if user does not existing ID or Token cookies
+    if "orgdb.ID" not in requestCookie.keys(
+    ) or "orgdb.Token" not in requestCookie.keys():
+        return type
+    # connect to database if not already connected
+    if DBConnection is not None:
+        if DBConnection.is_connected():
+            DBConnection.persistent = True
+        DBC = DBConnection
+    else:
+        DBC = DBConnection("db.conf")
+    with DBC as sqlcnx:
+        # create database cursor
+        cur = sqlcnx.cursor(buffered=True)
         # get ID & Token cookie values
         ID = requestCookie["orgdb.ID"].value
         Token = requestCookie["orgdb.Token"].value
@@ -104,7 +112,7 @@ def checkCredentials(DBC=None):
             })
         res = cur.fetchall()
         # if ID & Token are in LoginAccessTable and not expired
-        if cur.rowcount >= 1:
+        if len(res) >= 1:
             # update token expiry date to 1 hour from now
             cur.execute(
                 "UPDATE LoginAccessTable SET Expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) "
@@ -126,191 +134,211 @@ def checkCredentials(DBC=None):
             responseCookie["orgdb.Token"]["httponly"] = True
             # set type to the fetched usertype from LoginCredentialsTable
             type = toInt(res[0][0])
-    # delete any ID-Token pairs in LoginAccessTable that's already expired
-    cur.execute("DELETE FROM LoginAccessTable WHERE Expires <= NOW()")
-    # commit database changes
-    sqlcnx.commit()
-    # close database cursor
-    cur.close()
+        # delete any ID-Token pairs in LoginAccessTable that's already expired
+        cur.execute("DELETE FROM LoginAccessTable WHERE Expires <= NOW()")
+        # commit database changes
+        sqlcnx.commit()
+        # close database cursor
+        cur.close()
     # return usertype
     return type
 
 
 # for users logging in
 # creates session cookie & returns True if valid, False otherwise
-def login(ID, PIN, DBC=None):
+def login(ID, PIN, DBConnection=None):
     # create response cookie
     cookie = cherrypy.response.cookie
     # connect to database if not already connected
-    if DBC is None:
-        DBC = DBConnection()
-    sqlcnx = DBC.connect()
+    if DBConnection is not None:
+        if DBConnection.is_connected():
+            DBConnection.persistent = True
+        DBC = DBConnection
+    else:
+        DBC = DBConnection("db.conf")
     # check if ID-Pin pair is in LoginCredentialsTable
     creds = verifyCredentials(ID, PIN, DBC)
     # if ID-Pin pair is in LoginCredentialsTable
     if creds is not None:
-        # create a random 64-byte hex token
-        token = urandom(64).hex()
-        # create database cursor
-        cur = sqlcnx.cursor(buffered=True)
-        # insert new ID-Token pair in LoginAccessTable, expiring 1 hour from now
-        cur.execute(
-            "INSERT INTO LoginAccessTable (ID, Token, Expires) VALUES (%(ID)s, %(Token)s, DATE_ADD(NOW(), INTERVAL 1 HOUR))",
-            {
-                "ID": ID,
-                "Token": token
-            })
-        # create new ID & Token cookie, expiring 1 hour from now
-        cookie["orgdb.ID"] = ID
-        cookie["orgdb.ID"]["path"] = "/"
-        cookie["orgdb.ID"]["max-age"] = 3600
-        cookie["orgdb.ID"]["version"] = 1
-        cookie["orgdb.ID"]["httponly"] = True
-        cookie["orgdb.Token"] = token
-        cookie["orgdb.Token"]["path"] = "/"
-        cookie["orgdb.Token"]["max-age"] = 3600
-        cookie["orgdb.Token"]["version"] = 1
-        cookie["orgdb.Token"]["httponly"] = True
-        # commit changes to database
-        sqlcnx.commit()
-        # close database cursor
-        cur.close()
-        # True: user login succeeded
-        return True
+        with DBC as sqlcnx:
+            # create a random 64-byte hex token
+            token = urandom(64).hex()
+            # create database cursor
+            cur = sqlcnx.cursor(buffered=True)
+            # insert new ID-Token pair in LoginAccessTable, expiring 1 hour from now
+            cur.execute(
+                "INSERT INTO LoginAccessTable (ID, Token, Expires) VALUES (%(ID)s, %(Token)s, DATE_ADD(NOW(), INTERVAL 1 HOUR))",
+                {
+                    "ID": ID,
+                    "Token": token
+                })
+            # create new ID & Token cookie, expiring 1 hour from now
+            cookie["orgdb.ID"] = ID
+            cookie["orgdb.ID"]["path"] = "/"
+            cookie["orgdb.ID"]["max-age"] = 3600
+            cookie["orgdb.ID"]["version"] = 1
+            cookie["orgdb.ID"]["httponly"] = True
+            cookie["orgdb.Token"] = token
+            cookie["orgdb.Token"]["path"] = "/"
+            cookie["orgdb.Token"]["max-age"] = 3600
+            cookie["orgdb.Token"]["version"] = 1
+            cookie["orgdb.Token"]["httponly"] = True
+            # commit changes to database
+            sqlcnx.commit()
+            # close database cursor
+            cur.close()
+            # True: user login succeeded
+            return True
     # False: user login failed
     return False
 
 
 # for users logging out
 # deletes session cookie and session token
-def logout(DBC=None):
+def logout(DBConnection=None):
     # create response cookie
     responseCookie = cherrypy.response.cookie
     # get user's request cookies
     requestCookie = cherrypy.request.cookie
     # connect to database if not already connected
-    if DBC is None:
-        DBC = DBConnection()
-    sqlcnx = DBC.connect()
-    # create database cursor
-    cur = sqlcnx.cursor(buffered=True)
-    # if user has ID & Token cookies
-    if "orgdb.ID" in requestCookie.keys(
-    ) and "orgdb.Token" in requestCookie.keys():
-        # delete ID-Token pair from LoginAccessTable
-        cur.execute(
-            "DELETE FROM LoginAccessTable WHERE ID = %(ID)s AND Token = %(Token)s",
-            {
-                "ID": requestCookie["orgdb.ID"].value,
-                "Token": requestCookie["orgdb.Token"].value
-            })
-        # delete ID & Token cookies
-        responseCookie["orgdb.ID"] = ""
-        responseCookie["orgdb.Token"] = ""
-        responseCookie["orgdb.ID"]["expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
-        responseCookie["orgdb.Token"][
-            "expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
-    # commit changes to database
-    sqlcnx.commit()
-    # close database cursor
-    cur.close()
+    if DBConnection is not None:
+        DBC = DBConnection
+    else:
+        DBC = DBConnection("db.conf")
+    with DBC as sqlcnx:
+        # create database cursor
+        cur = sqlcnx.cursor(buffered=True)
+        # if user has ID & Token cookies
+        if "orgdb.ID" in requestCookie.keys(
+        ) and "orgdb.Token" in requestCookie.keys():
+            # delete ID-Token pair from LoginAccessTable
+            cur.execute(
+                "DELETE FROM LoginAccessTable WHERE ID = %(ID)s AND Token = %(Token)s",
+                {
+                    "ID": requestCookie["orgdb.ID"].value,
+                    "Token": requestCookie["orgdb.Token"].value
+                })
+            # delete ID & Token cookies
+            responseCookie["orgdb.ID"] = ""
+            responseCookie["orgdb.Token"] = ""
+            responseCookie["orgdb.ID"][
+                "expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
+            responseCookie["orgdb.Token"][
+                "expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
+        # commit changes to database
+        sqlcnx.commit()
+        # close database cursor
+        cur.close()
 
 
 # for new users, creates entry in LoginCredentialsTable
 # returns True if successfully deleted, False otherwise
-def createCredentials(ID, PIN, Type, DBC=None):
+def createCredentials(ID, PIN, Type, DBConnection=None):
     # create new 32-byte salt
     salt = urandom(32)
     PINSalt = salt.hex()
     # hash the PIN with the salt
     PINHash = pbkdf2_hmac('sha512', bytes(PIN, "utf8"), salt, 100000).hex()
     # connect to database if not already connected
-    if DBC is None:
-        DBC = DBConnection()
-    sqlcnx = DBC.connect()
-    # create database cursor
-    cur = sqlcnx.cursor()
-    # check if ID already exists in LoginCredentialsTable
-    cur.execute("SELECT ID FROM LoginCredentialsTable WHERE ID = %(ID)s",
-                {"ID": ID})
-    res = cur.fetchall()
-    # if ID already exists in LoginCredentialsTable
-    if cur.rowcount > 0:
-        # log the incident
-        cherrypy.log.error(
-            "Warning (Login.createCredentials): Not creating duplicate credentials ("
-            + ID + ")")
-        # False: error occured
-        return False
-    # insert ID, hash, salt, & type to LoginCredentialsTable
-    cur.execute(
-        "INSERT INTO LoginCredentialsTable (ID, PINHash, PINSalt, Type) "
-        "VALUES (%(ID)s, %(PINHash)s, %(PINSalt)s, %(Type)s)", {
-            "ID": ID,
-            "PINHash": PINHash,
-            "PINSalt": PINSalt,
-            "Type": Type
-        })
-    # commit changes to database
-    sqlcnx.commit()
-    # close database cursor
-    cur.close()
-    # True: created successfully
-    return True
+    if DBConnection is not None:
+        DBC = DBConnection
+    else:
+        DBC = DBConnection("db.conf")
+    with DBC as sqlcnx:
+        # create database cursor
+        cur = sqlcnx.cursor()
+        # check if ID already exists in LoginCredentialsTable
+        cur.execute("SELECT ID FROM LoginCredentialsTable WHERE ID = %(ID)s",
+                    {"ID": ID})
+        res = cur.fetchall()
+        # if ID already exists in LoginCredentialsTable
+        if cur.rowcount > 0:
+            # log the incident
+            cherrypy.log.error(
+                "Warning (Login.createCredentials): Not creating duplicate credentials ("
+                + ID + ")")
+            # False: error occured
+            return False
+        # insert ID, hash, salt, & type to LoginCredentialsTable
+        cur.execute(
+            "INSERT INTO LoginCredentialsTable (ID, PINHash, PINSalt, Type) "
+            "VALUES (%(ID)s, %(PINHash)s, %(PINSalt)s, %(Type)s)", {
+                "ID": ID,
+                "PINHash": PINHash,
+                "PINSalt": PINSalt,
+                "Type": Type
+            })
+        # commit changes to database
+        sqlcnx.commit()
+        # close database cursor
+        cur.close()
+        # True: created successfully
+        return True
+    # False: error occured
+    return False
 
 
 # (not used yet, to be implemented)
 # deletes credentials if ID-Pin pair is valid
-def deleteCredentials(ID, PIN, DBC=None):
+def deleteCredentials(ID, PIN, DBConnection=None):
     # connect to database if not already connected
-    if DBC is None:
-        DBC = DBConnection()
-    sqlcnx = DBC.connect()
-    # create database cursor
-    check = verifyCredentials(ID, PIN, DBC)
-    # if verified user found
-    if check is not None:
-        type, hash = check
-        cur = sqlcnx.cursor(buffered=True)
-        # delete ID from LoginCredentialsTable
-        cur.execute(
-            "DELETE FROM LoginCredentialsTable "
-            "WHERE ID = %(ID)s AND PINHash = %(PINHash)s", {
-                "ID": ID,
-                "PINHash": hash
-            })
-        # commit changes to database
-        sqlcnx.commit()
+    if DBConnection is not None:
+        DBC = DBConnection
     else:
-        # log the incident
-        cherrypy.log.error(
-            "Warning (Login.deleteCredentials): Tried deleting credentials of unverified user ("
-            + ID + ")")
-        # False: an error occured
-        return False
-    # close databse cursor
-    cur.close()
-    # True: successfully deleted
-    return True
+        DBC = DBConnection("db.conf")
+    with DBC as sqlcnx:
+        # create database cursor
+        check = verifyCredentials(ID, PIN, DBC)
+        # if verified user found
+        if check is not None:
+            type, hash = check
+            cur = sqlcnx.cursor(buffered=True)
+            # delete ID from LoginCredentialsTable
+            cur.execute(
+                "DELETE FROM LoginCredentialsTable "
+                "WHERE ID = %(ID)s AND PINHash = %(PINHash)s", {
+                    "ID": ID,
+                    "PINHash": hash
+                })
+            # commit changes to database
+            sqlcnx.commit()
+        else:
+            # log the incident
+            cherrypy.log.error(
+                "Warning (Login.deleteCredentials): Tried deleting credentials of unverified user ("
+                + ID + ")")
+            # False: an error occured
+            return False
+        # close database cursor
+        cur.close()
+        # True: successfully deleted
+        return True
+    # False: an error occured
+    return False
 
 
 # helper method, not to be used on its own
 # checks if an ID-PIN pair is in LoginCredentialsTable
 # returns tuple (type (0:Club, 1:Admin), hash) if it exists, None otherwise
-def verifyCredentials(ID, PIN, DBC=None):
+def verifyCredentials(ID, PIN, DBConnection=None):
     # connect to database if not already connected
-    if DBC is None:
-        DBC = DBConnection()
-    sqlcnx = DBC.connect()
-    # create database cursor
-    cur = sqlcnx.cursor(buffered=True)
-    # get hash, salt, & type with ID
-    cur.execute(
-        "SELECT PINHash, PINSalt, Type FROM LoginCredentialsTable "
-        "WHERE ID = %(ID)s", {"ID": ID})
-    res = cur.fetchall()
+    if DBConnection is not None:
+        if DBConnection.is_connected():
+            DBConnection.persistent = True
+        DBC = DBConnection
+    else:
+        DBC = DBConnection("db.conf")
+    res = []
+    with DBC as sqlcnx:
+        # create database cursor
+        cur = sqlcnx.cursor(buffered=True)
+        # get hash, salt, & type with ID
+        cur.execute(
+            "SELECT PINHash, PINSalt, Type FROM LoginCredentialsTable "
+            "WHERE ID = %(ID)s", {"ID": ID})
+        res = cur.fetchall()
     # if there's exactly 1 matching ID
-    if cur.rowcount == 1:
+    if len(res) == 1:
         actualHash, salt, type = res[0]
         # compute hash from input PIN & fetched salt
         computedHash = pbkdf2_hmac('sha512', bytes(PIN, "utf8"),
@@ -319,7 +347,7 @@ def verifyCredentials(ID, PIN, DBC=None):
         if actualHash == computedHash:
             return type, computedHash
     # if there's more than 1 matching ID (invalid)
-    elif cur.rowcount > 1:
+    elif len(res) > 1:
         # log the incident
         cherrypy.log.error(
             "Warning (Login.verifyCredentials): Duplicate credentials exist ("
@@ -331,9 +359,9 @@ def verifyCredentials(ID, PIN, DBC=None):
 class Login(object):
     def __init__(self, DBC=None, Renderer=None):
         if DBC is not None:
-            self.DBC = DBC
+            self.DBC = DBConnection(DBC)
         else:
-            self.DBC = DBConnection()
+            self.DBC = DBConnection("db.conf")
         if Renderer is not None:
             self.renderer = Renderer
         else:
@@ -350,15 +378,18 @@ class Login(object):
 
     @cherrypy.expose
     def verify(self, ID=None, PIN=None):
-        # if user is logged-out
-        if checkCredentials(self.DBC) == -1:
-            # if input credentials are valid
-            if login(ID, PIN, self.DBC) is True:
-                # redirect to homepage (successful login)
-                raise cherrypy.HTTPRedirect("/")
-            # go back to login page
-            raise cherrypy.HTTPRedirect("/login")
-        # redirect to homepage (already logged in)
+        with self.DBC as sqlcnx:
+            # if user is logged-out
+            if checkCredentials(self.DBC) == -1:
+                # if input credentials are valid
+                if login(ID, PIN, self.DBC) is True:
+                    # redirect to homepage (successful login)
+                    self.DBC.disconnect()
+                    raise cherrypy.HTTPRedirect("/")
+                # go back to login page
+                self.DBC.disconnect()
+                raise cherrypy.HTTPRedirect("/login")
+            raise cherrypy.HTTPRedirect("/")
         raise cherrypy.HTTPRedirect("/")
 
     def logout(self):

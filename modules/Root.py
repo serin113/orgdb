@@ -6,23 +6,25 @@
 # Code History:
 # 2019/03/22 (Simon) - Moved class to this file
 # 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
+# 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
+#                           instead of a DBConnection class
 
 from ._helpers import *
-from .Summary import *
-from .ViewApplication import *
-from .ViewRecord import *
 from .AddApplication import *
 from .AddRecord import *
 from .Login import *
+from .Summary import *
+from .ViewApplication import *
+from .ViewRecord import *
 
 
 # class used by CherryPy to handle HTTP requests for /
 class Root(object):
     def __init__(self, DBC=None, Renderer=None, Validator=None):
         if DBC is not None:
-            self.DBC = DBC
+            self.DBC = DBConnection(DBC)
         else:
-            self.DBC = DBConnection()
+            self.DBC = DBConnection("db.conf")
         if Renderer is not None:
             self.renderer = Renderer
         else:
