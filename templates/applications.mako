@@ -41,9 +41,8 @@ Mako variables:
         <header>
             <%include file="header.mako" args="user=user, current='applications'"/>
         </header>
+        <h1 class="ui header center title">Pending Applications</h1>
         <div class="ui container">
-            <h1 class="center title">Pending Applications</h1>
-            <hr>
             <form method="get" action="" id="filter-form">
                 <div class="ui fluid action icon input">
                   <input type="text" name="q" value="${q}" placeholder="Search..."/>
