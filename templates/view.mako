@@ -17,6 +17,7 @@ Code History:
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
                    - Updated table styling
                    - Translates region/level/type numbers to readable strings
+2019/04/02 (Simon) - Updated button styles, moved some inline scripts to enable_tablesort.js
 </%doc>
 
 
@@ -71,11 +72,7 @@ typeName = {
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/tablesort.js"></script>
-        <script>
-            $(document).ready(function(){
-                $('table').tablesort();
-            });
-        </script>
+        <script src="/scripts/enable_tablesort.js"></script>
     </head>
     <body>
         <header>
@@ -120,11 +117,11 @@ typeName = {
                             <td class="collapsing center aligned">
                                 <div class="ui two small icon buttons">
                                     % if len(q) > 0:
-                                    <a href="${record['clubID']}?q=${q}" class="ui button" tabindex="0">
+                                    <a href="${record['clubID']}?q=${q}" class="ui primary button" tabindex="0">
                                         <i class="eye icon"></i>
                                     </a>
                                     % else:
-                                    <a href="${record['clubID']}" class="ui button" tabindex="0">
+                                    <a href="${record['clubID']}" class="ui primary button" tabindex="0">
                                         <i class="eye icon"></i>
                                     </a>
                                     % endif

@@ -32,6 +32,7 @@
 #                    - Removed persistent DBConnection (classes create a new one instead)
 #                    - Added debug options
 #                    - Webserver now open to localhost & LAN
+# 2019/04/02 (Simon) - Added HTTP secure headers, added 404 error handling
 
 import os  # for resolving filesystem paths
 
@@ -39,15 +40,6 @@ import cherrypy  # import CherryPy library
 
 import modules._helpers as helper  # import helper classes
 from modules import Root  # import CherryPy-exposed Root class
-
-
-def handle_error():
-    cherrypy.response.status = 500
-    cherrypy.response.body = [
-        bytes("<html><body>Sorry, an error occured</body></html>", "utf8")
-    ]
-    print(cherrypy._cperror.format_exc())
-
 
 debug = True
 clearLogs = True
@@ -67,26 +59,52 @@ if __name__ == '__main__':
             os.remove("error.log")
         except:
             pass
+
+    # initialize persistent renderer & validator classes
+    renderer = helper.ContentRenderer(debug=debug)
+    validator = helper.InputValidator()
+
+    @cherrypy.tools.register('before_finalize', priority=60)
+    def secureheaders():
+        headers = cherrypy.response.headers
+        headers['X-Frame-Options'] = 'DENY'
+        headers['X-XSS-Protection'] = '1; mode=block'
+        headers['Content-Security-Policy'] = (
+            "default-src 'self';"
+            "style-src 'self' 'unsafe-inline';"
+            "font-src 'self' data: https://fonts.gstatic.com;"
+            "img-src 'self' data:;"
+            "script-src 'self'")
+
+    def handle_error():
+        cherrypy.response.status = 500
+        cherrypy.response.body = [
+            bytes("<html><body>Sorry, an error occured</body></html>", "utf8")
+        ]
+        cherrypy.error.log(cherrypy._cperror.format_exc())
+
+    def error_page_404(status, message, traceback, version):
+        from modules.Login import getUserType  # for fetching current logged-in user for template
+        return renderer.render(
+            "404.mako", {'user': getUserType(helper.DBConnection("db.conf"))})
+
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
         'server.socket_port': 8080,
         'log.screen': False,
         'log.error_file': 'error.log' if debug else "",
         'log.access_file': 'access.log' if debug else "",
-        'error_page.404': os.path.abspath("static/404.html"),
+        'error_page.404': error_page_404,
         'request.error_response': handle_error,
         'request.show_tracebacks': debug,
         'engine.autoreload.on': reload
     })
 
-    # initialize persistent renderer & validator classes
-    renderer = helper.ContentRenderer(debug=debug)
-    validator = helper.InputValidator()
-
     conf = {
         '/': {
             'tools.sessions.on': True,
-            'tools.staticdir.root': os.path.abspath(os.getcwd())
+            'tools.staticdir.root': os.path.abspath(os.getcwd()),
+            'tools.secureheaders.on': True
         },
         '/static': {
             'tools.staticdir.on': True,

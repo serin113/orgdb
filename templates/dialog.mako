@@ -8,6 +8,7 @@ Code History:
 2019/02/20 (Simon) - Initial template
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
+2019/04/02 (Simon) - Updated layout, moved some inline scripts to dialog.js
 </%doc>
 
 
@@ -16,11 +17,14 @@ Mako variables:
     (string) title
     (string) message
     (string) linkaddr
+    (list) errors
+        (tuple) error
+            (<message>, <field>, <value>)
     (string) linktext
 </%doc>
 
 
-<%page args="user=None, title=None, message=None, linkaddr=None, linktext=None"/>
+<%page args="user=None, title=None, message=None, linkaddr=None, errors=None, linktext=None"/>
 
 
 <html>
@@ -30,21 +34,31 @@ Mako variables:
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
+        <script src="/scripts/dialog.js"></script>
     </head>
     <body>
         <header>
             <%include file="header.mako" args="user=user"/>
         </header>
         <section class="ui container">
-            <div class="dialog">
+            <div class="ui message">
                 % if title is not None:
-                <h1>${title}</h1>
+                <h1 class="header">${title}</h1>
                 % endif
                 % if message is not None:
                 <p>${message}</p>
                 % endif
+                % if errors is not None:
+                <div class="ui list">
+                    % for e in errors:
+                    <div class="item">
+                        <b>[${str(e[0])}]</b> '${str(e[1])}': ${str(e[2])}
+                    </div>
+                    % endfor
+                </div>
+                % endif
                 % if (linkaddr is not None) or (linktext is not None):
-                <a href="${linkaddr}">${linktext}</a>
+                <a href="${linkaddr}" class="ui small basic blue button" id="button">${linktext}</a>
                 % endif
             </div>
         </section>

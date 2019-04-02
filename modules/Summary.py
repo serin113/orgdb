@@ -13,6 +13,7 @@
 # 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
+# 2019/04/02 (Simon) - Changed "back" URL
 
 from ._helpers import *
 from .Login import *
@@ -84,8 +85,8 @@ class Summary(object):
         return self.renderer.render(
             "dialog.mako", {
                 'title': "Error!",
-                'message': "A database error occured.<br>",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back",
+                'message': "A database error occured.",
+                'linkaddr': "#back",
+                'linktext': "< Back",
                 'user': getUserType(self.DBC)
             })

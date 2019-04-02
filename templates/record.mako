@@ -8,6 +8,7 @@ Code History:
 2019/03/23 (Simon) - Intial template code
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
+2019/04/02 (Simon) - Updated layout
 </%doc>
 
 
@@ -68,7 +69,7 @@ typeName = {
         <header>
             <%include file="header.mako" args="user=user, current='view'"/>
         </header>
-        <section class="ui container">
+        <div class="ui container">
             % if record_info is not None:
             <div class="ui inverted blue raised vertical segments">
                 <div class="ui inverted blue segment">
@@ -78,7 +79,7 @@ typeName = {
                     </h1>
                     <div class="ui green label">
                         ${regionName[record_info["region"]][1]}
-                        <div class="detail">${regionName[record_info["region"]][0]}</div>
+                        <div class="detail">Region ${regionName[record_info["region"]][0]}</div>
                     </div>
                     <div class="ui violet label">
                         ${levelName[record_info["level"]]}
@@ -89,19 +90,30 @@ typeName = {
                         <div class="detail">Type</div>
                     </div>
                 </div>
-                <div class="ui basic segment">
-                    ${record_info["clubID"]}<br>
-                    ${record_info["dateUpdated"]}<br>
-                    ${record_info["address"]}<br>
-                    ${record_info["city"]}<br>
-                    ${record_info["province"]}<br>
-                    ${record_info["adviserName"]}<br>
-                    ${record_info["contact"]}<br>
-                    ${record_info["email"]}
+                <div class="ui segment">
+                    <div class="ui stackable grid">
+                        <div class="eight wide column">
+                            <div class="ui list">
+                                <div class="item"><b>Club Adviser/s: </b>${record_info["adviserName"]}</div>
+                                <div class="item"><b>Contact: </b>${record_info["contact"]}</div>
+                                <div class="item"><b>E-mail: </b><a href="mailto:${record_info['email']}">${record_info["email"]}</a></div>
+                            </div>
+                        </div>
+                        <div class="eight wide column">
+                            <div class="ui list">
+                                <div class="item"><b>Address: </b>${record_info["address"]}</div>
+                                <div class="item"><b>City: </b>${record_info["city"]}</div>
+                                <div class="item"><b>Province: </b>${record_info["province"]}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui secondary segment">
+                    <i>Last updated ${record_info["dateUpdated"]}</i>
                 </div>
             </div>
             % endif
-        </section>
+        </div>
         <footer>
             <%include file="footer.mako"/>
         </footer>

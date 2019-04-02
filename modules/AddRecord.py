@@ -12,6 +12,7 @@
 # 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
+# 2019/04/02 (Simon) - Changed field error handling, changed "back" URL
 
 from ._helpers import *
 from .Login import *
@@ -110,17 +111,14 @@ class AddRecord(object):
             # display errors, if any
             if len(errors) > 0:
                 cur.close()  # close database cursor
-                errortext = ""
-                for e in errors:
-                    errortext += "[" + str(e[0]) + "] '" + str(
-                        e[1]) + "': " + str(e[2]) + "<br>"
                 return self.renderer.render(
                     "dialog.mako", {
                         'title': "Error!",
                         'message':
                         "Invalid affiliation record data:<br>" + errortext,
-                        'linkaddr': "javascript:history.back();",
-                        'linktext': "&gt; Back",
+                        'linkaddr': "#back",
+                        'linktext': "< Back",
+                        'errors': errors,
                         'user': getUserType(self.DBC)
                     })
             # checking for preexisting record
@@ -137,8 +135,8 @@ class AddRecord(object):
                         'title': "Error!",
                         'message':
                         "A matching record already exists in the database.",
-                        'linkaddr': "javascript:history.back();",
-                        'linktext': "&gt; Back",
+                        'linkaddr': "#back",
+                        'linktext': "< Back",
                         'user': getUserType(self.DBC)
                     })
             res = self.validate_affiliation(
@@ -148,17 +146,14 @@ class AddRecord(object):
                 paymentsendmode)
             if len(res) > 0:
                 cur.close()  # close database cursor
-                errortext = ""
-                for e in res:
-                    errortext += "[" + str(e[0]) + "] '" + str(
-                        e[1]) + "': " + str(e[2]) + "<br>"
                 return self.renderer.render(
                     "dialog.mako", {
                         'title': "Error!",
                         'message':
                         "Invalid affiliation record data:<br>" + errortext,
-                        'linkaddr': "javascript:history.back();",
-                        'linktext': "&gt; Back",
+                        'linkaddr': "#back",
+                        'linktext': "< Back",
+                        'errors': res,
                         'user': getUserType(self.DBC)
                     })
             cur.execute(add_record,
@@ -181,9 +176,9 @@ class AddRecord(object):
         return self.renderer.render(
             "dialog.mako", {
                 'title': "Error!",
-                'message': "A database error occured.<br>",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back",
+                'message': "A database error occured.",
+                'linkaddr': "#back",
+                'linktext': "< Back",
                 'user': getUserType(self.DBC)
             })
 

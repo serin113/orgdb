@@ -11,6 +11,8 @@
 # 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
+# 2019/04/02 (Simon) - Fixed saved club if application indicates no existing record
+#                    - Changed "back" URL
 
 from ._helpers import *
 from .AddRecord import *
@@ -102,9 +104,9 @@ class ViewApplication(object):
         return self.renderer.render(
             "dialog.mako", {
                 'title': "Error!",
-                'message': "A database error occured.<br>",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back",
+                'message': "A database error occured.",
+                'linkaddr': "#back",
+                'linktext': "< Back",
                 'user': getUserType(self.DBC)
             })
 
@@ -123,7 +125,9 @@ class ViewApplication(object):
         with self.DBC as sqlcnx:
             # create instance of AddRecord for insertion
             addrecord = AddRecord(
-                DBC=self.DBC, Renderer=self.renderer, Validator=self.validator)
+                DBC=self.DBC.config,
+                Renderer=self.renderer,
+                Validator=self.validator)
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database
             cur.execute(
@@ -184,7 +188,8 @@ class ViewApplication(object):
                         "address": apd["address"],
                         "region": apd["region"]
                     })
-                apd["clubID"] = cur.fetchone()
+                res = cur.fetchone()
+                apd["clubID"] = res[0][0]
                 cur.close()  # close database cursor
             # if application indicates an existing record with clubID
             else:
@@ -195,6 +200,7 @@ class ViewApplication(object):
                     apd["paymentMode"], apd["paymentDate"], apd["paymentID"],
                     apd["paymentAmount"], apd["receiptNumber"],
                     apd["paymentSendMode"])
+
             cur = sqlcnx.cursor(buffered=True)  # create SQL database cursor
             # delete application from AffiliationApplicationsTable (it's already approved)
             cur.execute(
@@ -208,15 +214,15 @@ class ViewApplication(object):
                     'title': "Approved application.",
                     'message': "",
                     'linkaddr': "/applications",
-                    'linktext': "&lt; Back to pending applications",
+                    'linktext': "< Back to pending applications",
                     'user': getUserType(self.DBC)
                 })
         return self.renderer.render(
             "dialog.mako", {
                 'title': "Error!",
-                'message': "A database error occured.<br>",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back",
+                'message': "A database error occured.",
+                'linkaddr': "#back",
+                'linktext': "< Back",
                 'user': getUserType(self.DBC)
             })
 
@@ -244,8 +250,8 @@ class ViewApplication(object):
         return self.renderer.render(
             "dialog.mako", {
                 'title': "Error!",
-                'message': "A database error occured.<br>",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back",
+                'message': "A database error occured.",
+                'linkaddr': "#back",
+                'linktext': "< Back",
                 'user': getUserType(self.DBC)
             })

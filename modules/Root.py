@@ -8,10 +8,12 @@
 # 2019/03/26 (Simon) - Login.getUserType values passed to ContentRenderer.render
 # 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
 #                           instead of a DBConnection class
+# 2019/04/02 (Simon) - Added /edit, changed "back" URL for debug dialog
 
 from ._helpers import *
 from .AddApplication import *
 from .AddRecord import *
+from .EditRecord import *
 from .Login import *
 from .Summary import *
 from .ViewApplication import *
@@ -48,6 +50,20 @@ class Root(object):
             DBC=DBC, Renderer=Renderer, Validator=Validator)
         # class handling /summary
         self.summary = Summary(DBC=DBC, Renderer=Renderer)
+        # class handling /edit
+        self.edit = EditRecord(DBC=DBC, Renderer=Renderer, Validator=Validator)
+
+    @cherrypy.expose
+    @accessible_by("dev")
+    def dialog(self):
+        return self.renderer.render(
+            "dialog.mako", {
+                'user': getUserType(self.DBC),
+                'title': "Title",
+                'message': "Message Message Message!",
+                'linkaddr': "#back",
+                'linktext': "< Back"
+            })
 
     @cherrypy.expose
     # CherryPy method handling /

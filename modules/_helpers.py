@@ -10,12 +10,17 @@
 #                    - Updated newID
 # 2019/03/29 (Simon) - DBConnection can be used in "with-as" statements to handle connecting,
 #                           disconnecting, and exception handling automatically
+# 2019/04/02 (Simon) - sha512 hashes in newID() compressed using base64
+#                    - string variables in ContentRenderer.render() now HTML-escaped
 
 import re  # for input validation
+from base64 import urlsafe_b64encode  # for encoding sha512 hash to base64
 from collections import \
     defaultdict  # for general-purpose dicts with default values
 from datetime import date, datetime  # for getting the current date
 from hashlib import sha512  # for creating a unique ID from other data
+from html import \
+    escape  # for escaping string variables before rendering templates
 from uuid import uuid4  # for creating a unique ID
 
 import cherrypy  # for handling HTTP requests
@@ -31,7 +36,9 @@ from mako.lookup import TemplateLookup  # for template rendering
 # returns a string-type unique id from string_base
 def newID(string_base=None, length=None, prefix=None, postfix=None):
     if string_base is not None:
-        string = sha512(bytes(string_base, "utf8")).hexdigest()
+        string = urlsafe_b64encode(
+            sha512(bytes(string_base,
+                         "utf8")).digest()).rstrip(b"=").decode("utf8")
         if length is not None:
             string = string[:length]
         if prefix is not None:
@@ -97,10 +104,7 @@ class DBConnection(object):
 
     # method executed when DBConnection is created in a with statement
     def __enter__(self):
-        if not self.is_connected():
-            conn = self.connect()
-            return conn
-        return self.connection
+        return self.connect()
 
     # method executed when DBConnection is destroyed in a with statement
     def __exit__(self, type, value, traceback):
@@ -336,6 +340,9 @@ class ContentRenderer(object):
             t = self.lookup.get_template(templatefile)
             if (templatevars is None):
                 return t.render()
+            for key, val in templatevars.items():
+                if type(val) is str:
+                    templatevars[key] = escape(val)
             return t.render(**templatevars)
         except mako.exceptions.MakoException as err:
             cherrypy.log.error("Error (ContentRenderer.render): " + str(err))

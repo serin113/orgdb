@@ -15,6 +15,7 @@ Code History:
 2019/03/27 (Simon) - Changed max value for "schoolyear" to 2050
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
                    - Updated form layout
+2019/04/02 (Simon) - Updated form layout, moved some inline scripts to enable.js
 </%doc>
 
 
@@ -28,23 +29,20 @@ Code History:
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
-        <script>
-            $(document).ready(function(){
-                $('select.dropdown').dropdown();
-                $('.ui.radio.checkbox').checkbox();
-            });
-        </script>
+        <script src="/scripts/enable.js"></script>
     </head>
     <body>
         <header>
             <%include file="header.mako" args="user=user, current='add'"/>
         </header>
-        <section class="ui container">
+        <div class="ui container">
             <h1 class="ui header center title">Add Affiliation Record</h1>
             <div class="ui fluid raised blue container segment">
                 <form method="post" action="insert" id="add-form" class="ui form">
                     <div class="ui stackable grid">
-                        <h2 class="ui dividing header sixteen wide column">Record Info</h2>
+                        <div class="sixteen wide blue column">
+                            <h2 class="ui inverted header">Club Info</h2>
+                        </div>
                         <div class="sixteen wide column">
                             <div class="required field">
                                 <label>Club Name</label>
@@ -139,7 +137,9 @@ Code History:
                             </div>
                         </div>
                         <div class="ui horizontal hidden divider"></div>
-                        <h2 class="ui dividing header sixteen wide column">Affiliation Info</h2>
+                        <div class="sixteen wide blue column">
+                            <h2 class="ui inverted header">Affiliation Info</h2>
+                        </div>
                         <div class="three wide column">
                             <div class="required field">
                                 <label>School Year</label>
@@ -263,14 +263,14 @@ Code History:
                                 <input type="text" placeholder="Remarks..." name="remarks">
                             </div>
                         </div>
-                        <div class="ui horizontal hidden divider"></div>
+                        <div class="ui horizontal divider"></div>
                         <div class="sixteen wide column">
-                            <button class='ui submit button' type="submit">Add Record</button>
+                            <button class='ui submit blue button' type="submit">Add Record</button>
                         </div>
                     </div>
                 </form>
             </div>
-        </section>
+        </div>
         <footer>
             <%include file="footer.mako"/>
         </footer>

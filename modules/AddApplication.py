@@ -11,6 +11,7 @@
 # 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
+# 2019/04/02 (Simon) - Additional logging, changed field error handling, changed "back" URL
 
 from ._helpers import *
 from .AddRecord import *
@@ -76,7 +77,6 @@ class AddApplication(object):
             "(appID, hasRecord, clubID, dateCreated, region, level, type, school, clubName, address, city, province, adviserName, contact, email, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode) "
             "VALUES (%(appID)s, %(hasRecord)s, %(clubID)s, %(dateCreated)s, %(region)s, %(level)s, %(type)s, %(school)s, %(clubName)s, %(address)s, %(city)s, %(province)s, %(adviserName)s, %(contact)s, %(email)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s)"
         )
-
         with self.DBC as sqlcnx:
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database
@@ -142,6 +142,8 @@ class AddApplication(object):
                     errors.append(("Invalid club ID", "clubID", clubid))
                     application_data['clubID'] = None
                 else:
+                    cherrypy.log.error(
+                        "Error: More than one club with same ID: " + clubid)
                     errors.append(("More than one club with same ID", "clubID",
                                    clubid))
                     application_data['clubID'] = None
@@ -173,30 +175,29 @@ class AddApplication(object):
                          (clubid, schoolyear, yearsaffiliated)))
 
                 application_data['appID'] = newID(
-                    str(application_data['hasRecord']) +
-                    str(application_data['clubID']) +
-                    str(application_data['dateCreated']) +
-                    str(application_data['region']) +
-                    str(application_data['level']) +
-                    str(application_data['type']) +
-                    str(application_data['school']) +
-                    str(application_data['clubName']) +
-                    str(application_data['address']) +
-                    str(application_data['city']) +
-                    str(application_data['province']) +
-                    str(application_data['adviserName']) +
-                    str(application_data['contact']) +
-                    str(application_data['email']) +
-                    str(application_data['schoolYear']) +
-                    str(application_data['yearsAffiliated']) +
-                    str(application_data['SCA']) +
-                    str(application_data['SCM']) +
-                    str(application_data['paymentMode']) +
-                    str(application_data['paymentDate']) +
-                    str(application_data['paymentID']) +
-                    str(application_data['paymentAmount']) +
-                    str(application_data['receiptNumber']) +
-                    str(application_data['paymentSendMode']))
+                    str(application_data['hasRecord']) + str(
+                        application_data['clubID']) + str(
+                            application_data['dateCreated']) + str(
+                                application_data['region']) + str(
+                                    application_data['level']) + str(
+                                        application_data['type']) + str(
+                                            application_data['school']) +
+                    str(application_data['clubName']) + str(
+                        application_data['address']) + str(
+                            application_data['city']) + str(
+                                application_data['province']) + str(
+                                    application_data['adviserName']) + str(
+                                        application_data['contact']) + str(
+                                            application_data['email']) + str(
+                                                application_data['schoolYear'])
+                    + str(application_data['yearsAffiliated']) + str(
+                        application_data['SCA']) + str(application_data['SCM'])
+                    + str(application_data['paymentMode'])
+                    + str(application_data['paymentDate']) + str(
+                        application_data['paymentID']) + str(
+                            application_data['paymentAmount']) + str(
+                                application_data['receiptNumber']) + str(
+                                    application_data['paymentSendMode']), 16)
 
                 # change validation method if record data is already known to be valid
                 if skip_record_check:
@@ -208,16 +209,13 @@ class AddApplication(object):
             # display errors, if any
             if len(errors) > 0:
                 cur.close()  # close database cursor
-                errortext = ""
-                for e in errors:
-                    errortext += "[" + str(e[0]) + "] '" + str(
-                        e[1]) + "': " + str(e[2]) + "<br>"
                 return self.renderer.render(
                     "dialog.mako", {
                         'title': "Error",
                         'message': errortext,
-                        'linkaddr': "javascript:history.back();",
-                        'linktext': "&lt; Back",
+                        'linkaddr': "#back",
+                        'linktext': "< Back",
+                        'errors': errors,
                         'user': getUserType(self.DBC)
                     })
             cur.execute(

@@ -11,6 +11,7 @@ Code History:
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
                    - Removed appID column
                    - Updated table styling, added sorting
+2019/04/02 (Simon) - Updated form layout, moved some inline scripts to enable_tablesort.js
 </%doc>
 
 
@@ -31,11 +32,7 @@ Mako variables:
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/tablesort.js"></script>
-        <script>
-            $(document).ready(function(){
-                $('table').tablesort();
-            });
-        </script>
+        <script src="/scripts/enable_tablesort.js"></script>
     </head>
     <body>
         <header>
@@ -73,12 +70,14 @@ Mako variables:
                         <tr>
                             <td class="collapsing center aligned">
                                 <div class="ui small buttons">
-                                    <a href="view/${app['appID']}" class="ui icon button"><i class="eye icon"></i></a>
-                                    <a href="approve/${app['appID']}" class="ui positive icon button">
-                                        <i class="check icon"></i> approve
+                                    <a href="view/${app['appID']}" class="ui icon primary button"><i class="eye icon"></i></a>
+                                    <a href="approve/${app['appID']}" class="ui positive vertical animated button">
+                                        <div class="visible content">approve</div>
+                                        <div class="hidden content"><i class="check icon"></i></div>
                                     </a>
-                                    <a href="reject/${app['appID']}" class="ui negative icon button">
-                                        <i class="close icon"></i> reject
+                                    <a href="reject/${app['appID']}" class="ui negative vertical animated button">
+                                        <div class="visible content">reject</div>
+                                        <div class="hidden content"><i class="close icon"></i></div>
                                     </a>
                                 </div>
                             </td>
@@ -95,6 +94,31 @@ Mako variables:
                     </tbody>
                 </table>
             </div>
+            <%doc>
+            <div class="ui container">
+                % for app in data:
+                <div class="ui inverted blue raised vertical segments">
+                    <div class="ui blue segment">
+                        <h1 class="ui blue header">
+                            ${app["clubName"]}
+                            <div class="ui blue sub header">${app["school"]}</div>
+                        </h1>
+                        <div class="ui small buttons">
+                            <a href="view/${app['appID']}" class="ui icon primary button"><i class="eye icon"></i></a>
+                            <a href="approve/${app['appID']}" class="ui positive vertical animated button">
+                                <div class="visible content">approve</div>
+                                <div class="hidden content"><i class="check icon"></i></div>
+                            </a>
+                            <a href="reject/${app['appID']}" class="ui negative vertical animated button">
+                                <div class="visible content">reject</div>
+                                <div class="hidden content"><i class="close icon"></i></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                % endfor
+            </div>
+            </%doc>
             % else:
             <div class="ui warning message">
                 <i class="warning icon"></i>Database is empty.

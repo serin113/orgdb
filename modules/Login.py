@@ -9,6 +9,7 @@
 # 2019/03/29 (Simon) - Database connection now handled using a with statement
 #                    - Improved handling of existing database connections (avoids redundancy)
 #                    - Redirect to homepage on logout
+# 2019/04/02 (Simon) - Changed non-authorized redirects to HTTP error code 401
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -21,7 +22,7 @@ from ._helpers import *
 # causes a redirect to the homepage if user is not
 # in authorized usertypes
 # usertypes:
-#   (string type) "default"(logged-out), "club"(club), "admin"(admin)
+#   (string type) "default"(logged-out), "club", "admin", "dev"
 #   or (list type) [list of strings]
 def accessible_by(usertype):
     def wrap(func):
@@ -40,17 +41,18 @@ def accessible_by(usertype):
                         # if user is not indicated usertype
                         if actualuser != types[usertype]:
                             # redirect to homepage
-                            raise cherrypy.HTTPRedirect("/", 307)
+                            raise cherrypy.HTTPError(401)
                     # if usertype is list of strings
                     elif type(usertype) is list:
                         # if user is not in indicated usertypes
                         if actualuser not in [types[u] for u in usertype]:
                             # redirect to homepage
-                            raise cherrypy.HTTPRedirect("/", 307)
+                            raise cherrypy.HTTPError(401)
             # if some cherrypy http error occurs
             except cherrypy.HTTPError as error:
                 # display the http error
-                return error
+                #if error[0] == 404:
+                return str(error)
             # return wrapped function
             return func(*args, **kwargs)
 
@@ -372,7 +374,7 @@ class Login(object):
     def index(self):
         # if user is logged in, redirect to homepage
         if checkCredentials(self.DBC) != -1:
-            raise cherrypy.HTTPRedirect("/", 307)
+            raise cherrypy.HTTPRedirect("/")
         # else, display login page
         return self.renderer.render("login.mako",
                                     {'user': None})  # display summary data

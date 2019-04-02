@@ -13,6 +13,7 @@ Code History:
 2019/03/27 (Simon) - Added filter bar
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
                    - Updated table styling
+2019/04/02 (Simon) - Updated table styling, moved some inline scripts to enable_tablesort.js
 </%doc>
 
 
@@ -71,11 +72,7 @@ typeName = {
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/tablesort.js"></script>
-        <script>
-            $(document).ready(function(){
-                $('table').tablesort();
-            });
-        </script>
+        <script src="/scripts/enable_tablesort.js"></script>
     </head>
     <body>
         <header>
@@ -112,7 +109,7 @@ typeName = {
                 <div class="ui padded stackable grid">
                     <div class="three column row">
                         <div class="column">
-                            <table class="ui striped sortable unstackable compact table">
+                            <table class="ui striped sortable unstackable compact blue table">
                                 <thead>
                                     <tr>
                                         <th data-vivaldi-spatnav-clickable="1">region</th>
@@ -130,7 +127,7 @@ typeName = {
                             </table>
                         </div>
                         <div class="column">
-                            <table class="ui striped sortable unstackable compact table">
+                            <table class="ui striped sortable unstackable compact blue table">
                                 <thead>
                                     <tr>
                                         <th data-vivaldi-spatnav-clickable="1">level</th>
@@ -148,7 +145,7 @@ typeName = {
                             </table>
                         </div>
                         <div class="column">
-                            <table class="ui striped sortable unstackable compact table">
+                            <table class="ui striped sortable unstackable compact blue table">
                                 <thead>
                                     <tr>
                                         <th data-vivaldi-spatnav-clickable="1">type</th>

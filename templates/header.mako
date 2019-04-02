@@ -14,6 +14,7 @@ Code History:
 2019/03/26 (Simon) - changed page arguments, updated UI
 2019/03/27 (Simon) - slightly updated UI
 2019/03/29 (Simon) - home and login/logout icons added
+2019/04/02 (Simon) - added /dialog for debugging (dev accounts only)
 </%doc>
 
 
@@ -57,12 +58,13 @@ ID, type = user
             <a class="${is_active['add']} item" href="/add">Add record</a>
             <a class="${is_active['view']} item" href="/view">View records</a>
             <a class="${is_active['summary']} item" href="/summary">Summary</a>
-            % else:
+            % elif type == 2:
             <a class="${is_active['add']} item" href="/add">AddRecord</a>
             <a class="${is_active['view']} item" href="/view">ViewRecord</a>
             <a class="${is_active['apply']} item" href="/apply">AddApplication</a>
             <a class="${is_active['applications']} item" href="/applications">ViewApplication</a>
             <a class="${is_active['summary']} item" href="/summary">Summary</a>
+            <a class="item" href="/dialog">Dialog</a>
             % endif
             <div class="right menu">
                 % if ID is not None:

@@ -10,12 +10,13 @@
 # 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
+# 2019/04/02 (Simon) - Changed "back" URL
 
 from ._helpers import *
 from .Login import *
 
 
-# class used by CherryPy for handling /view
+# class used by CherryPy for handling /view/<record_id>
 @cherrypy.popargs('record_id')
 class ViewRecord(object):
     def __init__(self, DBC=None, Renderer=None):
@@ -31,7 +32,7 @@ class ViewRecord(object):
     @cherrypy.expose
     @cherrypy.tools.gzip()
     @accessible_by(["club", "admin"])
-    # CherryPy method handling /view
+    # CherryPy method handling /view/<record_id>
     def index(self, q="", record_id=None, affiliation_id=None):
         with self.DBC as sqlcnx:
             # get user credentials
@@ -148,8 +149,8 @@ class ViewRecord(object):
         return self.renderer.render(
             "dialog.mako", {
                 'title': "Error!",
-                'message': "A database error occured.<br>",
-                'linkaddr': "javascript:history.back();",
-                'linktext': "&gt; Back",
+                'message': "A database error occured.",
+                'linkaddr': "#back",
+                'linktext': "< Back",
                 'user': getUserType(self.DBC)
             })
