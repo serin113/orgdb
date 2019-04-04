@@ -12,6 +12,7 @@
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
 # 2019/04/02 (Simon) - Additional logging, changed field error handling, changed "back" URL
+# 2019/04/05 (Simon) - Removed unused error variable in insert()
 
 from ._helpers import *
 from .AddRecord import *
@@ -212,7 +213,6 @@ class AddApplication(object):
                 return self.renderer.render(
                     "dialog.mako", {
                         'title': "Error",
-                        'message': errortext,
                         'linkaddr': "#back",
                         'linktext': "< Back",
                         'errors': errors,
