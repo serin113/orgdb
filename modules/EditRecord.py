@@ -5,6 +5,7 @@
 
 # Code History:
 # 2019/04/01 (Simon) - Initial code
+# 2019/04/05 (Simon) - Removed duplicate checking in update()
 
 from ._helpers import *
 from .Login import *
@@ -148,7 +149,6 @@ class EditRecord(object):
                     "Error (EditRecord.update): More than one club with same ID: "
                     + clubid)
                 raise cherrypy.HTTPRedirect("/edit")
-
             # prepare updated data
             date_today = today()
             record_data = {
@@ -166,7 +166,6 @@ class EditRecord(object):
                 'contact': contact,
                 'email': email
             }
-
             # input validation
             self.validator.setLimits("record")
             errors = self.validator.validate(record_data)
@@ -181,23 +180,6 @@ class EditRecord(object):
                         'linkaddr': "#back",
                         'linktext': "< Back",
                         'errors': errors,
-                        'user': getUserType(self.DBC)
-                    })
-            # checking for preexisting record
-            collision_query = "SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s"
-            cur.execute(collision_query, {
-                'school': school,
-                'clubName': clubname
-            })
-            if cur.rowcount > 0:
-                cur.close()  # close database cursor
-                return self.renderer.render(
-                    "dialog.mako", {
-                        'title': "Error!",
-                        'message':
-                        "A matching record already exists in the database.",
-                        'linkaddr': "#back",
-                        'linktext': "< Back",
                         'user': getUserType(self.DBC)
                     })
             cur.execute(update_record,
