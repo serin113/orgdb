@@ -10,6 +10,7 @@
 #                    - Improved handling of existing database connections (avoids redundancy)
 #                    - Redirect to homepage on logout
 # 2019/04/02 (Simon) - Changed non-authorized redirects to HTTP error code 401
+# 2019/04/05 (Simon) - Removed self.DBC.disconnect() in verify()
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -387,10 +388,8 @@ class Login(object):
                 # if input credentials are valid
                 if login(ID, PIN, self.DBC) is True:
                     # redirect to homepage (successful login)
-                    self.DBC.disconnect()
                     raise cherrypy.HTTPRedirect("/")
                 # go back to login page
-                self.DBC.disconnect()
                 raise cherrypy.HTTPRedirect("/login")
             raise cherrypy.HTTPRedirect("/")
         raise cherrypy.HTTPRedirect("/")
