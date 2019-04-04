@@ -33,6 +33,7 @@
 #                    - Added debug options
 #                    - Webserver now open to localhost & LAN
 # 2019/04/02 (Simon) - Added HTTP secure headers, added 404 error handling
+# 2019/04/05 (Simon) - Fixed typo
 
 import os  # for resolving filesystem paths
 
@@ -81,7 +82,7 @@ if __name__ == '__main__':
         cherrypy.response.body = [
             bytes("<html><body>Sorry, an error occured</body></html>", "utf8")
         ]
-        cherrypy.error.log(cherrypy._cperror.format_exc())
+        cherrypy.log.error(cherrypy._cperror.format_exc())
 
     def error_page_404(status, message, traceback, version):
         from modules.Login import getUserType  # for fetching current logged-in user for template
