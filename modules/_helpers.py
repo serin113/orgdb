@@ -12,6 +12,7 @@
 #                           disconnecting, and exception handling automatically
 # 2019/04/02 (Simon) - sha512 hashes in newID() compressed using base64
 #                    - string variables in ContentRenderer.render() now HTML-escaped
+# 2019/04/05 (Simon) - DBConnection.__enter__() will only proceed if connected to the database
 
 import re  # for input validation
 from base64 import urlsafe_b64encode  # for encoding sha512 hash to base64
@@ -104,17 +105,18 @@ class DBConnection(object):
 
     # method executed when DBConnection is created in a with statement
     def __enter__(self):
+        while self.connect() is None:
+            continue
         return self.connect()
 
     # method executed when DBConnection is destroyed in a with statement
     def __exit__(self, type, value, traceback):
         if type is None:
             if not self.persistent:
-                if self.is_connected():
-                    self.disconnect()
+                self.disconnect()
         else:
             cherrypy.log.error(
-                msg="Error: DBConnection encountered an exception",
+                msg="Error: DBConnection.__exit__ encountered an exception",
                 traceback=True)
 
     # for checking if there is still a connection to the database

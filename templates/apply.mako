@@ -10,10 +10,18 @@ Code History:
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
 2019/04/02 (Simon) - Updated form layout, moved some inline scripts to enable.js & apply.js
+2019/04/05 (Simon) - If logged-in user is a club account, some elements are hidden from view
 </%doc>
 
 
 <%page args="user=None"/>
+
+
+<%
+if user is None:
+    user = (None, -1)
+ID, type = user
+%>
 
 
 <html>
@@ -35,6 +43,7 @@ Code History:
             <div class="ui fluid raised blue container segment">
                 <form method="post" action="insert" id="apply-form" class="ui form">
                     <div class="ui stackable grid">
+                        % if type != 0:
                         <div class="sixteen wide column">
                             <div class="inline fields">
                                 <label class="required">I am previously/currently affiliated with PSYSC</label>
@@ -162,6 +171,10 @@ Code History:
                             </div>
                         </div>
                         <div class="sixteen wide column"></div>
+                        % else:
+                        <input type="hidden" name="hasrecord" value="1" required>
+                        <input type="hidden" name="clubid" value="${ID}" required>
+                        % endif
                         <div class="sixteen wide blue column">
                             <h2 class="ui inverted header">Affiliation Info</h2>
                         </div>

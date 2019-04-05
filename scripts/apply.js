@@ -1,10 +1,10 @@
 $(document).ready(function(){
-    $("input#hasrecord-yes").trigger("select");
+    $("input[type='radio']#hasrecord-yes").trigger("select");
     $("div#record_old").find($("input, select")).attr("required", true)
     $("div#record_new").find($("input, select")).attr("required", false)
     $("div#record_old").show();
     $("div#record_new").hide();
-    $("input[name='hasrecord']").change(function(){
+    $("input[type='radio'][name='hasrecord']").change(function(){
         var val = $(this).val()
         if (val == "1") {
             $("div#record_old").find($("input, select")).attr("required", true)

@@ -11,6 +11,8 @@
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
 # 2019/04/02 (Simon) - Changed "back" URL
+# 2019/04/05 (Simon) - Removed redundant disconnect() calls
+#                    - Added viewing individual record for logged-in club account
 
 from ._helpers import *
 from .Login import *
@@ -66,7 +68,6 @@ class ViewRecord(object):
                         res = cur.fetchall()
                         # close database cursor
                         cur.close()
-                        self.DBC.disconnect()
                         # create (list of dicts) data_list from (list of tuples) res
                         data_list = []
                         for record in res:
@@ -105,7 +106,6 @@ class ViewRecord(object):
                             "WHERE clubID = %(clubID)s", {"clubID": record_id})
                         res = cur.fetchall()
                         cur.close()
-                        self.DBC.disconnect()
                         record_info = None
                         if len(res) == 1:
                             record_info = {
@@ -136,12 +136,46 @@ class ViewRecord(object):
                                 'user': usertype
                             })
                 # handle viewing only one record
-                elif type == 0:
-                    return self.renderer.render("record.mako", {
-                        "record_info": None,
-                        "affiliations": [],
-                        'user': usertype
-                    })
+                elif usertype[1] == 0:
+                    if record_id is not None:
+                        raise cherrypy.HTTPRedirect("/view")
+                    # create an SQL cursor to the database
+                    cur = sqlcnx.cursor(buffered=True)
+                    cur.execute(
+                        "SELECT clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
+                        "FROM AffiliationRecordsTable "
+                        "WHERE clubID = %(clubID)s", {"clubID": usertype[0]})
+                    res = cur.fetchall()
+                    cur.close()
+                    record_info = None
+                    if len(res) == 1:
+                        record_info = {
+                            "clubID": res[0][0],
+                            "dateUpdated": res[0][1],
+                            "region": res[0][2],
+                            "level": res[0][3],
+                            "type": res[0][4],
+                            "school": res[0][5],
+                            "clubName": res[0][6],
+                            "address": res[0][7],
+                            "city": res[0][8],
+                            "province": res[0][9],
+                            "adviserName": res[0][10],
+                            "contact": res[0][11],
+                            "email": res[0][12]
+                        }
+                    elif len(res) == 0:
+                        # print("No match")
+                        pass
+                    else:
+                        # print("too many matches")
+                        pass
+                    return self.renderer.render(
+                        "record.mako", {
+                            "record_info": record_info,
+                            "affiliations": [],
+                            'user': usertype
+                        })
             # if user is not logged-in
             else:
                 # go to login page

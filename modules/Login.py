@@ -11,6 +11,8 @@
 #                    - Redirect to homepage on logout
 # 2019/04/02 (Simon) - Changed non-authorized redirects to HTTP error code 401
 # 2019/04/05 (Simon) - Removed self.DBC.disconnect() in verify()
+#                    - Removed redundant redirects
+#                    - @accessible_by() now redirects instead of printing an HTTP error
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -29,7 +31,6 @@ def accessible_by(usertype):
     def wrap(func):
         @wraps(func)
         def func_wrap(*args, **kwargs):
-            # args[0] is usually "self"
             try:
                 # translate usertype string to int
                 types = {"default": -1, "club": 0, "admin": 1, "dev": 2}
@@ -53,7 +54,8 @@ def accessible_by(usertype):
             except cherrypy.HTTPError as error:
                 # display the http error
                 #if error[0] == 404:
-                return str(error)
+                #return str(error)
+                raise cherrypy.HTTPRedirect("/login")
             # return wrapped function
             return func(*args, **kwargs)
 
@@ -389,10 +391,11 @@ class Login(object):
                 if login(ID, PIN, self.DBC) is True:
                     # redirect to homepage (successful login)
                     raise cherrypy.HTTPRedirect("/")
-                # go back to login page
-                raise cherrypy.HTTPRedirect("/login")
-            raise cherrypy.HTTPRedirect("/")
-        raise cherrypy.HTTPRedirect("/")
+                else:
+                    # go back to login page
+                    raise cherrypy.HTTPRedirect("/login")
+            else:
+                raise cherrypy.HTTPRedirect("/")
 
     def logout(self):
         logout(self.DBC)

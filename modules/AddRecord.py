@@ -13,6 +13,7 @@
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
 # 2019/04/02 (Simon) - Changed field error handling, changed "back" URL
+# 2019/04/05 (Simon) - insert() now uses unexposed _insert() method
 
 from ._helpers import *
 from .Login import *
@@ -42,37 +43,35 @@ class AddRecord(object):
         return self.renderer.render("add.mako",
                                     {'user': getUserType(self.DBC)})
 
-    @cherrypy.expose
-    @accessible_by("admin")
-    # CherryPy method handling /add/insert with incoming POST/GET data
+    # method handling the actual record insertion
     # every argument in the method (except for self) is defined in db.sql
-    def insert(self,
-               region=None,
-               level=None,
-               type=None,
-               school=None,
-               clubname=None,
-               address=None,
-               city=None,
-               province=None,
-               advisername=None,
-               contact=None,
-               email=None,
-               affiliated=None,
-               status=None,
-               hasaffiliationforms=None,
-               benefits=None,
-               remarks=None,
-               schoolyear=None,
-               yearsaffiliated=None,
-               sca=None,
-               scm=None,
-               paymentmode=None,
-               paymentdate=None,
-               paymentid=None,
-               paymentamount=None,
-               receiptnumber=None,
-               paymentsendmode=None):
+    def _insert(self,
+                region=None,
+                level=None,
+                type=None,
+                school=None,
+                clubname=None,
+                address=None,
+                city=None,
+                province=None,
+                advisername=None,
+                contact=None,
+                email=None,
+                affiliated=None,
+                status=None,
+                hasaffiliationforms=None,
+                benefits=None,
+                remarks=None,
+                schoolyear=None,
+                yearsaffiliated=None,
+                sca=None,
+                scm=None,
+                paymentmode=None,
+                paymentdate=None,
+                paymentid=None,
+                paymentamount=None,
+                receiptnumber=None,
+                paymentsendmode=None):
         with self.DBC as sqlcnx:
             # string format for inserting record_data into SQL database
             # table structure is defined in db.sql
@@ -181,6 +180,43 @@ class AddRecord(object):
                 'linktext': "< Back",
                 'user': getUserType(self.DBC)
             })
+
+    @cherrypy.expose
+    @accessible_by("admin")
+    # CherryPy method handling /add/insert with incoming POST/GET data
+    def insert(self,
+               region=None,
+               level=None,
+               type=None,
+               school=None,
+               clubname=None,
+               address=None,
+               city=None,
+               province=None,
+               advisername=None,
+               contact=None,
+               email=None,
+               affiliated=None,
+               status=None,
+               hasaffiliationforms=None,
+               benefits=None,
+               remarks=None,
+               schoolyear=None,
+               yearsaffiliated=None,
+               sca=None,
+               scm=None,
+               paymentmode=None,
+               paymentdate=None,
+               paymentid=None,
+               paymentamount=None,
+               receiptnumber=None,
+               paymentsendmode=None):
+        return self._insert(region, level, type, school, clubname, address,
+                            city, province, advisername, contact, email,
+                            affiliated, status, hasaffiliationforms, benefits,
+                            remarks, schoolyear, yearsaffiliated, sca, scm,
+                            paymentmode, paymentdate, paymentid, paymentamount,
+                            receiptnumber, paymentsendmode)
 
     def validate_affiliation(self,
                              clubid=None,
