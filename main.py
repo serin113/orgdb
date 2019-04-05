@@ -34,6 +34,7 @@
 #                    - Webserver now open to localhost & LAN
 # 2019/04/02 (Simon) - Added HTTP secure headers, added 404 error handling
 # 2019/04/05 (Simon) - Fixed typo
+#                    - Removed persistent InputValidator class passed to Root
 
 import os  # for resolving filesystem paths
 
@@ -61,9 +62,8 @@ if __name__ == '__main__':
         except:
             pass
 
-    # initialize persistent renderer & validator classes
+    # initialize persistent renderer
     renderer = helper.ContentRenderer(debug=debug)
-    validator = helper.InputValidator()
 
     @cherrypy.tools.register('before_finalize', priority=60)
     def secureheaders():
@@ -125,5 +125,5 @@ if __name__ == '__main__':
         }
     }
     # start the webserver
-    cherrypy.quickstart(Root("db.conf", renderer, validator), '/', conf)
+    cherrypy.quickstart(Root("db.conf", Renderer=renderer), '/', conf)
     print("\nServer exited")

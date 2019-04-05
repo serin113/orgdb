@@ -9,6 +9,7 @@
 # 2019/03/29 (Simon) - "DBC" argument now indicates the database configuration settings
 #                           instead of a DBConnection class
 # 2019/04/02 (Simon) - Added /edit, changed "back" URL for debug dialog
+# 2019/04/05 (Simon) - Removed persistent InputValidator class from handler classes
 
 from ._helpers import *
 from .AddApplication import *
@@ -39,19 +40,17 @@ class Root(object):
         # class handling /login
         self.login = Login(DBC=DBC, Renderer=Renderer)
         # class handling /apply
-        self.apply = AddApplication(
-            DBC=DBC, Renderer=Renderer, Validator=Validator)
+        self.apply = AddApplication(DBC=DBC, Renderer=Renderer)
         # class handling /view
         self.view = ViewRecord(DBC=DBC, Renderer=Renderer)
         # class handling /add
-        self.add = AddRecord(DBC=DBC, Renderer=Renderer, Validator=Validator)
+        self.add = AddRecord(DBC=DBC, Renderer=Renderer)
         # class handling /applications
-        self.applications = ViewApplication(
-            DBC=DBC, Renderer=Renderer, Validator=Validator)
+        self.applications = ViewApplication(DBC=DBC, Renderer=Renderer)
         # class handling /summary
         self.summary = Summary(DBC=DBC, Renderer=Renderer)
         # class handling /edit
-        self.edit = EditRecord(DBC=DBC, Renderer=Renderer, Validator=Validator)
+        self.edit = EditRecord(DBC=DBC, Renderer=Renderer)
 
     @cherrypy.expose
     @accessible_by("dev")

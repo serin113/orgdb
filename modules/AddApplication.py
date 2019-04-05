@@ -13,6 +13,7 @@
 #                    - Database connection now handled using a with statement
 # 2019/04/02 (Simon) - Additional logging, changed field error handling, changed "back" URL
 # 2019/04/05 (Simon) - Removed unused error variable in insert()
+#                    - Validate the other fields even if clubID is invalid
 
 from ._helpers import *
 from .AddRecord import *
@@ -71,14 +72,14 @@ class AddApplication(object):
                paymentamount=None,
                receiptnumber=None,
                paymentsendmode=None):
-        # string format for inserting record_data into SQL database
-        # table structure is defined in db.sql
-        add_application = (
-            "INSERT INTO AffiliationApplicationsTable "
-            "(appID, hasRecord, clubID, dateCreated, region, level, type, school, clubName, address, city, province, adviserName, contact, email, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode) "
-            "VALUES (%(appID)s, %(hasRecord)s, %(clubID)s, %(dateCreated)s, %(region)s, %(level)s, %(type)s, %(school)s, %(clubName)s, %(address)s, %(city)s, %(province)s, %(adviserName)s, %(contact)s, %(email)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s)"
-        )
         with self.DBC as sqlcnx:
+            # string format for inserting record_data into SQL database
+            # table structure is defined in db.sql
+            add_application = (
+                "INSERT INTO AffiliationApplicationsTable "
+                "(appID, hasRecord, clubID, dateCreated, region, level, type, school, clubName, address, city, province, adviserName, contact, email, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode) "
+                "VALUES (%(appID)s, %(hasRecord)s, %(clubID)s, %(dateCreated)s, %(region)s, %(level)s, %(type)s, %(school)s, %(clubName)s, %(address)s, %(city)s, %(province)s, %(adviserName)s, %(contact)s, %(email)s, %(schoolYear)s, %(yearsAffiliated)s, %(SCA)s, %(SCM)s, %(paymentMode)s, %(paymentDate)s, %(paymentID)s, %(paymentAmount)s, %(receiptNumber)s, %(paymentSendMode)s)"
+            )
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database
             date_today = today()
@@ -110,7 +111,6 @@ class AddApplication(object):
             }
             # input validation
             self.validator.setLimits("application")
-
             # checking for preexisting record
             skip_record_check = False
             errors = []
@@ -200,12 +200,12 @@ class AddApplication(object):
                                 application_data['receiptNumber']) + str(
                                     application_data['paymentSendMode']), 16)
 
-                # change validation method if record data is already known to be valid
-                if skip_record_check:
-                    errors += self.validator.validate(
-                        application_data, [*self.validator.record_dict])
-                else:
-                    errors += self.validator.validate(application_data)
+            # change validation method if record data is already known to be valid
+            if skip_record_check:
+                errors += self.validator.validate(
+                    application_data, [*self.validator.record_dict])
+            else:
+                errors += self.validator.validate(application_data)
 
             # display errors, if any
             if len(errors) > 0:

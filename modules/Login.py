@@ -388,14 +388,12 @@ class Login(object):
             # if user is logged-out
             if checkCredentials(self.DBC) == -1:
                 # if input credentials are valid
-                if login(ID, PIN, self.DBC) is True:
-                    # redirect to homepage (successful login)
-                    raise cherrypy.HTTPRedirect("/")
-                else:
+                if login(ID, PIN, self.DBC) is False:
                     # go back to login page
                     raise cherrypy.HTTPRedirect("/login")
-            else:
-                raise cherrypy.HTTPRedirect("/")
+            # successful login / already logged in
+            raise cherrypy.HTTPRedirect("/")
+        cherrypy.log.error("Failed to connect to database")
 
     def logout(self):
         logout(self.DBC)
