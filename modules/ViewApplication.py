@@ -13,6 +13,7 @@
 #                    - Database connection now handled using a with statement
 # 2019/04/02 (Simon) - Fixed saved club if application indicates no existing record
 #                    - Changed "back" URL
+# 2019/04/05 (Simon) - Handle case of paymentDate being an empty string ""
 
 from ._helpers import *
 from .AddRecord import *
@@ -87,7 +88,7 @@ class ViewApplication(object):
                     "SCA": app[17],
                     "SCM": app[18],
                     "paymentMode": app[19],
-                    "paymentDate": app[20],
+                    "paymentDate": app[20] if len(app[20]) > 0 else None,
                     "paymentID": app[21],
                     "paymentAmount": app[22],
                     "receiptNumber": app[23],
@@ -158,7 +159,7 @@ class ViewApplication(object):
                 "SCA": app[17],
                 "SCM": app[18],
                 "paymentMode": app[19],
-                "paymentDate": app[20],
+                "paymentDate": app[20] if len(app[20]) > 0 else None,
                 "paymentID": app[21],
                 "paymentAmount": app[22],
                 "receiptNumber": app[23],

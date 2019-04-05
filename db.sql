@@ -12,6 +12,7 @@
 -- 2019/03/07 (Simon) - Fixed data types
 -- 2019/03/26 (Simon) - Added LoginCredentialsTable and LoginAccessTable
 --                    - Changed appID and affiliationID lengths to 128 (for SHA-512 hex hash)
+-- 2019/04/05 (Simon) - Updated some fields to to be required ("NOT NULL")
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
@@ -60,10 +61,10 @@ CREATE TABLE IF NOT EXISTS `AffiliationTable` (
   `hasAffiliationForms` TINYINT(1) NULL,    -- are forms submitted? 0:no, 1:yes
   `benefits` VARCHAR(200) NULL,             -- any discounts/sponsorships/scholarships/etc.
   `remarks` VARCHAR(200) NULL,              -- extra remarks
-  `schoolYear` YEAR(4) NULL,                -- if s.y. 2018-2019, store 2019
-  `yearsAffiliated` INT(11) NULL,               -- duration of affiliation
-  `SCA` SMALLINT(10) NULL,                  -- # of club advisers
-  `SCM` SMALLINT(10) NULL,                  -- # of club members
+  `schoolYear` YEAR(4) NOT NULL,                -- if s.y. 2018-2019, store 2019
+  `yearsAffiliated` INT(11) NOT NULL,               -- duration of affiliation
+  `SCA` SMALLINT(10) NOT NULL,                  -- # of club advisers
+  `SCM` SMALLINT(10) NOT NULL,                  -- # of club members
   `paymentMode` VARCHAR(200) NULL,          -- means of payment (deposit/check/etc.)
   `paymentDate` DATETIME NULL,                  -- date paid
   `paymentID` VARCHAR(200) NULL,            -- identifier for payment

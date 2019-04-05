@@ -14,6 +14,7 @@
 # 2019/04/02 (Simon) - Additional logging, changed field error handling, changed "back" URL
 # 2019/04/05 (Simon) - Removed unused error variable in insert()
 #                    - Validate the other fields even if clubID is invalid
+#                    - Handle case of paymentDate being an empty string ""
 
 from ._helpers import *
 from .AddRecord import *
@@ -103,7 +104,7 @@ class AddApplication(object):
                 'SCA': toInt(sca),
                 'SCM': toInt(scm),
                 'paymentMode': paymentmode,
-                'paymentDate': paymentdate,
+                'paymentDate': paymentdate if len(paymentdate) > 0 else None,
                 'paymentID': paymentid,
                 'paymentAmount': toInt(paymentamount),
                 'receiptNumber': receiptnumber,
