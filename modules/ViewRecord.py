@@ -13,6 +13,7 @@
 # 2019/04/02 (Simon) - Changed "back" URL
 # 2019/04/05 (Simon) - Removed redundant disconnect() calls
 #                    - Added viewing individual record for logged-in club account
+#                    - usertype in index() is checked before connecting to database for querying record info
 
 from ._helpers import *
 from .Login import *
@@ -36,9 +37,9 @@ class ViewRecord(object):
     @accessible_by(["club", "admin"])
     # CherryPy method handling /view/<record_id>
     def index(self, q="", record_id=None, affiliation_id=None):
+        # get user credentials
+        usertype = getUserType(self.DBC)
         with self.DBC as sqlcnx:
-            # get user credentials
-            usertype = getUserType(self.DBC)
             # if user is logged-in
             if usertype is not None:
                 # if user is an admin or dev
@@ -136,6 +137,7 @@ class ViewRecord(object):
                                 'user': usertype
                             })
                 # handle viewing only one record
+                # if user is a club
                 elif usertype[1] == 0:
                     if record_id is not None:
                         raise cherrypy.HTTPRedirect("/view")

@@ -14,6 +14,7 @@
 # 2019/04/02 (Simon) - Fixed saved club if application indicates no existing record
 #                    - Changed "back" URL
 # 2019/04/05 (Simon) - Handle case of paymentDate being an empty string ""
+#                    - clubID checking in approve() is handled with a separate DBConnection
 
 from ._helpers import *
 from .AddRecord import *
@@ -24,9 +25,12 @@ from .Login import *
 class ViewApplication(object):
     def __init__(self, DBC=None, Renderer=None, Validator=None):
         if DBC is not None:
+            self.DBC_conf = DBC
             self.DBC = DBConnection(DBC)
         else:
+            self.DBC_conf = "db.conf"
             self.DBC = DBConnection("db.conf")
+
         if Renderer is not None:
             self.renderer = Renderer
         else:
@@ -88,12 +92,18 @@ class ViewApplication(object):
                     "SCA": app[17],
                     "SCM": app[18],
                     "paymentMode": app[19],
-                    "paymentDate": app[20] if len(app[20]) > 0 else None,
                     "paymentID": app[21],
                     "paymentAmount": app[22],
                     "receiptNumber": app[23],
                     "paymentSendMode": app[24]
                 }
+                if app[20] is not None:
+                    if len(app[20]) > 0:
+                        app_dict["paymentDate"] = app[20]
+                    else:
+                        app_dict["paymentDate"] = None
+                else:
+                    app_dict["paymentDate"] = None
                 data_list.append(app_dict)
             # returns Mako-rendered view page HTML
             # (control ViewAffiliationApplicationList)
@@ -159,16 +169,22 @@ class ViewApplication(object):
                 "SCA": app[17],
                 "SCM": app[18],
                 "paymentMode": app[19],
-                "paymentDate": app[20] if len(app[20]) > 0 else None,
                 "paymentID": app[21],
                 "paymentAmount": app[22],
                 "receiptNumber": app[23],
                 "paymentSendMode": app[24]
             }
+            if app[20] is not None:
+                if len(app[20]) > 0:
+                    apd["paymentDate"] = app[20]
+                else:
+                    apd["paymentDate"] = None
+            else:
+                apd["paymentDate"] = None
             # if application indicates no existing record
             if toInt(apd["hasRecord"]) == 0:
                 # insert data into AffiliationRecordsTable & AffiliationTable
-                addrecord.insert(
+                addrecord._insert(
                     apd["region"], apd["level"], apd["type"], apd["school"],
                     apd["clubName"], apd["address"], apd["city"],
                     apd["province"], apd["adviserName"], apd["contact"],
@@ -177,21 +193,23 @@ class ViewApplication(object):
                     apd["paymentMode"], apd["paymentDate"], apd["paymentID"],
                     apd["paymentAmount"], apd["receiptNumber"],
                     apd["paymentSendMode"])
-                cur = sqlcnx.cursor(
-                    buffered=True)  # create SQL database cursor
-                # get clubID of new record
-                cur.execute(
-                    "SELECT clubID FROM AffiliationRecordsTable WHERE "
-                    "school = %(school)s AND clubName = %(clubName)s AND "
-                    "address = %(address)s AND region = %(region)s", {
-                        "school": apd["school"],
-                        "clubName": apd["clubName"],
-                        "address": apd["address"],
-                        "region": apd["region"]
-                    })
-                res = cur.fetchone()
-                apd["clubID"] = res[0][0]
-                cur.close()  # close database cursor
+                # fetch the clubID with a different (updated) database connection
+                with DBConnection(self.DBC_conf) as sqlcnx2:
+                    cur = sqlcnx2.cursor(
+                        buffered=True)  # create SQL database cursor
+                    # get clubID of new record
+                    cur.execute(
+                        "SELECT clubID FROM AffiliationRecordsTable WHERE "
+                        "school = %(school)s AND clubName = %(clubName)s AND "
+                        "address = %(address)s AND region = %(region)s", {
+                            "school": apd["school"],
+                            "clubName": apd["clubName"],
+                            "address": apd["address"],
+                            "region": apd["region"]
+                        })
+                    res = cur.fetchone()
+                    apd["clubID"] = res[0][0]
+                    cur.close()  # close database cursor
             # if application indicates an existing record with clubID
             else:
                 # insert data into AffiliationTable

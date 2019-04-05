@@ -14,6 +14,8 @@
 #                    - string variables in ContentRenderer.render() now HTML-escaped
 # 2019/04/05 (Simon) - DBConnection.__enter__() will only proceed if connected to the database
 #                    - Added missing "paymentDate" validation in InputValidator
+#                    - InputValidator.validate() handles case if value is Null
+#                    - DBConnection.__exit__() will not log HTTPRedirects
 
 import re  # for input validation
 from base64 import urlsafe_b64encode  # for encoding sha512 hash to base64
@@ -116,9 +118,11 @@ class DBConnection(object):
             if not self.persistent:
                 self.disconnect()
         else:
-            cherrypy.log.error(
-                msg="Error: DBConnection.__exit__ encountered an exception",
-                traceback=True)
+            # do not log redirects, log everything else
+            if type is not cherrypy.HTTPRedirect:
+                cherrypy.log.error(
+                    msg="Error: DBConnection.__exit__ encountered an exception",
+                    traceback=True)
 
     # for checking if there is still a connection to the database
     # returns True if connected, False otherwise
@@ -310,16 +314,17 @@ class InputValidator(object):
                     errors.append(("Invalid email address", key, val))
             # if current field item is "paymentDate", check if it has a valid format and is a valid past date
             elif key is "paymentDate" and not isMissing:
-                if len(val) == 0:
-                    continue
-                elif len(val) == 10:
-                    # date comparison assumes ISO format: yyyy-mm-dd
-                    date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
-                    date_match = re.match(date_pattern, val, re.M)
-                    if not date_match:
-                        errors.append(("Invalid date format", key, val))
-                    if (str(val) > str(today(hasTime=False))):
-                        errors.append(("Date is in the future", key, val))
+                if val is not None:
+                    if len(val) == 0:
+                        continue
+                    elif len(val) == 10:
+                        # date comparison assumes ISO format: yyyy-mm-dd
+                        date_pattern = r'^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$'
+                        date_match = re.match(date_pattern, val, re.M)
+                        if not date_match:
+                            errors.append(("Invalid date format", key, val))
+                        if (str(val) > str(today(hasTime=False))):
+                            errors.append(("Date is in the future", key, val))
         return errors
 
 

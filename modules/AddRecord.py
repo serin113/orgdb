@@ -247,13 +247,19 @@ class AddRecord(object):
             'SCA': toInt(sca),
             'SCM': toInt(scm),
             'paymentMode': paymentmode,
-            'paymentDate': paymentdate if len(paymentdate) > 0 else None,
             'paymentID': paymentid,
             'paymentAmount': toInt(paymentamount),
             'receiptNumber': receiptnumber,
             'paymentSendMode': paymentsendmode,
             'AffiliationRecordsTable_clubID': clubid
         }
+        if paymentdate is not None:
+            if len(paymentdate) > 0:
+                affiliation_data["paymentDate"] = paymentdate
+            else:
+                affiliation_data["paymentDate"] = None
+        else:
+            affiliation_data["paymentDate"] = None
         # input validation
         self.validator.setLimits("affiliation")
         errors = self.validator.validate(affiliation_data)
@@ -315,7 +321,7 @@ class AddRecord(object):
                 'paymentMode':
                 paymentmode,
                 'paymentDate':
-                paymentdate if len(paymentdate) > 0 else None,
+                paymentdate,
                 'paymentID':
                 paymentid,
                 'paymentAmount':
@@ -327,6 +333,13 @@ class AddRecord(object):
                 'AffiliationRecordsTable_clubID':
                 clubid
             }
+            if paymentdate is not None:
+                if len(paymentdate) > 0:
+                    affiliation_data["paymentDate"] = paymentdate
+                else:
+                    affiliation_data["paymentDate"] = None
+            else:
+                affiliation_data["paymentDate"] = None
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database
             cur.execute(

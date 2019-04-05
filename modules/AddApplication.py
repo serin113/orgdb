@@ -104,12 +104,18 @@ class AddApplication(object):
                 'SCA': toInt(sca),
                 'SCM': toInt(scm),
                 'paymentMode': paymentmode,
-                'paymentDate': paymentdate if len(paymentdate) > 0 else None,
                 'paymentID': paymentid,
                 'paymentAmount': toInt(paymentamount),
                 'receiptNumber': receiptnumber,
                 'paymentSendMode': paymentsendmode,
             }
+            if paymentdate is not None:
+                if len(paymentdate) > 0:
+                    application_data["paymentDate"] = paymentdate
+                else:
+                    application_data["paymentDate"] = None
+            else:
+                application_data["paymentDate"] = None
             # input validation
             self.validator.setLimits("application")
             # checking for preexisting record

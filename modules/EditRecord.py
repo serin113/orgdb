@@ -189,7 +189,7 @@ class EditRecord(object):
             # display update success HTML
             return self.renderer.render(
                 "dialog.mako", {
-                    'title': "Affiliation record added.",
+                    'title': "Affiliation record updated.",
                     'linkaddr': "/view/" + record_id,
                     'linktext': " Go to record",
                     'user': getUserType(self.DBC)
