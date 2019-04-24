@@ -10,6 +10,7 @@
 #                           instead of a DBConnection class
 # 2019/04/02 (Simon) - Added /edit, changed "back" URL for debug dialog
 # 2019/04/05 (Simon) - Removed persistent InputValidator class from handler classes
+# 2019/04/24 (Simon) - Added @accessible_by("all") to CherryPy page handler methods
 
 from ._helpers import *
 from .AddApplication import *
@@ -23,7 +24,7 @@ from .ViewRecord import *
 
 # class used by CherryPy to handle HTTP requests for /
 class Root(object):
-    def __init__(self, DBC=None, Renderer=None, Validator=None):
+    def __init__(self, DBC=None, Renderer=None):
         if DBC is not None:
             self.DBC = DBConnection(DBC)
         else:
@@ -32,10 +33,6 @@ class Root(object):
             self.renderer = Renderer
         else:
             self.renderer = ContentRenderer()
-        if Validator is not None:
-            self.validator = Validator
-        else:
-            self.validator = InputValidator()
 
         # class handling /login
         self.login = Login(DBC=DBC, Renderer=Renderer)
@@ -65,6 +62,7 @@ class Root(object):
             })
 
     @cherrypy.expose
+    @accessible_by("all")
     # CherryPy method handling /
     def index(self):
         # returns Mako-rendered homepage HTML
@@ -72,5 +70,6 @@ class Root(object):
                                     {'user': getUserType(self.DBC)})
 
     @cherrypy.expose
+    @accessible_by("all")
     def logout(self):
         self.login.logout()

@@ -15,6 +15,7 @@ Code History:
 2019/03/27 (Simon) - slightly updated UI
 2019/03/29 (Simon) - home and login/logout icons added
 2019/04/02 (Simon) - added /dialog for debugging (dev accounts only)
+2019/04/24 (Simon) - updated username field format
 </%doc>
 
 
@@ -70,10 +71,11 @@ ID, type = user
                 % if ID is not None:
                 <i class="ui item">
                     % if type is not 2:
-                    <b>${ID}</b>
+                    <i class="user circle icon"></i>
                     % else:
-                    <i class="inverted small red circular bug icon"></i><b>${ID}</b>
+                    <i class="inverted small red circular bug icon"></i>
                     % endif
+                    <b>${ID}</b>
                 </i>
                 % endif
                 % if type == -1:

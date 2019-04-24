@@ -15,6 +15,9 @@
 # 2019/04/02 (Simon) - Changed field error handling, changed "back" URL
 # 2019/04/05 (Simon) - insert() now uses unexposed _insert() method
 #                    - Handle case of paymentDate being an empty string ""
+# 2019/04/24 (Simon) - paymentDate coverted to string before displaying
+#                    - New login credential generated upon adding a record
+#                    - Backlink changed on successful insertion
 
 from ._helpers import *
 from .Login import *
@@ -84,11 +87,11 @@ class AddRecord(object):
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database
             date_today = today()
-            id = newID(
-                str(region) + str(level) + str(type) + str(school) +
-                str(clubname) + str(address) + str(city) + str(province) +
-                str(advisername) + str(contact) + str(email),
-                length=8)  # generate new unique ID for record_data
+            id = newID(str(region) + str(level) + str(type) + str(school) +
+                       str(clubname) + str(address) + str(city) +
+                       str(province) + str(advisername) + str(contact) +
+                       str(email),
+                       length=8)  # generate new unique ID for record_data
             record_data = {
                 'clubID': id,
                 'dateUpdated': date_today,
@@ -160,17 +163,21 @@ class AddRecord(object):
                         record_data)  # insert record_data to database
             sqlcnx.commit()  # commit changes to database
             cur.close()  # close database cursor
-            self.insert_affiliation(
-                id, affiliated, status, hasaffiliationforms, benefits, remarks,
-                schoolyear, yearsaffiliated, sca, scm, paymentmode,
-                paymentdate, paymentid, paymentamount, receiptnumber,
-                paymentsendmode)
+            self.insert_affiliation(id, affiliated, status,
+                                    hasaffiliationforms, benefits, remarks,
+                                    schoolyear, yearsaffiliated, sca, scm,
+                                    paymentmode, paymentdate, paymentid,
+                                    paymentamount, receiptnumber,
+                                    paymentsendmode)
+            createCredentials(id, id, 0, self.DBC)  # create club credentials
             return self.renderer.render(
                 "dialog.mako",
                 {  # return insertion success HTML
                     'title': "Affiliation record added.",
-                    'linkaddr': "/add",
-                    'linktext': "Add another record",
+                    'linkaddr': "/view/" + str(id),
+                    'linktext': "< Go to record",
+                    'linkaddr2': "/add",
+                    'linktext2': "< Add another record",
                     'user': getUserType(self.DBC)
                 })
         return self.renderer.render(
@@ -254,8 +261,8 @@ class AddRecord(object):
             'AffiliationRecordsTable_clubID': clubid
         }
         if paymentdate is not None:
-            if len(paymentdate) > 0:
-                affiliation_data["paymentDate"] = paymentdate
+            if len(str(paymentdate)) > 0:
+                affiliation_data["paymentDate"] = str(paymentdate)
             else:
                 affiliation_data["paymentDate"] = None
         else:
@@ -334,8 +341,8 @@ class AddRecord(object):
                 clubid
             }
             if paymentdate is not None:
-                if len(paymentdate) > 0:
-                    affiliation_data["paymentDate"] = paymentdate
+                if len(str(paymentdate)) > 0:
+                    affiliation_data["paymentDate"] = str(paymentdate)
                 else:
                     affiliation_data["paymentDate"] = None
             else:

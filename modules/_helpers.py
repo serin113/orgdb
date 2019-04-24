@@ -16,6 +16,7 @@
 #                    - Added missing "paymentDate" validation in InputValidator
 #                    - InputValidator.validate() handles case if value is Null
 #                    - DBConnection.__exit__() will not log HTTPRedirects
+# 2019/04/24 (Simon) - Specific argument formats converted to strings in render()
 
 import re  # for input validation
 from base64 import urlsafe_b64encode  # for encoding sha512 hash to base64
@@ -341,11 +342,11 @@ class ContentRenderer(object):
             self.debug = False
         else:
             self.debug = debug
-        self.lookup = TemplateLookup(
-            directories=["templates/"],
-            collection_size=100,
-            format_exceptions=True,
-            module_directory="tmp/mako_modules")
+        self.lookup = TemplateLookup(directories=["templates/"],
+                                     collection_size=100,
+                                     format_exceptions=True,
+                                     module_directory="tmp/mako_modules",
+                                     default_filters=['decode.utf8', 'trim'])
 
     def render(self, templatefile, templatevars=None):
         try:
@@ -353,8 +354,38 @@ class ContentRenderer(object):
             if (templatevars is None):
                 return t.render()
             for key, val in templatevars.items():
-                if type(val) is str:
+                val_type = type(val)
+                # escape string argument
+                if val_type is str:
+                    #print("str", val)
                     templatevars[key] = escape(val)
+                # escape strings in dict argument
+                elif val_type is dict:
+                    for k, v in val.items():
+                        if type(v) is str:
+                            #print("dict", v)
+                            val[k] = escape(v)
+                    templatevars[key] = val
+                # escape strings in every item in list argument
+                elif val_type is list:
+                    for idx, item in enumerate(val):
+                        item_type = type(item)
+                        if item_type is dict:
+                            for k, v in item.items():
+                                if type(v) is str:
+                                    #print("list_dict", v)
+                                    item[k] = escape(v)
+                            val[idx] = item
+                        elif item_type is tuple:
+                            l = []
+                            for v in item:
+                                if type(v) is str:
+                                    #print("list_str", v)
+                                    l.append(escape(v))
+                                else:
+                                    l.append(v)
+                            val[idx] = tuple(l)
+                    templatevars[key] = val
             return t.render(**templatevars)
         except mako.exceptions.MakoException as err:
             cherrypy.log.error("Error (ContentRenderer.render): " + str(err))

@@ -7,6 +7,7 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 Code History:
 2019/03/23 (Simon) - added initial landing site
 2019/04/01 (Simon) - changed to Mako template
+2019/04/24 (Simon) - Updated template
 -->
 
 
@@ -25,9 +26,14 @@ Code History:
         <header>
             <%include file="header.mako" args="user=user, current='index'"/>
         </header>
-        <section class="ui container">
-            <h1 class="ui center header">404: page not found</h1>
-        </section>
+        <div class="ui container">
+            <div class="ui message">
+                <h1 class="ui red header">
+                    404
+                    <div class="sub header">Page not found.</div>
+                </h1>
+            </div>
+        </div>
         <footer>
             <%include file="footer.mako"/>
         </footer>

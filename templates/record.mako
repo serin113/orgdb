@@ -9,6 +9,7 @@ Code History:
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
 2019/04/02 (Simon) - Updated layout
+2019/04/23 (Simon) - Updated layout, added edit button (visible if admin)
 </%doc>
 
 
@@ -54,6 +55,10 @@ typeName = {
     2: "Private",
     3: "State College/University"
 }
+
+if user is None:
+    user = (None, -1)
+ID, type = user
 %>
 
 
@@ -72,22 +77,38 @@ typeName = {
         <div class="ui container">
             % if record_info is not None:
             <div class="ui inverted blue raised vertical segments">
-                <div class="ui inverted blue segment">
+                <div class="ui inverted blue clearing segment">
+                    % if type == 1:
+                    <a href="/edit/${record_info['clubID']}" class="ui right floated blue icon button" tabindex="0">
+                        <i class="edit icon"></i>
+                    </a>
+                    <h1 class="ui inverted left floated header">
+                    % else:
                     <h1 class="ui inverted header">
+                    % endif
                         ${record_info["clubName"]}
                         <div class="ui inverted sub header">${record_info["school"]}</div>
                     </h1>
-                    <div class="ui green label">
-                        ${regionName[record_info["region"]][1]}
-                        <div class="detail">Region ${regionName[record_info["region"]][0]}</div>
-                    </div>
-                    <div class="ui violet label">
-                        ${levelName[record_info["level"]]}
-                        <div class="detail">Level</div>
-                    </div>
-                    <div class="ui teal label">
-                        ${typeName[record_info["type"]]}
-                        <div class="detail">Type</div>
+                    <div class="ui hidden clearing fitted divider"></div>
+                    <div class="ui horizontal list">
+                        <div class="item">
+                            <div class="ui green label">
+                                ${regionName[record_info["region"]][1]}
+                                <div class="detail">Region ${regionName[record_info["region"]][0]}</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="ui violet label">
+                                ${levelName[record_info["level"]]}
+                                <div class="detail">Level</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="ui teal label">
+                                ${typeName[record_info["type"]]}
+                                <div class="detail">Type</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="ui segment">

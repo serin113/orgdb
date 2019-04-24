@@ -15,6 +15,7 @@
 # 2019/04/05 (Simon) - Removed unused error variable in insert()
 #                    - Validate the other fields even if clubID is invalid
 #                    - Handle case of paymentDate being an empty string ""
+# 2019/04/24 (Simon) - paymentDate coverted to string before displaying
 
 from ._helpers import *
 from .AddRecord import *
@@ -110,8 +111,8 @@ class AddApplication(object):
                 'paymentSendMode': paymentsendmode,
             }
             if paymentdate is not None:
-                if len(paymentdate) > 0:
-                    application_data["paymentDate"] = paymentdate
+                if len(str(paymentdate)) > 0:
+                    application_data["paymentDate"] = str(paymentdate)
                 else:
                     application_data["paymentDate"] = None
             else:
@@ -152,8 +153,8 @@ class AddApplication(object):
                 else:
                     cherrypy.log.error(
                         "Error: More than one club with same ID: " + clubid)
-                    errors.append(("More than one club with same ID", "clubID",
-                                   clubid))
+                    errors.append(
+                        ("More than one club with same ID", "clubID", clubid))
                     application_data['clubID'] = None
             else:
                 # check for preexisting record
@@ -183,29 +184,30 @@ class AddApplication(object):
                          (clubid, schoolyear, yearsaffiliated)))
 
                 application_data['appID'] = newID(
-                    str(application_data['hasRecord']) + str(
-                        application_data['clubID']) + str(
-                            application_data['dateCreated']) + str(
-                                application_data['region']) + str(
-                                    application_data['level']) + str(
-                                        application_data['type']) + str(
-                                            application_data['school']) +
-                    str(application_data['clubName']) + str(
-                        application_data['address']) + str(
-                            application_data['city']) + str(
-                                application_data['province']) + str(
-                                    application_data['adviserName']) + str(
-                                        application_data['contact']) + str(
-                                            application_data['email']) + str(
-                                                application_data['schoolYear'])
-                    + str(application_data['yearsAffiliated']) + str(
-                        application_data['SCA']) + str(application_data['SCM'])
-                    + str(application_data['paymentMode'])
-                    + str(application_data['paymentDate']) + str(
-                        application_data['paymentID']) + str(
-                            application_data['paymentAmount']) + str(
-                                application_data['receiptNumber']) + str(
-                                    application_data['paymentSendMode']), 16)
+                    str(application_data['hasRecord']) +
+                    str(application_data['clubID']) +
+                    str(application_data['dateCreated']) +
+                    str(application_data['region']) +
+                    str(application_data['level']) +
+                    str(application_data['type']) +
+                    str(application_data['school']) +
+                    str(application_data['clubName']) +
+                    str(application_data['address']) +
+                    str(application_data['city']) +
+                    str(application_data['province']) +
+                    str(application_data['adviserName']) +
+                    str(application_data['contact']) +
+                    str(application_data['email']) +
+                    str(application_data['schoolYear']) +
+                    str(application_data['yearsAffiliated']) +
+                    str(application_data['SCA']) +
+                    str(application_data['SCM']) +
+                    str(application_data['paymentMode']) +
+                    str(application_data['paymentDate']) +
+                    str(application_data['paymentID']) +
+                    str(application_data['paymentAmount']) +
+                    str(application_data['receiptNumber']) +
+                    str(application_data['paymentSendMode']), 16)
 
             # change validation method if record data is already known to be valid
             if skip_record_check:

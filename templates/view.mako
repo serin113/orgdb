@@ -18,6 +18,7 @@ Code History:
                    - Updated table styling
                    - Translates region/level/type numbers to readable strings
 2019/04/02 (Simon) - Updated button styles, moved some inline scripts to enable_tablesort.js
+2019/04/23 (Simon) - Changed handling of empty results
 </%doc>
 
 
@@ -91,7 +92,8 @@ typeName = {
                   </button>
                 </div>
             </form>
-            % if (data is not None) and (len(data) > 0):
+            % if (data is not None):
+            % if len(data) > 0:
             <div class="ui container" style="overflow-x:auto">
                 <table class="ui selectable stackable compact striped celled sortable blue small table">
                     <thead class="full-width">
@@ -151,6 +153,7 @@ typeName = {
             <div class="ui warning message">
                 <i class="warning icon"></i>Zero results.
             </div>
+            % endif
             % endif
         </div>
         <footer>

@@ -9,6 +9,7 @@ Code History:
 2019/03/26 (Simon) - Changed page arguments, updated UI
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
 2019/04/02 (Simon) - Updated layout, moved some inline scripts to dialog.js
+2019/04/24 (Simon) - Added option for additional button
 </%doc>
 
 
@@ -24,7 +25,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="user=None, title=None, message=None, linkaddr=None, errors=None, linktext=None"/>
+<%page args="user=None, title=None, message=None, errors=None, linkaddr=None, linktext=None, linkaddr2=None, linktext2=None"/>
 
 
 <html>
@@ -59,6 +60,9 @@ Mako variables:
                 % endif
                 % if (linkaddr is not None) or (linktext is not None):
                 <a href="${linkaddr}" class="ui small basic blue button" id="button">${linktext}</a>
+                % endif
+                % if (linkaddr2 is not None) or (linktext2 is not None):
+                <a href="${linkaddr2}" class="ui small basic blue button" id="button">${linktext2}</a>
                 % endif
             </div>
         </section>

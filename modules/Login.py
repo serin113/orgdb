@@ -13,6 +13,9 @@
 # 2019/04/05 (Simon) - Removed self.DBC.disconnect() in verify()
 #                    - Removed redundant redirects
 #                    - @accessible_by() now redirects instead of printing an HTTP error
+# 2019/04/24 (Simon) - Added more activity logging
+#                    - Added "all" option in accessible_by() wrapper
+#                    - Added deleteCookies() method
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -25,37 +28,43 @@ from ._helpers import *
 # causes a redirect to the homepage if user is not
 # in authorized usertypes
 # usertypes:
-#   (string type) "default"(logged-out), "club", "admin", "dev"
+#   (string type)
+#       "default" (logged-out users only)
+#       "club"
+#       "admin"
+#       "dev" (can access all pages, requires login)
+#       "all" (all users, logged-out or otherwise, can access)
 #   or (list type) [list of strings]
 def accessible_by(usertype):
     def wrap(func):
         @wraps(func)
         def func_wrap(*args, **kwargs):
-            try:
-                # translate usertype string to int
-                types = {"default": -1, "club": 0, "admin": 1, "dev": 2}
+            # translate usertype string to int
+            types = {"default": -1, "club": 0, "admin": 1, "dev": 2}
+            # if access is restricted to specific users
+            if usertype is not "all":
                 # get user credentials
                 actualuser = checkCredentials(args[0].DBC)
-                # if user is not usertype "dev"
+                # if user is not usertype "dev" or
                 if actualuser != 2:
                     # if usertype is single string
                     if type(usertype) is str:
                         # if user is not indicated usertype
                         if actualuser != types[usertype]:
                             # redirect to homepage
-                            raise cherrypy.HTTPError(401)
+                            cherrypy.log.error(
+                                "Warning (Login.accessible_by): tried unauthorized access"
+                            )
+                            raise cherrypy.HTTPError(404)
                     # if usertype is list of strings
                     elif type(usertype) is list:
                         # if user is not in indicated usertypes
                         if actualuser not in [types[u] for u in usertype]:
                             # redirect to homepage
-                            raise cherrypy.HTTPError(401)
-            # if some cherrypy http error occurs
-            except cherrypy.HTTPError as error:
-                # display the http error
-                #if error[0] == 404:
-                #return str(error)
-                raise cherrypy.HTTPRedirect("/login")
+                            cherrypy.log.error(
+                                "Warning (Login.accessible_by): tried unauthorized access"
+                            )
+                            raise cherrypy.HTTPError(404)
             # return wrapped function
             return func(*args, **kwargs)
 
@@ -64,6 +73,18 @@ def accessible_by(usertype):
 
     # return wrapped function
     return wrap
+
+
+# deletes the orgdb.ID and orgdb.Token cookies
+def deleteCookies():
+    # create response cookie
+    cookie = cherrypy.response.cookie
+    # delete ID & Token cookies if they exist
+    if "orgdb.ID" in cookie.keys() or "orgdb.Token" in cookie.keys():
+        cookie["orgdb.ID"] = ""
+        cookie["orgdb.Token"] = ""
+        cookie["orgdb.ID"]["expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
+        cookie["orgdb.Token"]["expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
 
 
 # (to be used for passing user info to header.mako)
@@ -107,6 +128,9 @@ def checkCredentials(DBConnection=None):
         # get ID & Token cookie values
         ID = requestCookie["orgdb.ID"].value
         Token = requestCookie["orgdb.Token"].value
+        cherrypy.log.error(
+            "Info (Login.checkCredentials): verifying token (ID={0}, Token={1})"
+            .format(ID, Token))
         # check if ID & Token are in LoginAccessTable and not expired, and get the usertype
         cur.execute(
             "SELECT LoginCredentialsTable.Type FROM "
@@ -119,6 +143,9 @@ def checkCredentials(DBConnection=None):
         res = cur.fetchall()
         # if ID & Token are in LoginAccessTable and not expired
         if len(res) >= 1:
+            cherrypy.log.error(
+                "Info (Login.checkCredentials): token verified (ID={0}, Token={1})"
+                .format(ID, Token))
             # update token expiry date to 1 hour from now
             cur.execute(
                 "UPDATE LoginAccessTable SET Expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) "
@@ -140,6 +167,11 @@ def checkCredentials(DBConnection=None):
             responseCookie["orgdb.Token"]["httponly"] = True
             # set type to the fetched usertype from LoginCredentialsTable
             type = toInt(res[0][0])
+        else:
+            cherrypy.log.error(
+                "Info (Login.checkCredentials): deleting token (ID={0}, Token={1})"
+                .format(ID, Token))
+            deleteCookies()
         # delete any ID-Token pairs in LoginAccessTable that's already expired
         cur.execute("DELETE FROM LoginAccessTable WHERE Expires <= NOW()")
         # commit database changes
@@ -171,6 +203,9 @@ def login(ID, PIN, DBConnection=None):
             token = urandom(64).hex()
             # create database cursor
             cur = sqlcnx.cursor(buffered=True)
+            cherrypy.log.error(
+                "Info (Login.login): logged in (ID={0}, Token={1})".format(
+                    ID, token))
             # insert new ID-Token pair in LoginAccessTable, expiring 1 hour from now
             cur.execute(
                 "INSERT INTO LoginAccessTable (ID, Token, Expires) VALUES (%(ID)s, %(Token)s, DATE_ADD(NOW(), INTERVAL 1 HOUR))",
@@ -202,8 +237,6 @@ def login(ID, PIN, DBConnection=None):
 # for users logging out
 # deletes session cookie and session token
 def logout(DBConnection=None):
-    # create response cookie
-    responseCookie = cherrypy.response.cookie
     # get user's request cookies
     requestCookie = cherrypy.request.cookie
     # connect to database if not already connected
@@ -217,20 +250,21 @@ def logout(DBConnection=None):
         # if user has ID & Token cookies
         if "orgdb.ID" in requestCookie.keys(
         ) and "orgdb.Token" in requestCookie.keys():
+            # get ID & Token cookie values
+            ID = requestCookie["orgdb.ID"].value
+            Token = requestCookie["orgdb.Token"].value
+            cherrypy.log.error(
+                "Info (Login.logout): logging out (ID={0}, Token={1})".format(
+                    ID, Token))
             # delete ID-Token pair from LoginAccessTable
             cur.execute(
                 "DELETE FROM LoginAccessTable WHERE ID = %(ID)s AND Token = %(Token)s",
                 {
-                    "ID": requestCookie["orgdb.ID"].value,
-                    "Token": requestCookie["orgdb.Token"].value
+                    "ID": ID,
+                    "Token": Token
                 })
             # delete ID & Token cookies
-            responseCookie["orgdb.ID"] = ""
-            responseCookie["orgdb.Token"] = ""
-            responseCookie["orgdb.ID"][
-                "expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
-            responseCookie["orgdb.Token"][
-                "expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
+            deleteCookies()
         # commit changes to database
         sqlcnx.commit()
         # close database cursor
@@ -265,6 +299,9 @@ def createCredentials(ID, PIN, Type, DBConnection=None):
                 + ID + ")")
             # False: error occured
             return False
+        cherrypy.log.error(
+            "Info (Login.createCredentials): credentials created (ID={0})".
+            format(ID))
         # insert ID, hash, salt, & type to LoginCredentialsTable
         cur.execute(
             "INSERT INTO LoginCredentialsTable (ID, PINHash, PINSalt, Type) "
@@ -297,6 +334,9 @@ def deleteCredentials(ID, PIN, DBConnection=None):
         check = verifyCredentials(ID, PIN, DBC)
         # if verified user found
         if check is not None:
+            cherrypy.log.error(
+                "Info (Login.deleteCredentials): deleting credentials (ID={0})"
+                .format(ID))
             type, hash = check
             cur = sqlcnx.cursor(buffered=True)
             # delete ID from LoginCredentialsTable
@@ -311,8 +351,8 @@ def deleteCredentials(ID, PIN, DBConnection=None):
         else:
             # log the incident
             cherrypy.log.error(
-                "Warning (Login.deleteCredentials): Tried deleting credentials of unverified user ("
-                + ID + ")")
+                "Warning (Login.deleteCredentials): Tried deleting credentials of unverified user (ID={0})"
+                .format(ID))
             # False: an error occured
             return False
         # close database cursor
@@ -345,13 +385,23 @@ def verifyCredentials(ID, PIN, DBConnection=None):
         res = cur.fetchall()
     # if there's exactly 1 matching ID
     if len(res) == 1:
+        cherrypy.log.error(
+            "Info (Login.verifyCredentials): verifying user (ID={0})".format(
+                ID))
         actualHash, salt, type = res[0]
         # compute hash from input PIN & fetched salt
         computedHash = pbkdf2_hmac('sha512', bytes(PIN, "utf8"),
                                    bytes.fromhex(salt), 100000).hex()
         # if fetched hash matches computed hash
         if actualHash == computedHash:
+            cherrypy.log.error(
+                "Info (Login.verifyCredentials): user verification successful (ID={0})"
+                .format(ID))
             return type, computedHash
+        else:
+            cherrypy.log.error(
+                "Warning (Login.verifyCredentials): user verification failed (ID={0})"
+                .format(ID))
     # if there's more than 1 matching ID (invalid)
     elif len(res) > 1:
         # log the incident

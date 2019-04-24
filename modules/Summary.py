@@ -14,6 +14,7 @@
 #                           instead of a DBConnection class
 #                    - Database connection now handled using a with statement
 # 2019/04/02 (Simon) - Changed "back" URL
+# 2019/04/24 (Simon) - Added gzip compression to page handler
 
 from ._helpers import *
 from .Login import *
@@ -32,6 +33,7 @@ class Summary(object):
             self.renderer = ContentRenderer()
 
     @cherrypy.expose
+    @cherrypy.tools.gzip()
     @accessible_by("admin")
     def index(self, q=""):
         data = None

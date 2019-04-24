@@ -35,6 +35,9 @@
 # 2019/04/02 (Simon) - Added HTTP secure headers, added 404 error handling
 # 2019/04/05 (Simon) - Fixed typo
 #                    - Removed persistent InputValidator class passed to Root
+# 2019/04/23 (Simon) - Moved actions to main() method
+#                    - Print Python version if debug messages are enabled
+#                    - Error handler now uses Mako template
 
 import os  # for resolving filesystem paths
 
@@ -43,16 +46,21 @@ import cherrypy  # import CherryPy library
 import modules._helpers as helper  # import helper classes
 from modules import Root  # import CherryPy-exposed Root class
 
-debug = True
-clearLogs = True
-reload = True
+def main(debug=None, clearlogs=None, reload=None):
+    if debug is None:
+        debug = True
+    if clearlogs is None:
+        clearlogs = True
+    if reload is None:
+        reload = True
 
-# configuration of CherryPy webserver
-if __name__ == '__main__':
+    # configuration of CherryPy webserver
     print("Running server")
     if debug:
         print("Debug messages enabled")
-    if clearLogs:
+        import sys
+        print(sys.version)
+    if clearlogs:
         try:
             os.remove("access.log")
         except:
@@ -79,10 +87,9 @@ if __name__ == '__main__':
 
     def handle_error():
         cherrypy.response.status = 500
-        cherrypy.response.body = [
-            bytes("<html><body>Sorry, an error occured</body></html>", "utf8")
-        ]
         cherrypy.log.error(cherrypy._cperror.format_exc())
+        html = renderer.render("dialog.mako", {'title': "An error occured."})
+        cherrypy.response.body = [bytes(html)]
 
     def error_page_404(status, message, traceback, version):
         from modules.Login import getUserType  # for fetching current logged-in user for template
@@ -127,3 +134,6 @@ if __name__ == '__main__':
     # start the webserver
     cherrypy.quickstart(Root("db.conf", Renderer=renderer), '/', conf)
     print("\nServer exited")
+
+if __name__ == '__main__':
+    main()

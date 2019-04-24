@@ -12,6 +12,7 @@ Code History:
                    - Removed appID column
                    - Updated table styling, added sorting
 2019/04/02 (Simon) - Updated form layout, moved some inline scripts to enable_tablesort.js
+2019/04/24 (Simon) - Updated template, added region/level/type conversion to readable string
 </%doc>
 
 
@@ -22,6 +23,44 @@ Mako variables:
 
 
 <%page args="user=None, data=None, q=''"/>
+
+
+<%
+regionName = {
+    1: ("1", "Ilocos"),
+	2: ("2", "Cagayan Valley"),
+	3: ("3", "Central Luzon"),
+	4: ("4A", "CALABARZON"),
+	5: ("5", "Bicol"),
+	6: ("6", "Western Visayas"),
+	7: ("7", "Central Visayas"),
+	8: ("8", "Eastern Visayas"),
+	9: ("9", "Zamboanga Peninsula"),
+	10: ("10", "Northern Mindanao"),
+	11: ("11", "Davao"),
+	12: ("12", "SOCCSKSARGEN"),
+	13: ("13", "NCR"),
+	14: ("14", "CAR"),
+	15: ("15", "ARMM"),
+	16: ("16", "CARAGA"),
+	17: ("17", "MIMAROPA")
+}
+levelName = {
+    1: "Elementary",
+    2: "High School",
+    3: "Elementary & H.S.",
+    4: "College"
+}
+typeName = {
+    1: "Public",
+    2: "Private",
+    3: "State College/University"
+}
+
+if user is None:
+    user = (None, -1)
+ID, type = user
+%>
 
 
 <html>
@@ -49,62 +88,13 @@ Mako variables:
                     <button class ="ui icon button" type="submit"><i class="search icon"></i></button>
                 </div>
             </form>
-            % if (data is not None) and (len(data) > 0):
-            <div class="ui container" style="overflow-x:auto">
-                <table class="ui selectable stackable compact striped celled sortable blue small table">
-                    <thead class="full-width">
-                        <tr>
-                            <th data-vivaldi-spatnav-clickable="0"></th>
-                            <th data-vivaldi-spatnav-clickable="1">club name</th>
-                            <th data-vivaldi-spatnav-clickable="1">school</th>
-                            <th data-vivaldi-spatnav-clickable="1">adviser/s</th>
-                            <th data-vivaldi-spatnav-clickable="1">payment amount</th>
-                            <th data-vivaldi-spatnav-clickable="1">payment date</th>
-                            <th data-vivaldi-spatnav-clickable="1">contact</th>
-                            <th data-vivaldi-spatnav-clickable="1">email</th>
-                            <th data-vivaldi-spatnav-clickable="1">last updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        % for app in data:
-                        <tr>
-                            <td class="collapsing center aligned">
-                                <div class="ui small buttons">
-                                    <a href="view/${app['appID']}" class="ui icon primary button"><i class="eye icon"></i></a>
-                                    <a href="approve/${app['appID']}" class="ui positive vertical animated button">
-                                        <div class="visible content">approve</div>
-                                        <div class="hidden content"><i class="check icon"></i></div>
-                                    </a>
-                                    <a href="reject/${app['appID']}" class="ui negative vertical animated button">
-                                        <div class="visible content">reject</div>
-                                        <div class="hidden content"><i class="close icon"></i></div>
-                                    </a>
-                                </div>
-                            </td>
-                            <td class="collapsing">${app['clubName']}</td>
-                            <td class="collapsing">${app['school']}</td>
-                            <td>${app['adviserName']}</td>
-                            <td class="collapsing">${app['paymentAmount']}</td>
-                            <td class="collapsing">${app['paymentDate']}</td>
-                            <td class="collapsing">${app['contact']}</td>
-                            <td><a href="mailto:${app['email']}">${app['email']}</a></td>
-                            <td>${app['dateCreated']}</td>
-                        </tr>
-                        % endfor
-                    </tbody>
-                </table>
-            </div>
-            <%doc>
+            % if (data is not None):
+            % if len(data) > 0:
             <div class="ui container">
                 % for app in data:
                 <div class="ui inverted blue raised vertical segments">
-                    <div class="ui blue segment">
-                        <h1 class="ui blue header">
-                            ${app["clubName"]}
-                            <div class="ui blue sub header">${app["school"]}</div>
-                        </h1>
-                        <div class="ui small buttons">
-                            <a href="view/${app['appID']}" class="ui icon primary button"><i class="eye icon"></i></a>
+                    <div class="ui inverted blue segment">
+                        <div class="ui right floated small buttons">
                             <a href="approve/${app['appID']}" class="ui positive vertical animated button">
                                 <div class="visible content">approve</div>
                                 <div class="hidden content"><i class="check icon"></i></div>
@@ -114,15 +104,82 @@ Mako variables:
                                 <div class="hidden content"><i class="close icon"></i></div>
                             </a>
                         </div>
+                        <h1 class="ui inverted left floated header">
+                            ${app["clubName"]}
+                            <div class="ui inverted sub header">${app["school"]}</div>
+                        </h1>
+                        <div class="ui hidden clearing fitted divider"></div>
+                        <div class="ui horizontal list">
+                            <div class="item">
+                                <div class="ui green label">
+                                    ${regionName[app["region"]][1]}
+                                    <div class="detail">Region ${regionName[app["region"]][0]}</div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui violet label">
+                                    ${levelName[app["level"]]}
+                                    <div class="detail">Level</div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui teal label">
+                                    ${typeName[app["type"]]}
+                                    <div class="detail">Type</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui segment">
+                        <div class="ui stackable grid">
+                            <div class="eight wide column">
+                                <div class="ui list">
+                                    <div class="item"><b>School Year: </b>${app["schoolYear"]-1} - ${app["schoolYear"]}</div>
+                                    <div class="item"><b>Years Paid: </b>${app["yearsAffiliated"]}</div>
+                                    <div class="item"><b>Number of Club Advisers: </b>${app["SCA"]}</div>
+                                    <div class="item"><b>Number of Club Members: </b>${app["SCM"]}</div>
+                                </div>
+                            </div>
+                            <div class="eight wide column">
+                                <div class="ui list">
+                                    <div class="item"><b>Paid Amount: </b>${app["paymentAmount"]}</div>
+                                    <div class="item"><b>Payment ID: </b>${app["paymentID"]}</div>
+                                    <div class="item"><b>Receipt Number: </b>${app["receiptNumber"]}</div>
+                                    <div class="item"><b>Mode of Payment: </b>${app["paymentMode"]}</div>
+                                    <div class="item"><b>Payment Sent Thru: </b>${app["paymentSendMode"]}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui segment">
+                        <div class="ui stackable grid">
+                            <div class="eight wide column">
+                                <div class="ui list">
+                                    <div class="item"><b>Club Adviser/s: </b>${app["adviserName"]}</div>
+                                    <div class="item"><b>Contact: </b>${app["contact"]}</div>
+                                    <div class="item"><b>E-mail: </b><a href="mailto:${app['email']}">${app["email"]}</a></div>
+                                </div>
+                            </div>
+                            <div class="eight wide column">
+                                <div class="ui list">
+                                    <div class="item"><b>Address: </b>${app["address"]}</div>
+                                    <div class="item"><b>City: </b>${app["city"]}</div>
+                                    <div class="item"><b>Province: </b>${app["province"]}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui secondary segment">
+                        <i>Application sent ${app["dateCreated"]}</i>
                     </div>
                 </div>
                 % endfor
             </div>
-            </%doc>
             % else:
             <div class="ui warning message">
                 <i class="warning icon"></i>Database is empty.
             </div>
+            % endif
             % endif
         </div>
         <footer>

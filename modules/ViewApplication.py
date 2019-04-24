@@ -15,6 +15,10 @@
 #                    - Changed "back" URL
 # 2019/04/05 (Simon) - Handle case of paymentDate being an empty string ""
 #                    - clubID checking in approve() is handled with a separate DBConnection
+# 2019/04/24 (Simon) - Convert dates to strings before displaying
+#                    - Remove /view page handler
+#                    - Change backlink in success/error dialog
+#                    - Log more errors
 
 from ._helpers import *
 from .AddRecord import *
@@ -98,8 +102,8 @@ class ViewApplication(object):
                     "paymentSendMode": app[24]
                 }
                 if app[20] is not None:
-                    if len(app[20]) > 0:
-                        app_dict["paymentDate"] = app[20]
+                    if len(str(app[20])) > 0:
+                        app_dict["paymentDate"] = str(app[20])
                     else:
                         app_dict["paymentDate"] = None
                 else:
@@ -121,13 +125,6 @@ class ViewApplication(object):
                 'user': getUserType(self.DBC)
             })
 
-    # Handles /applications/view/<application_id>/
-    # should return details about the affiliation application
-    @cherrypy.expose
-    @accessible_by("admin")
-    def view(self, application_id):
-        return "app id: %s" % application_id
-
     # Handles /applications/approve/<application_id>/
     # creates a record from an affiliation application
     @cherrypy.expose
@@ -135,10 +132,9 @@ class ViewApplication(object):
     def approve(self, application_id):
         with self.DBC as sqlcnx:
             # create instance of AddRecord for insertion
-            addrecord = AddRecord(
-                DBC=self.DBC.config,
-                Renderer=self.renderer,
-                Validator=self.validator)
+            addrecord = AddRecord(DBC=self.DBC.config,
+                                  Renderer=self.renderer,
+                                  Validator=self.validator)
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database
             cur.execute(
@@ -175,24 +171,26 @@ class ViewApplication(object):
                 "paymentSendMode": app[24]
             }
             if app[20] is not None:
-                if len(app[20]) > 0:
-                    apd["paymentDate"] = app[20]
+                if len(str(app[20])) > 0:
+                    apd["paymentDate"] = str(app[20])
                 else:
                     apd["paymentDate"] = None
             else:
                 apd["paymentDate"] = None
+            hasRecord = toInt(apd["hasRecord"]) == 1
             # if application indicates no existing record
-            if toInt(apd["hasRecord"]) == 0:
+            if not hasRecord:
                 # insert data into AffiliationRecordsTable & AffiliationTable
-                addrecord._insert(
-                    apd["region"], apd["level"], apd["type"], apd["school"],
-                    apd["clubName"], apd["address"], apd["city"],
-                    apd["province"], apd["adviserName"], apd["contact"],
-                    apd["email"], "1", "", "1", "", "", apd["schoolYear"],
-                    apd["yearsAffiliated"], apd["SCA"], apd["SCM"],
-                    apd["paymentMode"], apd["paymentDate"], apd["paymentID"],
-                    apd["paymentAmount"], apd["receiptNumber"],
-                    apd["paymentSendMode"])
+                addrecord._insert(apd["region"], apd["level"], apd["type"],
+                                  apd["school"], apd["clubName"],
+                                  apd["address"], apd["city"], apd["province"],
+                                  apd["adviserName"], apd["contact"],
+                                  apd["email"], "1", "", "1", "", "",
+                                  apd["schoolYear"], apd["yearsAffiliated"],
+                                  apd["SCA"], apd["SCM"], apd["paymentMode"],
+                                  apd["paymentDate"], apd["paymentID"],
+                                  apd["paymentAmount"], apd["receiptNumber"],
+                                  apd["paymentSendMode"])
                 # fetch the clubID with a different (updated) database connection
                 with DBConnection(self.DBC_conf) as sqlcnx2:
                     cur = sqlcnx2.cursor(
@@ -201,15 +199,31 @@ class ViewApplication(object):
                     cur.execute(
                         "SELECT clubID FROM AffiliationRecordsTable WHERE "
                         "school = %(school)s AND clubName = %(clubName)s AND "
-                        "address = %(address)s AND region = %(region)s", {
+                        "address = %(address)s AND region = %(region)s AND "
+                        "level = %(level)s AND type = %(type)s", {
                             "school": apd["school"],
                             "clubName": apd["clubName"],
                             "address": apd["address"],
-                            "region": apd["region"]
+                            "region": apd["region"],
+                            "level": apd["level"],
+                            "type": apd["type"]
                         })
                     res = cur.fetchone()
-                    apd["clubID"] = res[0][0]
+                    if res is not None:
+                        apd["clubID"] = res[0]
                     cur.close()  # close database cursor
+                    if res is None:
+                        cherrypy.log.error(
+                            "Error (ViewApplication.approve): failed to find recently inserted record"
+                        )
+                        return self.renderer.render(
+                            "dialog.mako", {
+                                'title': "Error!",
+                                'message': "A database error occured.",
+                                'linkaddr': "#back",
+                                'linktext': "< Back",
+                                'user': getUserType(self.DBC)
+                            })
             # if application indicates an existing record with clubID
             else:
                 # insert data into AffiliationTable
@@ -232,8 +246,10 @@ class ViewApplication(object):
                 {  # return approval success HTML
                     'title': "Approved application.",
                     'message': "",
-                    'linkaddr': "/applications",
-                    'linktext': "< Back to pending applications",
+                    'linkaddr': "/view/" + str(apd["clubID"]),
+                    'linktext': "< Go to record",
+                    'linkaddr2': "/applications",
+                    'linktext2': "< Back to pending applications",
                     'user': getUserType(self.DBC)
                 })
         return self.renderer.render(
