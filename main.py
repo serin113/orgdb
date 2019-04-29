@@ -38,6 +38,7 @@
 # 2019/04/23 (Simon) - Moved actions to main() method
 #                    - Print Python version if debug messages are enabled
 #                    - Error handler now uses Mako template
+# 2019/04/29 (Simon) - Python, CherryPy, & Mako module versions printed as debug messages
 
 import os  # for resolving filesystem paths
 
@@ -55,11 +56,13 @@ def main(debug=None, clearlogs=None, reload=None):
         reload = True
 
     # configuration of CherryPy webserver
-    print("Running server")
     if debug:
         print("Debug messages enabled")
         import sys
-        print(sys.version)
+        print("Python version: {}.{}.{}".format(sys.version_info.major, sys.version_info.minor, sys.version_info.micro))
+        print("CherryPy version: ", cherrypy.__version__)
+        import mako
+        print("Mako version: ", mako.__version__)
     if clearlogs:
         try:
             os.remove("access.log")
@@ -132,6 +135,7 @@ def main(debug=None, clearlogs=None, reload=None):
         }
     }
     # start the webserver
+    print("Running server")
     cherrypy.quickstart(Root("db.conf", Renderer=renderer), '/', conf)
     print("\nServer exited")
 
