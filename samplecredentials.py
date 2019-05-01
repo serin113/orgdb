@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-# NOTE: DO NOT USE THIS IN PRODUCTION
-
 import modules
 import os
 
@@ -15,11 +13,11 @@ modules.cherrypy.config.update({
     'engine.autoreload.on': False
 })
 
-if os.environ.get('PORT') is not None:
+if os.environ.get('DYNO') is not None:
     print("Creating db.conf from Heroku environment vars")
     import urllib.parse
     urllib.parse.uses_netloc.append("mysql")
-    urlstr = os.environ.get('DATABASE_URL')
+    urlstr = os.environ.get('CLEARDB_DATABASE_URL')
     print(urlstr)
     url = urllib.parse.urlparse(urlstr)
     db_conf = open("db.conf", "w")

@@ -48,7 +48,7 @@ import modules._helpers as helper  # import helper classes
 from modules import Root  # import CherryPy-exposed Root class
 
 def main(debug=None, clearlogs=None, reload=None):
-    ON_HEROKU = os.environ.get('PORT') is not None
+    ON_HEROKU = os.environ.get('DYNO') is not None
     print("Running on Heroku: {}".format(ON_HEROKU))
     
     if debug is None:
@@ -146,7 +146,7 @@ def main(debug=None, clearlogs=None, reload=None):
     if ON_HEROKU:
         import urllib.parse
         urllib.parse.uses_netloc.append("mysql")
-        urlstr = os.environ.get('DATABASE_URL')
+        urlstr = os.environ.get('CLEARDB_DATABASE_URL')
         url = urllib.parse.urlparse(urlstr)
         db_conf = open("db.conf", "w")
         db_conf.write("[connector_python]\n")
