@@ -3,6 +3,7 @@
 # NOTE: DO NOT USE THIS IN PRODUCTION
 
 import modules
+import os
 
 print("Updating config")
 # update cherrypy global config
@@ -13,6 +14,17 @@ modules.cherrypy.config.update({
     'request.show_tracebacks': True,
     'engine.autoreload.on': False
 })
+
+if os.environ.get('PORT') is not None:
+    print("Creating db.conf from Heroku environment vars")
+    import urllib.parse
+    urllib.parse.uses_netloc.append("mysql")
+    urlstr = os.environ.get('DATABASE_URL')
+    url = urllib.parse.urlparse(urlstr)
+    db_conf = open("db.conf", "w")
+    db_conf.write("[connector_python]\n")
+    db_conf.write("host = {}\ndatabase = {}\nuser = {}\npassword = {}\nport = {}\nraise_on_warnings = True\n".format(url.hostname, url.path[1:], url.username, url.password, url.port))
+    db_conf.close()
 
 print("Creating database connection")
 # create database connection
