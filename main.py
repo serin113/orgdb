@@ -48,6 +48,8 @@ import modules._helpers as helper  # import helper classes
 from modules import Root  # import CherryPy-exposed Root class
 
 def main(debug=None, clearlogs=None, reload=None):
+    ON_HEROKU = os.environ.get('ON_HEROKU')
+    
     if debug is None:
         debug = True
     if clearlogs is None:
@@ -101,7 +103,7 @@ def main(debug=None, clearlogs=None, reload=None):
 
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
-        'server.socket_port': 8080,
+        'server.socket_port': int(os.environ.get('PORT', 17995)) if ON_HEROKU else 8080,
         'log.screen': False,
         'log.error_file': 'error.log' if debug else "",
         'log.access_file': 'access.log' if debug else "",
