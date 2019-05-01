@@ -103,7 +103,7 @@ def main(debug=None, clearlogs=None, reload=None):
 
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
-        'server.socket_port': int(os.environ.get('PORT', 17995)) if ON_HEROKU else 8080,
+        'server.socket_port': int(os.environ.get('PORT', 80)) if ON_HEROKU else 8080,
         'log.screen': False,
         'log.error_file': 'error.log' if debug else "",
         'log.access_file': 'access.log' if debug else "",
@@ -138,6 +138,15 @@ def main(debug=None, clearlogs=None, reload=None):
     }
     # start the webserver
     print("Running server")
+    if ON_HEROKU:
+        import urllib.parse
+        urllib.parse.uses_netloc.append("mysql")
+        urlstr = os.environ.get('DATABASE_URL')
+        url = urllib.parse.urlparse(urlstr)
+        db_conf = open("db.conf", "w")
+        db_conf.write("[connector_python]\n")
+        db_conf.write("host = {}\ndatabase = {}\nuser = {}\npassword = {}\nport = {}\nraise_on_warnings = True\n".format(url.hostname, url.path[1:], url.username, url.password, url.port))
+        db_conf.close()
     cherrypy.quickstart(Root("db.conf", Renderer=renderer), '/', conf)
     print("\nServer exited")
 
