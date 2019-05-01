@@ -48,7 +48,7 @@ import modules._helpers as helper  # import helper classes
 from modules import Root  # import CherryPy-exposed Root class
 
 def main(debug=None, clearlogs=None, reload=None):
-    ON_HEROKU = os.environ.get('ON_HEROKU')
+    ON_HEROKU = os.environ.get('PORT') is not None
     print(ON_HEROKU)
     
     if debug is None:
