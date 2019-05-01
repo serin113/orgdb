@@ -49,6 +49,7 @@ from modules import Root  # import CherryPy-exposed Root class
 
 def main(debug=None, clearlogs=None, reload=None):
     ON_HEROKU = os.environ.get('ON_HEROKU')
+    print(ON_HEROKU)
     
     if debug is None:
         debug = True
