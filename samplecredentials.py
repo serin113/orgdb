@@ -20,10 +20,11 @@ if os.environ.get('PORT') is not None:
     import urllib.parse
     urllib.parse.uses_netloc.append("mysql")
     urlstr = os.environ.get('DATABASE_URL')
+    print(urlstr)
     url = urllib.parse.urlparse(urlstr)
     db_conf = open("db.conf", "w")
     db_conf.write("[connector_python]\n")
-    db_conf.write("host = {}\ndatabase = {}\nuser = {}\npassword = {}\nport = {}\nraise_on_warnings = True\n".format(url.hostname, url.path[1:], url.username, url.password, url.port))
+    db_conf.write("host = {}\ndatabase = {}\nuser = {}\npassword = {}\nport = {}\nraise_on_warnings = True\n".format(url.hostname, url.path[1:], url.username, url.password, 3306))
     db_conf.close()
 
 print("Creating database connection")

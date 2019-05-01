@@ -49,7 +49,7 @@ from modules import Root  # import CherryPy-exposed Root class
 
 def main(debug=None, clearlogs=None, reload=None):
     ON_HEROKU = os.environ.get('PORT') is not None
-    print(ON_HEROKU)
+    print("Running on Heroku: {}".format(ON_HEROKU))
     
     if debug is None:
         debug = True
@@ -104,7 +104,7 @@ def main(debug=None, clearlogs=None, reload=None):
 
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
-        'server.socket_port': int(os.environ.get('PORT', 80)) if ON_HEROKU else 8080,
+        'server.socket_port': 8080,
         'log.screen': False,
         'log.error_file': 'error.log' if debug else "",
         'log.access_file': 'access.log' if debug else "",
@@ -113,6 +113,10 @@ def main(debug=None, clearlogs=None, reload=None):
         'request.show_tracebacks': debug,
         'engine.autoreload.on': reload
     })
+    if ON_HEROKU:
+        cherrypy.config.update({
+            'server.socket_port': int(os.environ.get('PORT'))
+        })
 
     conf = {
         '/': {
@@ -146,7 +150,7 @@ def main(debug=None, clearlogs=None, reload=None):
         url = urllib.parse.urlparse(urlstr)
         db_conf = open("db.conf", "w")
         db_conf.write("[connector_python]\n")
-        db_conf.write("host = {}\ndatabase = {}\nuser = {}\npassword = {}\nport = {}\nraise_on_warnings = True\n".format(url.hostname, url.path[1:], url.username, url.password, url.port))
+        db_conf.write("host = {}\ndatabase = {}\nuser = {}\npassword = {}\nport = {}\nraise_on_warnings = True\n".format(url.hostname, url.path[1:], url.username, url.password, 3306))
         db_conf.close()
     cherrypy.quickstart(Root("db.conf", Renderer=renderer), '/', conf)
     print("\nServer exited")
