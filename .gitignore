@@ -3,6 +3,7 @@ tmp/
 *.conf
 *.txt
 !requirements.txt
+!runtime.txt
 *.db
 *.csv
 *.log
