@@ -38,9 +38,12 @@ add = modules.AddRecord(DBC="db.conf")._insert(
     "2", "1", "50", "", "2019-01-01", "", "20000", "", "")
 
 print("Creating credentials")
+
+pass1 = input("Password for admin: ")
+pass2 = input("Password for dev: ")
 # create sample admin & dev accounts
-creds = [("admin", "psysc", 1), ("dev", "cs192", 2)]
+creds = [("admin", pass1, 1), ("dev", pass2, 2)]
 # print sample accounts
 for c in creds:
     modules.createCredentials(c[0], c[1], c[2], dbc)
-    print("\t[{2}] \"{0}\": \"{1}\"".format(c[0], c[1], c[2]))
+    #print("\t[{2}] \"{0}\": \"{1}\"".format(c[0], c[1], c[2]))
