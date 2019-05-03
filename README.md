@@ -11,11 +11,22 @@ This is a course requirement for CS191/192 Software Engineering Courses of the D
 - [Mako](https://www.makotemplates.org)
 
 ## Setup
+#### `main.py` running in a Heroku dyno with [ClearDB MySQL](https://elements.heroku.com/addons/cleardb)
+0. Clone this repo
+    1. Run `heroku create` in the `orgdb/` folder
+    2. Run `heroku addons:create cleardb:ignite` (change `ignite` to something else if on a different plan)
+1. Deploy this Git repo into a Heroku app using `git push heroku master`
+2. Run `heroku run python initcredentials.py` in a terminal
+3. Input new passwords for the `admin` & `dev` accounts (can be skipped)
+4. Run `heroku ps:scale web=1`
+5. Run `heroku open`
+#### `main.py` and MySQL/MariaDB running locally
 0. Install requirements
 1. Copy `dbconf.sample` and rename it as `db.conf`, edit server configuration accordingly
 2. Run the MySQL/MariaDB server
 3. Run `source db.sql;` in an SQL command prompt
-4. ***(not for production)*** Add default users by running `python samplecredentials.py` in a terminal
+4. Run `python initcredentials.py` in a terminal
+3. Input new passwords for the `admin` & `dev` accounts (can be skipped)
 5. Run `python main.py` in a terminal
 6. Open [localhost:8080](http://localhost:8080)
 
