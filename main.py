@@ -39,15 +39,16 @@
 #                    - Print Python version if debug messages are enabled
 #                    - Error handler now uses Mako template
 # 2019/04/29 (Simon) - Python, CherryPy, & Mako module versions printed as debug messages
+# 2019/05/06 (Simon) - Added command line args for changing program options (listed in `main.py -h`)
 
 import os  # for resolving filesystem paths
-
+import sys # for fetching system info (debugging & arguments)
 import cherrypy  # import CherryPy library
 
 import modules._helpers as helper  # import helper classes
 from modules import Root  # import CherryPy-exposed Root class
 
-def main(debug=None, clearlogs=None, reload=None):
+def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None):
     ON_HEROKU = os.environ.get('DYNO') is not None
     print("Running on Heroku: {}".format(ON_HEROKU))
     
@@ -56,12 +57,15 @@ def main(debug=None, clearlogs=None, reload=None):
     if clearlogs is None:
         clearlogs = True
     if reload is None:
-        reload = True
+        reload = False
+    if output is None:
+        output = True
+    if output_file is None:
+        output_file = False
 
     # configuration of CherryPy webserver
     if debug:
         print("Debug messages enabled")
-        import sys
         print("Python version: {}.{}.{}".format(sys.version_info.major, sys.version_info.minor, sys.version_info.micro))
         print("CherryPy version: ", cherrypy.__version__)
         import mako
@@ -105,9 +109,9 @@ def main(debug=None, clearlogs=None, reload=None):
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
         'server.socket_port': 8080,
-        'log.screen': False,
-        'log.error_file': 'error.log' if debug else "",
-        'log.access_file': 'access.log' if debug else "",
+        'log.screen': output,
+        'log.error_file': 'error.log' if output_file else "",
+        'log.access_file': 'access.log' if output_file else "",
         'error_page.404': error_page_404,
         'request.error_response': handle_error,
         'request.show_tracebacks': debug,
@@ -156,4 +160,12 @@ def main(debug=None, clearlogs=None, reload=None):
     print("\nServer exited")
 
 if __name__ == '__main__':
-    main()
+    from optparse import OptionParser # for parsing arguments
+    parser = OptionParser()
+    parser.add_option("-d", "--debug", action="store_true", dest="debug", help="Show debug messages", default=False)
+    parser.add_option("-x", "--clearlogs", action="store_true", dest="clearlogs", help="Clear previous logs on execute", default=False)
+    parser.add_option("-r", "--reload", action="store_true", dest="reload", help="Reload webserver on code changes", default=False)
+    parser.add_option("-o", "--output", action="store_true", dest="output", help="Output debug messages to stdout", default=False)
+    parser.add_option("-f", "--outtofile", action="store_true", dest="output_file", help="Output debug & access messages to debug.log & access.log", default=False)
+    (options, args) = parser.parse_args(sys.argv[1:])
+    main(**vars(options))
