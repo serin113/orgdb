@@ -16,6 +16,7 @@ Code History:
                    - Added return button
                    - Template accepts "q" parameter
                    - Added affiliation list table
+                   - Print empty fields as "N/A"
 </%doc>
 
 
@@ -66,6 +67,11 @@ typeName = {
 if user is None:
     user = (None, -1)
 ID, type = user
+
+def printEmpty(s):
+    if len(s.strip()) == 0:
+        return "<i>N/A</i>"
+    return s
 %>
 
 
@@ -188,14 +194,14 @@ ID, type = user
                                     <td>${aff["yearsAffiliated"]}</td>
                                     <td>${aff["SCA"]}</td>
                                     <td>${aff["SCM"]}</td>
-                                    <td class="collapsing">${aff["paymentMode"]}</td>
-                                    <td class="collapsing">${aff["paymentDate"]}</td>
-                                    <td class="collapsing">${aff["paymentID"]}</td>
-                                    <td class="collapsing">${aff["paymentAmount"]}</td>
-                                    <td class="collapsing">${aff["receiptNumber"]}</td>
-                                    <td class="collapsing">${aff["paymentSendMode"]}</td>
-                                    <td class="collapsing">${aff["benefits"]}</td>
-                                    <td class="right aligned collapsing">${aff["remarks"]}</td>
+                                    <td class="collapsing">${aff["paymentMode"] | printEmpty}</td>
+                                    <td class="collapsing">${aff["paymentDate"] | printEmpty}</td>
+                                    <td class="collapsing">${aff["paymentID"] | printEmpty}</td>
+                                    <td class="collapsing">${aff["paymentAmount"] | printEmpty}</td>
+                                    <td class="collapsing">${aff["receiptNumber"] | printEmpty}</td>
+                                    <td class="collapsing">${aff["paymentSendMode"] | printEmpty}</td>
+                                    <td class="right aligned collapsing">${aff["benefits"] | printEmpty}</td>
+                                    <td class="right aligned collapsing">${aff["remarks"] | printEmpty}</td>
                                 </tr>
                                 % endfor
                             </tbody>
