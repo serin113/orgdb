@@ -19,6 +19,7 @@
 #                    - New login credential generated upon adding a record
 #                    - Backlink changed on successful insertion
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
+#                    - Handles condition: add record for existing club+school, with non-colliding school year
 
 from ._helpers import *
 from .Login import *
@@ -125,12 +126,13 @@ class AddRecord(object):
                         'errors': errors,
                         'user': getUserType(self.DBC)
                     })
-            # checking for preexisting record
-            collision_query = "SELECT school, clubName, schoolYear FROM (AffiliationRecordsTable INNER JOIN AffiliationTable ON AffiliationRecordsTable.clubID = AffiliationTable.AffiliationRecordsTable_clubID) WHERE school = %(school)s AND clubName = %(clubName)s AND schoolYear = %(schoolYear)s"
+            # checking for preexisting affiliation from same club
+            collision_query = "SELECT clubName FROM (AffiliationRecordsTable INNER JOIN AffiliationTable ON AffiliationRecordsTable.clubID = AffiliationTable.AffiliationRecordsTable_clubID) WHERE school = %(school)s AND clubName = %(clubName)s AND (%(schoolYear)s BETWEEN schoolYear AND schoolYear-1+yearsAffiliated OR %(schoolYear)s-1+%(yearsAffiliated)s BETWEEN schoolYear AND schoolYear-1+yearsAffiliated)"
             cur.execute(collision_query, {
                 'school': school,
                 'clubName': clubname,
-                'schoolYear': schoolyear
+                'schoolYear': schoolyear,
+                'yearsAffiliated': yearsaffiliated
             })
             if cur.rowcount > 0:
                 cur.close()  # close database cursor
@@ -143,6 +145,7 @@ class AddRecord(object):
                         'linktext': "< Back",
                         'user': getUserType(self.DBC)
                     })
+            cur.fetchall()
             res = self.validate_affiliation(
                 id, affiliated, status, hasaffiliationforms, benefits, remarks,
                 schoolyear, yearsaffiliated, sca, scm, paymentmode,
@@ -160,7 +163,15 @@ class AddRecord(object):
                         'errors': res,
                         'user': getUserType(self.DBC)
                     })
-            cur.execute(add_record,
+            # checking for preexisting affiliation from same club
+            collision_query = "SELECT school, clubName FROM AffiliationRecordsTable WHERE school = %(school)s AND clubName = %(clubName)s"
+            cur.execute(collision_query, {
+                'school': school,
+                'clubName': clubname
+            })
+            # add new record only if school+clubname doesn't exist
+            if cur.rowcount == 0:
+                cur.execute(add_record,
                         record_data)  # insert record_data to database
             sqlcnx.commit()  # commit changes to database
             cur.close()  # close database cursor

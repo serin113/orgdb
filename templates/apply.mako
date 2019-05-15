@@ -43,9 +43,9 @@ ID, type = user
         <header>
             <%include file="_header.mako" args="user=user, current='apply'"/>
         </header>
-        <div class="ui container">
-            <h1 class="ui header center title">Application Form</h1>
-            <div class="ui fluid raised blue container segment">
+        <div class="ui center aligned container">
+            <h1 class="ui header title">Application Form</h1>
+            <div class="ui fluid raised blue left aligned container segment">
                 <form method="post" action="insert" id="apply-form" class="ui form">
                     <div class="ui stackable grid">
                         % if type != 0:

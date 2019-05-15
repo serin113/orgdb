@@ -9,6 +9,8 @@ Code History:
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
                    - Renamed header > _header, footer > _footer
+                   - Added return button
+                   - Template accepts "q" parameter
 </%doc>
 
 
@@ -18,7 +20,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="user=None, record_info=None"/>
+<%page args="user=None, record_info=None, q=''"/>
 <%inherit file="_base.mako"/>
 
 
@@ -54,10 +56,17 @@ if record_info is not None:
         <header>
             <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
-        <section class="ui container">
-            <h1 class="ui header center title">Edit Affiliation Record</h1>
+        <section class="ui center aligned container">
+            <div class="ui left aligned container">
+                % if len(q) > 0:
+                <a href="/view?q=${q}" class="ui small basic blue button" id="button">< Back to Records</a>
+                % else:
+                <a href="/view" class="ui small basic blue button" id="button">< Back to Records</a>
+                % endif
+            </div>
+            <h1 class="ui header title">Edit Affiliation Record</h1>
             % if record_info is not None:
-            <div class="ui fluid raised blue container segment">
+            <div class="ui fluid raised blue left aligned container segment">
                 <form method="post" action="update" id="add-form" class="ui form">
                     <div class="ui stackable grid">
                         <div class="ui sixteen wide blue column">

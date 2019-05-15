@@ -40,9 +40,9 @@ Code History:
         <header>
             <%include file="_header.mako" args="user=user, current='add'"/>
         </header>
-        <div class="ui container">
-            <h1 class="ui header center title">Add Affiliation Record</h1>
-            <div class="ui fluid raised blue container segment">
+        <div class="ui center aligned container">
+            <h1 class="ui header title">Add Affiliation Record</h1>
+            <div class="ui fluid raised blue left aligned container segment">
                 <form method="post" action="insert" id="add-form" class="ui form">
                     <div class="ui stackable grid">
                         <div class="sixteen wide blue column">

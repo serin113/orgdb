@@ -30,7 +30,7 @@ Code History:
         <header>
             <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
-        <div class="ui middle aligned center aligned grid">
+        <div class="ui center aligned grid">
             <div class="column" style="max-width:450px">
                 <h2 class="ui blue image header">Log in to PSYSC</h2>
                 <form class="ui large form" method="POST" action="verify">

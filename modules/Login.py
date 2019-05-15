@@ -17,6 +17,7 @@
 #                    - Added "all" option in accessible_by() wrapper
 #                    - Added deleteCookies() method
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
+#                    - Added Secure flag to token cookies (only sent through HTTPS)
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -161,11 +162,13 @@ def checkCredentials(DBConnection=None):
             responseCookie["orgdb.ID"]["max-age"] = 3600
             responseCookie["orgdb.ID"]["version"] = 1
             responseCookie["orgdb.ID"]["httponly"] = True
+            responseCookie["orgdb.ID"]["secure"] = True
             responseCookie["orgdb.Token"] = Token
             responseCookie["orgdb.Token"]["path"] = "/"
             responseCookie["orgdb.Token"]["max-age"] = 3600
             responseCookie["orgdb.Token"]["version"] = 1
             responseCookie["orgdb.Token"]["httponly"] = True
+            responseCookie["orgdb.Token"]["secure"] = True
             # set type to the fetched usertype from LoginCredentialsTable
             type = toInt(res[0][0])
         else:
@@ -220,11 +223,13 @@ def login(ID, PIN, DBConnection=None):
             cookie["orgdb.ID"]["max-age"] = 3600
             cookie["orgdb.ID"]["version"] = 1
             cookie["orgdb.ID"]["httponly"] = True
+            cookie["orgdb.ID"]["secure"] = True
             cookie["orgdb.Token"] = token
             cookie["orgdb.Token"]["path"] = "/"
             cookie["orgdb.Token"]["max-age"] = 3600
             cookie["orgdb.Token"]["version"] = 1
             cookie["orgdb.Token"]["httponly"] = True
+            cookie["orgdb.Token"]["secure"] = True
             # commit changes to database
             sqlcnx.commit()
             # close database cursor

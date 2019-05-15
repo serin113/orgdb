@@ -7,6 +7,7 @@
 # 2019/04/01 (Simon) - Initial code
 # 2019/04/05 (Simon) - Removed duplicate checking in update()
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
+#                    - index() passes "q" parameter through template
 
 from ._helpers import *
 from .Login import *
@@ -32,7 +33,7 @@ class EditRecord(object):
     @cherrypy.expose
     @accessible_by("admin")
     # CherryPy method handling /edit/<record_id>
-    def index(self, record_id=None, **kwargs):
+    def index(self, q="", record_id=None, **kwargs):
         with self.DBC as sqlcnx:
             # create database cursor
             cur = sqlcnx.cursor(buffered=True)
@@ -62,7 +63,8 @@ class EditRecord(object):
                 # returns Mako-rendered edit page HTML
                 return self.renderer.render("edit.mako", {
                     'user': getUserType(self.DBC),
-                    'record_info': record_info
+                    'record_info': record_info,
+                    'q': q
                 })
             # if != 1 matching club
             else:

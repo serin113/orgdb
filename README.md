@@ -20,7 +20,7 @@ This is a course requirement for CS191/192 Software Engineering Courses of the D
 3. Input new passwords for the `admin` & `dev` accounts (can be skipped)
 4. Run `heroku ps:scale web=1`
 5. Run `heroku open`
-#### `main.py` and MySQL/MariaDB running locally
+#### `main.py` and MySQL/MariaDB running locally (*not* for deployment)
 0. Install requirements: `pip install -r requirements.txt`
 1. Copy `dbconf.sample` and rename it as `db.conf`, edit server configuration accordingly
 2. Run the MySQL/MariaDB server
@@ -28,7 +28,7 @@ This is a course requirement for CS191/192 Software Engineering Courses of the D
 4. Run `python initcredentials.py` in a terminal
 3. Input new passwords for the `admin` & `dev` accounts (can be skipped)
 5. Run `python main.py` in a terminal
-6. Open [localhost:8080](http://localhost:8080) in a browser
+6. Open [https://localhost:8080](https://localhost:8080) in a browser
 
 ## Website
 

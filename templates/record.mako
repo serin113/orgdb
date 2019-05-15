@@ -13,6 +13,9 @@ Code History:
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
                    - Renamed header > _header, footer > _footer
+                   - Added return button
+                   - Template accepts "q" parameter
+                   - Added affiliation list table
 </%doc>
 
 
@@ -24,7 +27,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="user=None, record_info=None, affiliations=[]"/>
+<%page args="user=None, record_info=None, affiliations=[], q=''"/>
 <%inherit file="_base.mako"/>
 
 
@@ -73,6 +76,9 @@ ID, type = user
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
+        <script src="/scripts/back.js"></script>
+        <script src="/scripts/tablesort.js"></script>
+        <script src="/scripts/enable_tablesort.js"></script>
         <title>
             % if record_info is not None:
             PSYSC - ${record_info["clubName"]}
@@ -86,13 +92,28 @@ ID, type = user
             <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
         <div class="ui container">
+            % if type == 1 or type == 2:
+            <div class="ui container">
+                % if len(q) > 0:
+                <a href="/view?q=${q}" class="ui small basic blue button" id="button">< Back to Records</a>
+                % else:
+                <a href="/view" class="ui small basic blue button" id="button">< Back to Records</a>
+                % endif
+            </div>
+            % endif
             % if record_info is not None:
             <div class="ui inverted blue raised vertical segments">
                 <div class="ui inverted blue clearing segment">
-                    % if type == 1:
+                    % if type == 1 or type == 2:
+                    % if len(q) > 0:
+                    <a href="/edit/${record_info['clubID']}?q=${q}" class="ui right floated blue icon button" tabindex="0">
+                        <i class="edit icon"></i>
+                    </a>
+                    % else:
                     <a href="/edit/${record_info['clubID']}" class="ui right floated blue icon button" tabindex="0">
                         <i class="edit icon"></i>
                     </a>
+                    % endif
                     <h1 class="ui inverted left floated header">
                     % else:
                     <h1 class="ui inverted header">
@@ -140,9 +161,55 @@ ID, type = user
                         </div>
                     </div>
                 </div>
+                % if affiliations is not None:
+                <div class="ui segment">
+                    <div class="ui attached container" style="overflow-x:auto">
+                        <table class="ui selectable stackable compact striped celled sortable blue small table">
+                            <thead class="full-width">
+                                <tr>
+                                    <th data-vivaldi-spatnav-clickable="1">school year/s</th>
+                                    <th data-vivaldi-spatnav-clickable="1">years paid</th>
+                                    <th data-vivaldi-spatnav-clickable="1">adviser/s</th>
+                                    <th data-vivaldi-spatnav-clickable="1">members</th>
+                                    <th data-vivaldi-spatnav-clickable="1">paid through</th>
+                                    <th data-vivaldi-spatnav-clickable="1">date paid</th>
+                                    <th data-vivaldi-spatnav-clickable="1">payment ID</th>
+                                    <th data-vivaldi-spatnav-clickable="1">paid amount</th>
+                                    <th data-vivaldi-spatnav-clickable="1">receipt number</th>
+                                    <th data-vivaldi-spatnav-clickable="1">paid sent through</th>
+                                    <th data-vivaldi-spatnav-clickable="1">benefits</th>
+                                    <th data-vivaldi-spatnav-clickable="1">remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for aff in affiliations:
+                                <tr>
+                                    <td>${"{} - {}".format(int(aff["schoolYear"]) - 1, int(aff["schoolYear"]) - 1 + int(aff["yearsAffiliated"]))}</td>
+                                    <td>${aff["yearsAffiliated"]}</td>
+                                    <td>${aff["SCA"]}</td>
+                                    <td>${aff["SCM"]}</td>
+                                    <td class="collapsing">${aff["paymentMode"]}</td>
+                                    <td class="collapsing">${aff["paymentDate"]}</td>
+                                    <td class="collapsing">${aff["paymentID"]}</td>
+                                    <td class="collapsing">${aff["paymentAmount"]}</td>
+                                    <td class="collapsing">${aff["receiptNumber"]}</td>
+                                    <td class="collapsing">${aff["paymentSendMode"]}</td>
+                                    <td class="collapsing">${aff["benefits"]}</td>
+                                    <td class="right aligned collapsing">${aff["remarks"]}</td>
+                                </tr>
+                                % endfor
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                % endif
                 <div class="ui secondary segment">
                     <i>Last updated ${record_info["dateUpdated"]}</i>
                 </div>
+            </div>
+            % else:
+            <div class="ui warning message">
+                <i class="warning icon"></i>Record doesn't exist.
             </div>
             % endif
         </div>

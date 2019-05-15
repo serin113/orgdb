@@ -41,6 +41,7 @@
 # 2019/04/29 (Simon) - Python, CherryPy, & Mako module versions printed as debug messages
 # 2019/05/06 (Simon) - Added command line args for changing program options (listed in `main.py -h`)
 # 2019/05/15 (Simon) - Fixed incorrect bytes() call when displaying an error message
+#                    - Uses self-signed certs for running server through HTTPS locally (not for deployment)
 
 import os  # for resolving filesystem paths
 import sys # for fetching system info (debugging & arguments)
@@ -122,7 +123,13 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
         cherrypy.config.update({
             'server.socket_port': int(os.environ.get('PORT'))
         })
-
+    else:
+        cherrypy.config.update({
+            'server.ssl_module': 'builtin',
+            'server.ssl_certificate': 'cert.pem',
+            'server.ssl_private_key': 'privkey.pem',
+        })
+    
     conf = {
         '/': {
             'tools.sessions.on': True,

@@ -12,7 +12,8 @@ Code History:
 2019/04/24 (Simon) - Added option for additional button
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
-                   - Renamed header > _header, footer > _footer
+                   - Renamed header.mako > _header.mako, footer.mako > _footer.mako
+                   - Renamed dialog.js > back.js
 </%doc>
 
 
@@ -39,7 +40,7 @@ Mako variables:
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
-        <script src="/scripts/dialog.js"></script>
+        <script src="/scripts/back.js"></script>
         <title>PSYSC</title>
     </head>
     <body>
@@ -67,7 +68,7 @@ Mako variables:
                 <a href="${linkaddr}" class="ui small basic blue button" id="button">${linktext}</a>
                 % endif
                 % if (linkaddr2 is not None) or (linktext2 is not None):
-                <a href="${linkaddr2}" class="ui small basic blue button" id="button">${linktext2}</a>
+                <a href="${linkaddr2}" class="ui small basic blue button" id="button2">${linktext2}</a>
                 % endif
             </div>
         </section>

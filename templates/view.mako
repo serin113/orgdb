@@ -22,6 +22,8 @@ Code History:
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
                    - Renamed header > _header, footer > _footer
+                   - Resized search bar
+                   - Use "q" parameter for edit button link
 </%doc>
 
 
@@ -85,9 +87,9 @@ typeName = {
             <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
         <h1 class="ui header center title">View All Affiliation Records</h1>
-        <div class="ui container">
+        <div class="ui center aligned container">
             <form method="get" action="" id="filter-form">
-                <div class="ui fluid action icon input">
+                <div class="ui action icon input">
                   <input type="text" name="q" value="${q}" placeholder="Search..."/>
                   % if len(q) > 0:
                   <a href="/view" class="ui button" tabindex="0">Reset</a>
@@ -127,14 +129,17 @@ typeName = {
                                     <a href="${record['clubID']}?q=${q}" class="ui primary button" tabindex="0">
                                         <i class="eye icon"></i>
                                     </a>
+                                    <a href="/edit/${record['clubID']}?q=${q}" class="ui button" tabindex="0">
+                                        <i class="edit icon"></i>
+                                    </a>
                                     % else:
                                     <a href="${record['clubID']}" class="ui primary button" tabindex="0">
                                         <i class="eye icon"></i>
                                     </a>
-                                    % endif
                                     <a href="/edit/${record['clubID']}" class="ui button" tabindex="0">
                                         <i class="edit icon"></i>
                                     </a>
+                                    % endif
                                 </div>
                             </td>
                             <td>${record['clubID']}</td>

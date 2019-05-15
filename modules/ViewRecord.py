@@ -15,6 +15,8 @@
 #                    - Added viewing individual record for logged-in club account
 #                    - usertype in index() is checked before connecting to database for querying record info
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
+#                    - Simplified usertype conditions in index()
+#                    - Fetch affiliations from AffiliationTable for viewing individual record
 
 from ._helpers import *
 from .Login import *
@@ -37,147 +39,91 @@ class ViewRecord(object):
     @cherrypy.tools.gzip()
     @accessible_by(["club", "admin"])
     # CherryPy method handling /view/<record_id>
-    def index(self, q="", record_id=None, affiliation_id=None, **kwargs):
+    def index(self, q="", record_id=None, **kwargs):
         # get user credentials
         usertype = getUserType(self.DBC)
         with self.DBC as sqlcnx:
             # if user is logged-in
             if usertype is not None:
-                # if user is an admin or dev
-                if usertype[1] == 1 or usertype[1] == 2:
+                # create an SQL cursor to the database
+                cur = sqlcnx.cursor(buffered=True, dictionary=True)
+                # if user is an admin or dev, without specific record_id
+                if (usertype[1] == 1 or usertype[1] == 2) and (record_id is None):
                     # if no record_id is indicated in the URL
                     # (display list of all records)
-                    # create an SQL cursor to the database
-                    cur = sqlcnx.cursor(buffered=True)
-                    if record_id is None:
-                        # fetch all columns from all rows in AffiliationRecordsTable
-                        if (len(q) == 0):
-                            cur.execute(
-                                "SELECT clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
-                                "FROM AffiliationRecordsTable")
-                        # fetch all columns from rows matching a query(filter) in AffiliationRecordsTable
-                        else:
-                            cur.execute(
-                                "SELECT clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
-                                "FROM AffiliationRecordsTable "
-                                "WHERE LOWER(school) LIKE %(query)s or "
-                                "LOWER(clubName) LIKE %(query)s or "
-                                "LOWER(address) LIKE %(query)s or "
-                                "LOWER(city) LIKE %(query)s or "
-                                "LOWER(province) LIKE %(query)s or "
-                                "LOWER(adviserName) LIKE %(query)s",
-                                {"query": "%" + q + "%"})
-                        res = cur.fetchall()
-                        # close database cursor
-                        cur.close()
-                        # create (list of dicts) data_list from (list of tuples) res
-                        data_list = []
-                        for record in res:
-                            record_dict = {
-                                'clubID': record[0],
-                                'dateUpdated': record[1],
-                                'region': record[2],
-                                'level': record[3],
-                                'type': record[4],
-                                'school': record[5],
-                                'clubName': record[6],
-                                'address': record[7],
-                                'city': record[8],
-                                'province': record[9],
-                                'adviserName': record[10],
-                                'contact': record[11],
-                                'email': record[12]
-                            }
-                            data_list.append(record_dict)
-                        # returns Mako-rendered view page HTML
-                        # (control ViewAffiliationRecordList)
-                        return self.renderer.render("view.mako", {
-                            "data": data_list,
-                            "q": q,
-                            'user': usertype
-                        })
-                    # if record_id is indicated in the URL
-                    # (display individual record)
+                    # fetch all columns from all rows in AffiliationRecordsTable
+                    if (len(q) == 0):
+                        cur.execute(
+                            "SELECT clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
+                            "FROM AffiliationRecordsTable")
+                    # fetch all columns from rows matching a query(filter) in AffiliationRecordsTable
                     else:
-                        # (control ViewAffiliationRecord)
-                        # Handles /view/<record_id>/
-                        # display details about the affiliation record
                         cur.execute(
                             "SELECT clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
                             "FROM AffiliationRecordsTable "
-                            "WHERE clubID = %(clubID)s", {"clubID": record_id})
-                        res = cur.fetchall()
-                        cur.close()
-                        record_info = None
-                        if len(res) == 1:
-                            record_info = {
-                                "clubID": res[0][0],
-                                "dateUpdated": res[0][1],
-                                "region": res[0][2],
-                                "level": res[0][3],
-                                "type": res[0][4],
-                                "school": res[0][5],
-                                "clubName": res[0][6],
-                                "address": res[0][7],
-                                "city": res[0][8],
-                                "province": res[0][9],
-                                "adviserName": res[0][10],
-                                "contact": res[0][11],
-                                "email": res[0][12]
-                            }
-                        elif len(res) == 0:
-                            # print("No match")
-                            pass
-                        else:
-                            # print("too many matches")
-                            pass
-                        return self.renderer.render(
-                            "record.mako", {
-                                "record_info": record_info,
-                                "affiliations": [],
-                                'user': usertype
-                            })
+                            "WHERE LOWER(school) LIKE %(query)s or "
+                            "LOWER(clubName) LIKE %(query)s or "
+                            "LOWER(address) LIKE %(query)s or "
+                            "LOWER(city) LIKE %(query)s or "
+                            "LOWER(province) LIKE %(query)s or "
+                            "LOWER(adviserName) LIKE %(query)s",
+                            {"query": "%" + q + "%"})
+                    data_list = cur.fetchall()
+                    # close database cursor
+                    cur.close()
+                    # returns Mako-rendered view page HTML
+                    # (control ViewAffiliationRecordList)
+                    return self.renderer.render("view.mako", {
+                        "data": data_list,
+                        "q": q,
+                        "user": usertype
+                    })
                 # handle viewing only one record
-                # if user is a club
-                elif usertype[1] == 0:
-                    if record_id is not None:
-                        raise cherrypy.HTTPRedirect("/view")
-                    # create an SQL cursor to the database
-                    cur = sqlcnx.cursor(buffered=True)
+                # if user is a club, or a dev/admin indicating specific record_id
+                elif (usertype[1] == 0) or ((usertype[1] == 1 or usertype[1] == 2) and record_id is not None):
+                    # logged-in club cannot view other record_id's
+                    if usertype[1] == 0:
+                        if record_id is not None:
+                            raise cherrypy.HTTPRedirect("/view")
+                        else:
+                            record_id = usertype[0]
+                        
+                    # (control ViewAffiliationRecord)
+                    # Handles /view/<record_id>/ (admin/dev) and /view/ (club)
+                    # display details about the affiliation record
                     cur.execute(
                         "SELECT clubID, dateUpdated, region, level, type, school, clubName, address, city, province, adviserName, contact, email "
                         "FROM AffiliationRecordsTable "
-                        "WHERE clubID = %(clubID)s", {"clubID": usertype[0]})
+                        "WHERE clubID = %(clubID)s", {"clubID": record_id})
                     res = cur.fetchall()
-                    cur.close()
                     record_info = None
+                    check_affiliations = True
                     if len(res) == 1:
-                        record_info = {
-                            "clubID": res[0][0],
-                            "dateUpdated": res[0][1],
-                            "region": res[0][2],
-                            "level": res[0][3],
-                            "type": res[0][4],
-                            "school": res[0][5],
-                            "clubName": res[0][6],
-                            "address": res[0][7],
-                            "city": res[0][8],
-                            "province": res[0][9],
-                            "adviserName": res[0][10],
-                            "contact": res[0][11],
-                            "email": res[0][12]
-                        }
+                        record_info = res[0]
                     elif len(res) == 0:
-                        # print("No match")
-                        pass
+                        cherrypy.log.error(
+                            "Warning (ViewRecord.index): trying to access invalid record_id {}".format(record_id)
+                        )
+                        check_affiliations = False
                     else:
-                        # print("too many matches")
-                        pass
+                        cherrypy.log.error(
+                            "Error (ViewRecord.index): too many matches for record_id {}".format(record_id)
+                        )
+                        check_affiliations = False
+                    affiliation_list = None
+                    if check_affiliations:
+                        cur.execute(
+                            "SELECT affiliated, status, hasAffiliationForms benefits, remarks, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode "
+                            "FROM AffiliationTable "
+                            "WHERE AffiliationRecordsTable_clubID = %(clubID)s", {"clubID": record_id})
+                        affiliation_list = cur.fetchall()
+                    cur.close()
                     return self.renderer.render(
                         "record.mako", {
                             "record_info": record_info,
-                            "affiliations": [],
-                            'user': usertype
+                            "affiliations": affiliation_list,
+                            "user": usertype,
+                            "q": q
                         })
             # if user is not logged-in
             else:

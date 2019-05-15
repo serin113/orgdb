@@ -83,11 +83,11 @@ typeName = {
         <header>
             <%include file="_header.mako" args="user=user, current='summary'"/>
         </header>
-        <section class="ui container">
+        <section class="ui center aligned container">
             <h1 class="center title">Affiliated clubs per school year</h1>
             <form method="get" action="" id="filter-form">
-                <div class="ui fluid action icon input">
-                  <input type="number"  name="q" min="2007" max="2050" value = "${q}"/>
+                <div class="ui action icon input">
+                  <input type="number"  name="q" min="2007" max="2050" value = "${q}" placeholder="YYYY"/>
                   % if len(q) > 0:
                   <a href="/summary" class="ui button">Reset</a>
                   % endif

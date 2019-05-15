@@ -16,6 +16,7 @@ Code History:
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
                    - Renamed header > _header, footer > _footer
+                   - Resized search bar
 </%doc>
 
 
@@ -82,10 +83,10 @@ ID, type = user
         <header>
             <%include file="_header.mako" args="user=user, current='applications'"/>
         </header>
-        <h1 class="ui header center title">Pending Applications</h1>
-        <div class="ui container">
+        <div class="ui center aligned container">
+            <h1 class="ui header title">Pending Applications</h1>
             <form method="get" action="" id="filter-form">
-                <div class="ui fluid action icon input">
+                <div class="ui action icon input">
                   <input type="text" name="q" value="${q}" placeholder="Search..."/>
                     % if len(q) > 0:
                     <a href="/applications" class="ui button" tabindex="0">Reset</a>
@@ -95,7 +96,7 @@ ID, type = user
             </form>
             % if (data is not None):
             % if len(data) > 0:
-            <div class="ui container">
+            <div class="ui left aligned container">
                 % for app in data:
                 <div class="ui inverted blue raised vertical segments">
                     <div class="ui inverted blue segment">
@@ -182,7 +183,7 @@ ID, type = user
             </div>
             % else:
             <div class="ui warning message">
-                <i class="warning icon"></i>Database is empty.
+                <i class="warning icon"></i>No pending applications.
             </div>
             % endif
             % endif
