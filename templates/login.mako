@@ -7,10 +7,14 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 Code History:
 2019/03/23 (Simon) - added initial login template
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
+2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
+                   - Added <title>
+                   - Renamed header > _header, footer > _footer
 </%doc>
 
 
 <%page args="user=None"/>
+<%inherit file="_base.mako"/>
 
 
 <html>
@@ -20,10 +24,11 @@ Code History:
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
+        <title>PSYSC - Login</title>
     </head>
     <body style="min-width:320px; margin:0px; padding:0px">
         <header>
-            <%include file="header.mako" args="user=user, current='view'"/>
+            <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
         <div class="ui middle aligned center aligned grid">
             <div class="column" style="max-width:450px">

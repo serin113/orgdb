@@ -16,6 +16,7 @@
 # 2019/04/24 (Simon) - Added more activity logging
 #                    - Added "all" option in accessible_by() wrapper
 #                    - Added deleteCookies() method
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -424,7 +425,7 @@ class Login(object):
             self.renderer = ContentRenderer()
 
     @cherrypy.expose
-    def index(self):
+    def index(self, **kwargs):
         # if user is logged in, redirect to homepage
         if checkCredentials(self.DBC) != -1:
             raise cherrypy.HTTPRedirect("/")
@@ -433,7 +434,7 @@ class Login(object):
                                     {'user': None})  # display summary data
 
     @cherrypy.expose
-    def verify(self, ID=None, PIN=None):
+    def verify(self, ID=None, PIN=None, **kwargs):
         with self.DBC as sqlcnx:
             # if user is logged-out
             if checkCredentials(self.DBC) == -1:

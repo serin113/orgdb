@@ -10,6 +10,9 @@ Code History:
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
 2019/04/02 (Simon) - Updated layout
 2019/04/23 (Simon) - Updated layout, added edit button (visible if admin)
+2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
+                   - Added <title>
+                   - Renamed header > _header, footer > _footer
 </%doc>
 
 
@@ -22,6 +25,7 @@ Mako variables:
 
 
 <%page args="user=None, record_info=None, affiliations=[]"/>
+<%inherit file="_base.mako"/>
 
 
 <%
@@ -69,10 +73,17 @@ ID, type = user
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
+        <title>
+            % if record_info is not None:
+            PSYSC - ${record_info["clubName"]}
+            % else:
+            PSYSC
+            % endif
+        </title>
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="user=user, current='view'"/>
+            <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
         <div class="ui container">
             % if record_info is not None:
@@ -136,7 +147,7 @@ ID, type = user
             % endif
         </div>
         <footer>
-            <%include file="footer.mako"/>
+            <%include file="_footer.mako"/>
         </footer>
     </body>
 </html>

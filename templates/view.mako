@@ -19,6 +19,9 @@ Code History:
                    - Translates region/level/type numbers to readable strings
 2019/04/02 (Simon) - Updated button styles, moved some inline scripts to enable_tablesort.js
 2019/04/23 (Simon) - Changed handling of empty results
+2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
+                   - Added <title>
+                   - Renamed header > _header, footer > _footer
 </%doc>
 
 
@@ -29,6 +32,7 @@ Mako variables:
 
 
 <%page args="user=None, data=None, q=''"/>
+<%inherit file="_base.mako"/>
 
 
 <%
@@ -74,10 +78,11 @@ typeName = {
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/tablesort.js"></script>
         <script src="/scripts/enable_tablesort.js"></script>
+        <title>PSYSC - Records</title>
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="user=user, current='view'"/>
+            <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
         <h1 class="ui header center title">View All Affiliation Records</h1>
         <div class="ui container">
@@ -157,7 +162,7 @@ typeName = {
             % endif
         </div>
         <footer>
-            <%include file="footer.mako"/>
+            <%include file="_footer.mako"/>
         </footer>
     </body>
 </html>

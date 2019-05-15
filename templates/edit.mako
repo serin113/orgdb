@@ -6,6 +6,9 @@ Licensed under the MIT License, refer to https://opensource.org/licenses/MIT for
 
 Code History:
 2019/03/29 (Simon) - Initial working code
+2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
+                   - Added <title>
+                   - Renamed header > _header, footer > _footer
 </%doc>
 
 
@@ -16,6 +19,7 @@ Mako variables:
 
 
 <%page args="user=None, record_info=None"/>
+<%inherit file="_base.mako"/>
 
 
 <%
@@ -38,10 +42,17 @@ if record_info is not None:
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/enable.js"></script>
+        <title>
+            % if record_info is not None:
+            PSYSC - ${record_info["clubName"]}
+            % else:
+            PSYSC
+            % endif
+        </title>
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="user=user, current='view'"/>
+            <%include file="_header.mako" args="user=user, current='view'"/>
         </header>
         <section class="ui container">
             <h1 class="ui header center title">Edit Affiliation Record</h1>
@@ -158,7 +169,7 @@ if record_info is not None:
             % endif
         </section>
         <footer>
-            <%include file="footer.mako"/>
+            <%include file="_footer.mako"/>
         </footer>
     </body>
 </html>

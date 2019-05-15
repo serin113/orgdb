@@ -16,10 +16,14 @@ Code History:
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
                    - Updated form layout
 2019/04/02 (Simon) - Updated form layout, moved some inline scripts to enable.js
+2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
+                   - Added <title>
+                   - Renamed header > _header, footer > _footer
 </%doc>
 
 
 <%page args="user=None"/>
+<%inherit file="_base.mako"/>
 
 
 <html>
@@ -30,10 +34,11 @@ Code History:
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/enable.js"></script>
+        <title>PSYSC - Add Record</title>
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="user=user, current='add'"/>
+            <%include file="_header.mako" args="user=user, current='add'"/>
         </header>
         <div class="ui container">
             <h1 class="ui header center title">Add Affiliation Record</h1>
@@ -272,7 +277,7 @@ Code History:
             </div>
         </div>
         <footer>
-            <%include file="footer.mako"/>
+            <%include file="_footer.mako"/>
         </footer>
     </body>
 </html>

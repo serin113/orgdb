@@ -17,6 +17,7 @@
 #                    - InputValidator.validate() handles case if value is Null
 #                    - DBConnection.__exit__() will not log HTTPRedirects
 # 2019/04/24 (Simon) - Specific argument formats converted to strings in render()
+# 2019/05/15 (Simon) - Modified TemplateLookup() initialization in ContentRenderer
 
 import re  # for input validation
 from base64 import urlsafe_b64encode  # for encoding sha512 hash to base64
@@ -342,11 +343,12 @@ class ContentRenderer(object):
             self.debug = False
         else:
             self.debug = debug
-        self.lookup = TemplateLookup(directories=["templates/"],
-                                     collection_size=100,
-                                     format_exceptions=True,
-                                     module_directory="tmp/mako_modules",
-                                     default_filters=['decode.utf8', 'trim'])
+        self.lookup = TemplateLookup(
+            directories=["templates/"],
+            collection_size=100,
+            format_exceptions=False,
+            module_directory="tmp/mako_modules",
+            default_filters=['decode.utf8'])
 
     def render(self, templatefile, templatevars=None):
         try:
@@ -388,7 +390,6 @@ class ContentRenderer(object):
                     templatevars[key] = val
             return t.render(**templatevars)
         except mako.exceptions.MakoException as err:
+            cherrypy.response.status = 500
             cherrypy.log.error("Error (ContentRenderer.render): " + str(err))
-            if self.debug:
-                return str(err)
-            return "<html><body>Sorry, an error occured</body></html>"
+            return "<h3>An error occured.</h3>"

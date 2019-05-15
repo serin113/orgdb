@@ -19,6 +19,7 @@
 #                    - Remove /view page handler
 #                    - Change backlink in success/error dialog
 #                    - Log more errors
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from ._helpers import *
 from .AddRecord import *
@@ -48,7 +49,7 @@ class ViewApplication(object):
     @cherrypy.tools.gzip()
     @accessible_by("admin")
     # CherryPy method handling /applications
-    def index(self, q=""):
+    def index(self, q="", **kwargs):
         with self.DBC as sqlcnx:
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database
@@ -129,7 +130,7 @@ class ViewApplication(object):
     # creates a record from an affiliation application
     @cherrypy.expose
     @accessible_by("admin")
-    def approve(self, application_id):
+    def approve(self, application_id, **kwargs):
         with self.DBC as sqlcnx:
             # create instance of AddRecord for insertion
             addrecord = AddRecord(DBC=self.DBC.config,
@@ -265,7 +266,7 @@ class ViewApplication(object):
     # deletes an affiliation application
     @cherrypy.expose
     @accessible_by("admin")
-    def reject(self, application_id=None):
+    def reject(self, application_id=None, **kwargs):
         with self.DBC as sqlcnx:
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database

@@ -14,6 +14,7 @@
 # 2019/04/05 (Simon) - Removed redundant disconnect() calls
 #                    - Added viewing individual record for logged-in club account
 #                    - usertype in index() is checked before connecting to database for querying record info
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from ._helpers import *
 from .Login import *
@@ -36,7 +37,7 @@ class ViewRecord(object):
     @cherrypy.tools.gzip()
     @accessible_by(["club", "admin"])
     # CherryPy method handling /view/<record_id>
-    def index(self, q="", record_id=None, affiliation_id=None):
+    def index(self, q="", record_id=None, affiliation_id=None, **kwargs):
         # get user credentials
         usertype = getUserType(self.DBC)
         with self.DBC as sqlcnx:

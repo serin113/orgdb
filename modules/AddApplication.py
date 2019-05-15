@@ -16,6 +16,7 @@
 #                    - Validate the other fields even if clubID is invalid
 #                    - Handle case of paymentDate being an empty string ""
 # 2019/04/24 (Simon) - paymentDate coverted to string before displaying
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from ._helpers import *
 from .AddRecord import *
@@ -41,7 +42,7 @@ class AddApplication(object):
     @cherrypy.expose
     @accessible_by(["default", "club"])
     # CherryPy method handling /add/
-    def index(self):
+    def index(self, **kwargs):
         # returns Mako-rendered add page HTML
         return self.renderer.render("apply.mako",
                                     {'user': getUserType(self.DBC)})
@@ -73,7 +74,8 @@ class AddApplication(object):
                paymentid=None,
                paymentamount=None,
                receiptnumber=None,
-               paymentsendmode=None):
+               paymentsendmode=None,
+               **kwargs):
         with self.DBC as sqlcnx:
             # string format for inserting record_data into SQL database
             # table structure is defined in db.sql

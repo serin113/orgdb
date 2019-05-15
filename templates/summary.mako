@@ -14,6 +14,9 @@ Code History:
 2019/03/29 (Simon) - Added <meta name="viewport"> to scale properly in mobile screens
                    - Updated table styling
 2019/04/02 (Simon) - Updated table styling, moved some inline scripts to enable_tablesort.js
+2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
+                   - Added <title>
+                   - Renamed header > _header, footer > _footer
 </%doc>
 
 
@@ -29,6 +32,7 @@ Mako variables:
 
 
 <%page args="user=None, data=None, q=''"/>
+<%inherit file="_base.mako"/>
 
 
 <%
@@ -73,10 +77,11 @@ typeName = {
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/tablesort.js"></script>
         <script src="/scripts/enable_tablesort.js"></script>
+        <title>PSYSC - Summary</title>
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="user=user, current='summary'"/>
+            <%include file="_header.mako" args="user=user, current='summary'"/>
         </header>
         <section class="ui container">
             <h1 class="center title">Affiliated clubs per school year</h1>
@@ -174,7 +179,7 @@ typeName = {
             % endif
         </section>
         <footer>
-            <%include file="footer.mako"/>
+            <%include file="_footer.mako"/>
         </footer>
     </body>
 </html>

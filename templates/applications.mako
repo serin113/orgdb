@@ -13,6 +13,9 @@ Code History:
                    - Updated table styling, added sorting
 2019/04/02 (Simon) - Updated form layout, moved some inline scripts to enable_tablesort.js
 2019/04/24 (Simon) - Updated template, added region/level/type conversion to readable string
+2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
+                   - Added <title>
+                   - Renamed header > _header, footer > _footer
 </%doc>
 
 
@@ -23,6 +26,7 @@ Mako variables:
 
 
 <%page args="user=None, data=None, q=''"/>
+<%inherit file="_base.mako"/>
 
 
 <%
@@ -72,10 +76,11 @@ ID, type = user
         <script src="/scripts/semantic.min.js"></script>
         <script src="/scripts/tablesort.js"></script>
         <script src="/scripts/enable_tablesort.js"></script>
+        <title>PSYSC - Applications</title>
     </head>
     <body>
         <header>
-            <%include file="header.mako" args="user=user, current='applications'"/>
+            <%include file="_header.mako" args="user=user, current='applications'"/>
         </header>
         <h1 class="ui header center title">Pending Applications</h1>
         <div class="ui container">
@@ -183,7 +188,7 @@ ID, type = user
             % endif
         </div>
         <footer>
-            <%include file="footer.mako"/>
+            <%include file="_footer.mako"/>
         </footer>
     </body>
 </html>

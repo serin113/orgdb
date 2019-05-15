@@ -11,6 +11,7 @@
 # 2019/04/02 (Simon) - Added /edit, changed "back" URL for debug dialog
 # 2019/04/05 (Simon) - Removed persistent InputValidator class from handler classes
 # 2019/04/24 (Simon) - Added @accessible_by("all") to CherryPy page handler methods
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from ._helpers import *
 from .AddApplication import *
@@ -51,7 +52,7 @@ class Root(object):
 
     @cherrypy.expose
     @accessible_by("dev")
-    def dialog(self):
+    def dialog(self, **kwargs):
         return self.renderer.render(
             "dialog.mako", {
                 'user': getUserType(self.DBC),
@@ -64,12 +65,12 @@ class Root(object):
     @cherrypy.expose
     @accessible_by("all")
     # CherryPy method handling /
-    def index(self):
+    def index(self, **kwargs):
         # returns Mako-rendered homepage HTML
         return self.renderer.render("index.mako",
                                     {'user': getUserType(self.DBC)})
 
     @cherrypy.expose
     @accessible_by("all")
-    def logout(self):
+    def logout(self, **kwargs):
         self.login.logout()

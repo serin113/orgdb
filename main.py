@@ -40,6 +40,7 @@
 #                    - Error handler now uses Mako template
 # 2019/04/29 (Simon) - Python, CherryPy, & Mako module versions printed as debug messages
 # 2019/05/06 (Simon) - Added command line args for changing program options (listed in `main.py -h`)
+# 2019/05/15 (Simon) - Fixed incorrect bytes() call when displaying an error message
 
 import os  # for resolving filesystem paths
 import sys # for fetching system info (debugging & arguments)
@@ -99,7 +100,7 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
         cherrypy.response.status = 500
         cherrypy.log.error(cherrypy._cperror.format_exc())
         html = renderer.render("dialog.mako", {'title': "An error occured."})
-        cherrypy.response.body = [bytes(html)]
+        cherrypy.response.body = [bytes(html, "utf8")]
 
     def error_page_404(status, message, traceback, version):
         from modules.Login import getUserType  # for fetching current logged-in user for template

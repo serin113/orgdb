@@ -18,6 +18,7 @@
 # 2019/04/24 (Simon) - paymentDate coverted to string before displaying
 #                    - New login credential generated upon adding a record
 #                    - Backlink changed on successful insertion
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from ._helpers import *
 from .Login import *
@@ -42,7 +43,7 @@ class AddRecord(object):
     @cherrypy.expose
     @accessible_by("admin")
     # CherryPy method handling /add/
-    def index(self):
+    def index(self, **kwargs):
         # returns Mako-rendered add page HTML
         return self.renderer.render("add.mako",
                                     {'user': getUserType(self.DBC)})
@@ -218,7 +219,8 @@ class AddRecord(object):
                paymentid=None,
                paymentamount=None,
                receiptnumber=None,
-               paymentsendmode=None):
+               paymentsendmode=None,
+               **kwargs):
         return self._insert(region, level, type, school, clubname, address,
                             city, province, advisername, contact, email,
                             affiliated, status, hasaffiliationforms, benefits,

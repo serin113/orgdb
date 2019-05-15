@@ -6,6 +6,7 @@
 # Code History:
 # 2019/04/01 (Simon) - Initial code
 # 2019/04/05 (Simon) - Removed duplicate checking in update()
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from ._helpers import *
 from .Login import *
@@ -31,7 +32,7 @@ class EditRecord(object):
     @cherrypy.expose
     @accessible_by("admin")
     # CherryPy method handling /edit/<record_id>
-    def index(self, record_id=None):
+    def index(self, record_id=None, **kwargs):
         with self.DBC as sqlcnx:
             # create database cursor
             cur = sqlcnx.cursor(buffered=True)
@@ -105,7 +106,8 @@ class EditRecord(object):
                province=None,
                advisername=None,
                contact=None,
-               email=None):
+               email=None,
+               **kwargs):
         # if no clubID (record_id) specified, log error and go back
         if record_id is None:
             cherrypy.log.error("Error (EditRecord.update): Missing club ID: " +

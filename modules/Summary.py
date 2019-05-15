@@ -15,6 +15,7 @@
 #                    - Database connection now handled using a with statement
 # 2019/04/02 (Simon) - Changed "back" URL
 # 2019/04/24 (Simon) - Added gzip compression to page handler
+# 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 
 from ._helpers import *
 from .Login import *
@@ -35,7 +36,7 @@ class Summary(object):
     @cherrypy.expose
     @cherrypy.tools.gzip()
     @accessible_by("admin")
-    def index(self, q=""):
+    def index(self, q="", **kwargs):
         data = None
         with self.DBC as sqlcnx:
             cur = sqlcnx.cursor(buffered=True)  # create SQL database cursor
