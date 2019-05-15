@@ -18,6 +18,8 @@
 #                    - DBConnection.__exit__() will not log HTTPRedirects
 # 2019/04/24 (Simon) - Specific argument formats converted to strings in render()
 # 2019/05/15 (Simon) - Modified TemplateLookup() initialization in ContentRenderer
+#                    - Remove infinite while loop in DBConnection.__enter__()
+#                    - Added exception handling in DBConnection.__enter__()
 
 import re  # for input validation
 from base64 import urlsafe_b64encode  # for encoding sha512 hash to base64
@@ -110,9 +112,11 @@ class DBConnection(object):
 
     # method executed when DBConnection is created in a with statement
     def __enter__(self):
-        while self.connect() is None:
-            continue
-        return self.connect()
+        try:
+            cnx = self.connect()
+            return cnx
+        except Exception as e:
+            self.__exit__(e)
 
     # method executed when DBConnection is destroyed in a with statement
     def __exit__(self, type, value, traceback):
@@ -138,7 +142,7 @@ class DBConnection(object):
     def connect(self, retries=3):
         ctr = 0
         # keep trying to connect
-        while (ctr <= retries):
+        while (ctr < retries):
             if ctr > 0:
                 cherrypy.log.error("Retrying... (" + str(ctr + 1) + "/" +
                                    str(retries) + ")")
@@ -179,7 +183,7 @@ class DBConnection(object):
         # only executes if not yet connected for the first time
         cherrypy.log.error(
             "Error (DBConnection.connect): Cannot connect to SQL database")
-        return None
+        raise cherrypy.HTTPError(500)
 
     # disconnects from the database
     def disconnect(self):

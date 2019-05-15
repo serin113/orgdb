@@ -42,6 +42,7 @@
 # 2019/05/06 (Simon) - Added command line args for changing program options (listed in `main.py -h`)
 # 2019/05/15 (Simon) - Fixed incorrect bytes() call when displaying an error message
 #                    - Uses self-signed certs for running server through HTTPS locally (not for deployment)
+#                    - Enforce HTTPS (HSTS), hide server version from HTTP header (for deployment)
 
 import os  # for resolving filesystem paths
 import sys # for fetching system info (debugging & arguments)
@@ -96,6 +97,8 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
             "font-src 'self' data: https://fonts.gstatic.com;"
             "img-src 'self' data:;"
             "script-src 'self'")
+        if (cherrypy.server.ssl_certificate != None and cherrypy.server.ssl_private_key != None):
+            headers['Strict-Transport-Security'] = 'max-age=31536000'
 
     def handle_error():
         cherrypy.response.status = 500
@@ -111,6 +114,7 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
         'server.socket_port': 8080,
+        'response.headers.server': 'OrgDB',
         'log.screen': output,
         'log.error_file': 'error.log' if output_file else "",
         'log.access_file': 'access.log' if output_file else "",
