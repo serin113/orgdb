@@ -196,7 +196,7 @@ def printEmpty(s):
                                 <tr>
                                     <td>${"{} - {}".format(int(aff["schoolYear"]) - 1, int(aff["schoolYear"]) - 1 + int(aff["yearsAffiliated"]))}</td>
                                     <td>${aff["yearsAffiliated"]}</td>
-                                    <td>${aff["status"]}</td>
+                                    <td>${aff["status"] | printEmpty}</td>
                                     <td>${aff["SCA"]}</td>
                                     <td>${aff["SCM"]}</td>
                                     <td class="collapsing">${aff["paymentMode"] | printEmpty}</td>
