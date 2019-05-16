@@ -17,6 +17,7 @@ Code History:
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
                    - Renamed header > _header, footer > _footer
+2019/05/17 (Simon) - Added default sorting
 </%doc>
 
 
@@ -117,7 +118,7 @@ typeName = {
                             <table class="ui striped sortable unstackable compact blue table">
                                 <thead>
                                     <tr>
-                                        <th data-vivaldi-spatnav-clickable="1">region</th>
+                                        <th data-vivaldi-spatnav-clickable="1" class="default-sort">region</th>
                                         <th data-vivaldi-spatnav-clickable="1">total</th>
                                     </tr>
                                 </thead>

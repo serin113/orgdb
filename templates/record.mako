@@ -17,6 +17,9 @@ Code History:
                    - Template accepts "q" parameter
                    - Added affiliation list table
                    - Print empty fields as "N/A"
+2019/05/17 (Simon) - Added default sorting
+                   - Added status column in affiliation table
+                   - Changed some labels
 </%doc>
 
 
@@ -69,7 +72,7 @@ if user is None:
 ID, type = user
 
 def printEmpty(s):
-    if len(s.strip()) == 0:
+    if len(s.strip()) == 0 or s == "None":
         return "<i>N/A</i>"
     return s
 %>
@@ -173,8 +176,9 @@ def printEmpty(s):
                         <table class="ui selectable stackable compact striped celled sortable blue small table">
                             <thead class="full-width">
                                 <tr>
-                                    <th data-vivaldi-spatnav-clickable="1">school year/s</th>
+                                    <th data-vivaldi-spatnav-clickable="1" class="default-sort">school year/s</th>
                                     <th data-vivaldi-spatnav-clickable="1">years paid</th>
+                                    <th data-vivaldi-spatnav-clickable="1">status</th>
                                     <th data-vivaldi-spatnav-clickable="1">adviser/s</th>
                                     <th data-vivaldi-spatnav-clickable="1">members</th>
                                     <th data-vivaldi-spatnav-clickable="1">paid through</th>
@@ -182,7 +186,7 @@ def printEmpty(s):
                                     <th data-vivaldi-spatnav-clickable="1">payment ID</th>
                                     <th data-vivaldi-spatnav-clickable="1">paid amount</th>
                                     <th data-vivaldi-spatnav-clickable="1">receipt number</th>
-                                    <th data-vivaldi-spatnav-clickable="1">paid sent through</th>
+                                    <th data-vivaldi-spatnav-clickable="1">payment sent through</th>
                                     <th data-vivaldi-spatnav-clickable="1">benefits</th>
                                     <th data-vivaldi-spatnav-clickable="1">remarks</th>
                                 </tr>
@@ -192,6 +196,7 @@ def printEmpty(s):
                                 <tr>
                                     <td>${"{} - {}".format(int(aff["schoolYear"]) - 1, int(aff["schoolYear"]) - 1 + int(aff["yearsAffiliated"]))}</td>
                                     <td>${aff["yearsAffiliated"]}</td>
+                                    <td>${aff["status"]}</td>
                                     <td>${aff["SCA"]}</td>
                                     <td>${aff["SCM"]}</td>
                                     <td class="collapsing">${aff["paymentMode"] | printEmpty}</td>

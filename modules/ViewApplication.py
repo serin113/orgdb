@@ -20,6 +20,9 @@
 #                    - Change backlink in success/error dialog
 #                    - Log more errors
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
+# 2019/05/17 (Simon) - Added handling for missing affiliation_id case in approve() and reject()
+#                    - Added benefits & remarks parameters in approve()
+#                    - cursor.fetchall() returns dictionary list instead of tuple list when needed
 
 from ._helpers import *
 from .AddRecord import *
@@ -130,50 +133,36 @@ class ViewApplication(object):
     # creates a record from an affiliation application
     @cherrypy.expose
     @accessible_by("admin")
-    def approve(self, application_id, **kwargs):
+    def approve(self, application_id=None, benefits=None, remarks=None, **kwargs):
+        if application_id is None:
+            cherrypy.log.error(
+                "Warning (ViewApplication.approve): tried approving without application ID"
+            )
+            return self.renderer.render(
+                "dialog.mako",
+                {
+                    'title': "Error!",
+                    'message': "Invalid operation.",
+                    'linkaddr': "#back",
+                    'linktext': "< Back",
+                    'user': getUserType(self.DBC)
+                })
         with self.DBC as sqlcnx:
             # create instance of AddRecord for insertion
             addrecord = AddRecord(DBC=self.DBC.config,
                                   Renderer=self.renderer,
                                   Validator=self.validator)
             cur = sqlcnx.cursor(
-                buffered=True)  # create an SQL cursor to the database
+                buffered=True, dictionary=True)  # create an SQL cursor to the database
             cur.execute(
                 "SELECT appID, hasRecord, clubID, dateCreated, region, level, type, school, clubName, address, city, province, adviserName, contact, email, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode "
                 "FROM AffiliationApplicationsTable "
                 "WHERE appID = %(appID)s", {"appID": application_id})
-            app = cur.fetchone()  # fetch data
+            apd = cur.fetchone()  # fetch data
             cur.close()  # close database cursor
-            # create dict for validation
-            apd = {
-                "appID": app[0],
-                "hasRecord": app[1],
-                "clubID": app[2],
-                "dateCreated": app[3],
-                "region": app[4],
-                "level": app[5],
-                "type": app[6],
-                "school": app[7],
-                "clubName": app[8],
-                "address": app[9],
-                "city": app[10],
-                "province": app[11],
-                "adviserName": app[12],
-                "contact": app[13],
-                "email": app[14],
-                "schoolYear": app[15],
-                "yearsAffiliated": app[16],
-                "SCA": app[17],
-                "SCM": app[18],
-                "paymentMode": app[19],
-                "paymentID": app[21],
-                "paymentAmount": app[22],
-                "receiptNumber": app[23],
-                "paymentSendMode": app[24]
-            }
-            if app[20] is not None:
-                if len(str(app[20])) > 0:
-                    apd["paymentDate"] = str(app[20])
+            if apd["paymentDate"] is not None:
+                if len(str(apd["paymentDate"])) > 0:
+                    apd["paymentDate"] = str(apd["paymentDate"])
                 else:
                     apd["paymentDate"] = None
             else:
@@ -186,7 +175,7 @@ class ViewApplication(object):
                                   apd["school"], apd["clubName"],
                                   apd["address"], apd["city"], apd["province"],
                                   apd["adviserName"], apd["contact"],
-                                  apd["email"], "1", "", "1", "", "",
+                                  apd["email"], "1", "new", "1", benefits, remarks,
                                   apd["schoolYear"], apd["yearsAffiliated"],
                                   apd["SCA"], apd["SCM"], apd["paymentMode"],
                                   apd["paymentDate"], apd["paymentID"],
@@ -229,7 +218,7 @@ class ViewApplication(object):
             else:
                 # insert data into AffiliationTable
                 addrecord.insert_affiliation(
-                    apd["clubID"], "1", "", "1", "", "", apd["schoolYear"],
+                    apd["clubID"], "1", "renewing", "1", benefits, remarks, apd["schoolYear"],
                     apd["yearsAffiliated"], apd["SCA"], apd["SCM"],
                     apd["paymentMode"], apd["paymentDate"], apd["paymentID"],
                     apd["paymentAmount"], apd["receiptNumber"],
@@ -267,6 +256,19 @@ class ViewApplication(object):
     @cherrypy.expose
     @accessible_by("admin")
     def reject(self, application_id=None, **kwargs):
+        if application_id is None:
+            cherrypy.log.error(
+                "Warning (ViewApplication.reject): tried rejecting without application ID"
+            )
+            return self.renderer.render(
+                "dialog.mako",
+                {
+                    'title': "Error!",
+                    'message': "Invalid operation.",
+                    'linkaddr': "#back",
+                    'linktext': "< Back",
+                    'user': getUserType(self.DBC)
+                })
         with self.DBC as sqlcnx:
             cur = sqlcnx.cursor(
                 buffered=True)  # create an SQL cursor to the database

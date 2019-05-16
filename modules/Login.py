@@ -18,6 +18,8 @@
 #                    - Added deleteCookies() method
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 #                    - Added Secure flag to token cookies (only sent through HTTPS)
+# 2019/05/17 (Simon) - Added createCookies() method
+#                    - Added SameSite attribute to token cookies (only sent to same domain, mostly avoids CSRF)
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -87,6 +89,30 @@ def deleteCookies():
         cookie["orgdb.Token"] = ""
         cookie["orgdb.ID"]["expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
         cookie["orgdb.Token"]["expires"] = 'Thu, 01 Jan 1970 00:00:00 GMT'
+        
+
+# create ID & Token cookies
+def createCookies(ID, Token):
+    # add SameSite cookie attribute manually
+    # (only available in Python 3.8 at the moment)
+    from http.cookies import Morsel
+    Morsel._reserved["samesite"] = "SameSite"
+    # create response cookies
+    responseCookie = cherrypy.response.cookie
+    responseCookie["orgdb.ID"] = ID
+    responseCookie["orgdb.ID"]["path"] = "/"
+    responseCookie["orgdb.ID"]["max-age"] = 3600
+    responseCookie["orgdb.ID"]["version"] = 1
+    responseCookie["orgdb.ID"]["httponly"] = True
+    responseCookie["orgdb.ID"]["secure"] = True
+    responseCookie["orgdb.ID"]["samesite"] = "lax"
+    responseCookie["orgdb.Token"] = Token
+    responseCookie["orgdb.Token"]["path"] = "/"
+    responseCookie["orgdb.Token"]["max-age"] = 3600
+    responseCookie["orgdb.Token"]["version"] = 1
+    responseCookie["orgdb.Token"]["httponly"] = True
+    responseCookie["orgdb.Token"]["secure"] = True
+    responseCookie["orgdb.Token"]["samesite"] = "lax"
 
 
 # (to be used for passing user info to header.mako)
@@ -155,20 +181,8 @@ def checkCredentials(DBConnection=None):
                     "ID": ID,
                     "Token": Token
                 })
-            # create a response cookie with refreshed Max-Age to 1 hour from now
-            responseCookie = cherrypy.response.cookie
-            responseCookie["orgdb.ID"] = ID
-            responseCookie["orgdb.ID"]["path"] = "/"
-            responseCookie["orgdb.ID"]["max-age"] = 3600
-            responseCookie["orgdb.ID"]["version"] = 1
-            responseCookie["orgdb.ID"]["httponly"] = True
-            responseCookie["orgdb.ID"]["secure"] = True
-            responseCookie["orgdb.Token"] = Token
-            responseCookie["orgdb.Token"]["path"] = "/"
-            responseCookie["orgdb.Token"]["max-age"] = 3600
-            responseCookie["orgdb.Token"]["version"] = 1
-            responseCookie["orgdb.Token"]["httponly"] = True
-            responseCookie["orgdb.Token"]["secure"] = True
+            # create a response cookie
+            createCookies(ID, Token)
             # set type to the fetched usertype from LoginCredentialsTable
             type = toInt(res[0][0])
         else:
@@ -189,8 +203,6 @@ def checkCredentials(DBConnection=None):
 # for users logging in
 # creates session cookie & returns True if valid, False otherwise
 def login(ID, PIN, DBConnection=None):
-    # create response cookie
-    cookie = cherrypy.response.cookie
     # connect to database if not already connected
     if DBConnection is not None:
         if DBConnection.is_connected():
@@ -204,32 +216,21 @@ def login(ID, PIN, DBConnection=None):
     if creds is not None:
         with DBC as sqlcnx:
             # create a random 64-byte hex token
-            token = urandom(64).hex()
+            Token = urandom(64).hex()
             # create database cursor
             cur = sqlcnx.cursor(buffered=True)
             cherrypy.log.error(
                 "Info (Login.login): logged in (ID={0}, Token={1})".format(
-                    ID, token))
+                    ID, Token))
             # insert new ID-Token pair in LoginAccessTable, expiring 1 hour from now
             cur.execute(
                 "INSERT INTO LoginAccessTable (ID, Token, Expires) VALUES (%(ID)s, %(Token)s, DATE_ADD(NOW(), INTERVAL 1 HOUR))",
                 {
                     "ID": ID,
-                    "Token": token
+                    "Token": Token
                 })
-            # create new ID & Token cookie, expiring 1 hour from now
-            cookie["orgdb.ID"] = ID
-            cookie["orgdb.ID"]["path"] = "/"
-            cookie["orgdb.ID"]["max-age"] = 3600
-            cookie["orgdb.ID"]["version"] = 1
-            cookie["orgdb.ID"]["httponly"] = True
-            cookie["orgdb.ID"]["secure"] = True
-            cookie["orgdb.Token"] = token
-            cookie["orgdb.Token"]["path"] = "/"
-            cookie["orgdb.Token"]["max-age"] = 3600
-            cookie["orgdb.Token"]["version"] = 1
-            cookie["orgdb.Token"]["httponly"] = True
-            cookie["orgdb.Token"]["secure"] = True
+            # create new ID & Token cookie
+            createCookies(ID, Token)
             # commit changes to database
             sqlcnx.commit()
             # close database cursor

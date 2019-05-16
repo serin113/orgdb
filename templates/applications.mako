@@ -17,6 +17,9 @@ Code History:
                    - Added <title>
                    - Renamed header > _header, footer > _footer
                    - Resized search bar
+2019/05/17 (Simon) - Added modal UI for adding remarks & benefits before approving an application
+                   - Removed table sorting (no tables to sort anymore)
+                   - Rearranged buttons
 </%doc>
 
 
@@ -75,8 +78,8 @@ ID, type = user
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
         <script src="/scripts/jquery-3.3.1.min.js"></script>
         <script src="/scripts/semantic.min.js"></script>
-        <script src="/scripts/tablesort.js"></script>
-        <script src="/scripts/enable_tablesort.js"></script>
+        <script src="/scripts/enable.js"></script>
+        <script src="/scripts/remarks.js"></script>
         <title>PSYSC - Applications</title>
     </head>
     <body>
@@ -98,16 +101,41 @@ ID, type = user
             % if len(data) > 0:
             <div class="ui left aligned container">
                 % for app in data:
+                <div class="ui modal" id="modal_${app['appID']}">
+                    <div class="content">
+                        <form method="post" action="approve/${app['appID']}" class="ui form">
+                            <div class="field">
+                                <label>Benefits</label>
+                                <input type="text" name="benefits" placeholder="optional, leave blank if none">
+                            </div>
+                            <div class="field">
+                                <label>Remarks</label>
+                                <input type="text" name="remarks" placeholder="optional, leave blank if none">
+                            </div>
+                            <div class="ui hidden divider"></div>
+                            <div class="ui right floated small buttons">
+                                <button class='ui button cancel_modal' type="button" data-modal-id="modal_${app['appID']}">
+                                    cancel
+                                </button>
+                                <button class='ui positive vertical animated button' type="submit">
+                                    <div class="visible content">approve</div>
+                                    <div class="hidden content"><i class="check icon"></i></div>
+                                </button>
+                            </div>
+                            <div class="ui hidden clearing divider"></div>
+                        </form>
+                    </div>
+                </div>
                 <div class="ui inverted blue raised vertical segments">
                     <div class="ui inverted blue segment">
                         <div class="ui right floated small buttons">
-                            <a href="approve/${app['appID']}" class="ui positive vertical animated button">
-                                <div class="visible content">approve</div>
-                                <div class="hidden content"><i class="check icon"></i></div>
-                            </a>
                             <a href="reject/${app['appID']}" class="ui negative vertical animated button">
                                 <div class="visible content">reject</div>
                                 <div class="hidden content"><i class="close icon"></i></div>
+                            </a>
+                            <a class="ui positive vertical animated button approve_modal" data-modal-id="modal_${app['appID']}">
+                                <div class="visible content">approve</div>
+                                <div class="hidden content"><i class="check icon"></i></div>
                             </a>
                         </div>
                         <h1 class="ui inverted left floated header">

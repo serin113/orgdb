@@ -20,6 +20,7 @@
 #                    - Backlink changed on successful insertion
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 #                    - Handles condition: add record for existing club+school, with non-colliding school year
+# 2019/05/17 (Simon) - Update dateModified field row in AffiliationRecordsTable if a row is created in AffiliationTable
 
 from ._helpers import *
 from .Login import *
@@ -303,6 +304,7 @@ class AddRecord(object):
                            receiptnumber=None,
                            paymentsendmode=None):
         with self.DBC as sqlcnx:
+            date_today = today()
             # string format for inserting affiliation_data into SQL database
             # table structure is defined in db.sql
             add_affiliation = (
@@ -365,5 +367,9 @@ class AddRecord(object):
             cur.execute(
                 add_affiliation,
                 affiliation_data)  # insert affiliation_data to database
+            cur.execute("UPDATE AffiliationRecordsTable SET dateUpdated = %(dateUpdated)s WHERE clubID = %(clubID)s",{
+                "dateUpdated": date_today,
+                "clubID": clubid
+            })
             sqlcnx.commit()  # commit changes to database
             cur.close()  # close database cursor

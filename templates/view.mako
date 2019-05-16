@@ -24,6 +24,7 @@ Code History:
                    - Renamed header > _header, footer > _footer
                    - Resized search bar
                    - Use "q" parameter for edit button link
+2019/05/17 (Simon) - Added default sorting
 </%doc>
 
 
@@ -107,7 +108,7 @@ typeName = {
                         <tr>
                             <th data-vivaldi-spatnav-clickable="0"></th>
                             <th data-vivaldi-spatnav-clickable="1">club ID</th>
-                            <th data-vivaldi-spatnav-clickable="1">club name</th>
+                            <th data-vivaldi-spatnav-clickable="1" class="default-sort">club name</th>
                             <th data-vivaldi-spatnav-clickable="1">school</th>
                             <th data-vivaldi-spatnav-clickable="1">level</th>
                             <th data-vivaldi-spatnav-clickable="1">type</th>

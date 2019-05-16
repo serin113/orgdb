@@ -17,6 +17,7 @@
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 #                    - Simplified usertype conditions in index()
 #                    - Fetch affiliations from AffiliationTable for viewing individual record
+# 2019/05/17 (Simon) - Fixed SQL query typo in index()
 
 from ._helpers import *
 from .Login import *
@@ -113,7 +114,7 @@ class ViewRecord(object):
                     affiliation_list = None
                     if check_affiliations:
                         cur.execute(
-                            "SELECT affiliated, status, hasAffiliationForms benefits, remarks, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode "
+                            "SELECT affiliated, status, hasAffiliationForms, benefits, remarks, schoolYear, yearsAffiliated, SCA, SCM, paymentMode, paymentDate, paymentID, paymentAmount, receiptNumber, paymentSendMode "
                             "FROM AffiliationTable "
                             "WHERE AffiliationRecordsTable_clubID = %(clubID)s", {"clubID": record_id})
                         affiliation_list = cur.fetchall()
