@@ -43,6 +43,8 @@
 # 2019/05/15 (Simon) - Fixed incorrect bytes() call when displaying an error message
 #                    - Uses self-signed certs for running server through HTTPS locally (not for deployment)
 #                    - Enforce HTTPS (HSTS), hide server version from HTTP header (for deployment)
+# 2019/05/17 (Simon) - Added HTTP caching headers
+#                    - System timezone printed as a debug message on startup
 
 import os  # for resolving filesystem paths
 import sys # for fetching system info (debugging & arguments)
@@ -50,6 +52,8 @@ import cherrypy  # import CherryPy library
 
 import modules._helpers as helper  # import helper classes
 from modules import Root  # import CherryPy-exposed Root class
+
+from datetime import datetime, timedelta
 
 def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None):
     ON_HEROKU = os.environ.get('DYNO') is not None
@@ -68,6 +72,9 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
 
     # configuration of CherryPy webserver
     if debug:
+        delta = datetime.utcnow().astimezone().tzinfo.utcoffset(None)
+        sign = "+" if delta >= timedelta(0) else "-"
+        print("System timezone: UTC{}{}".format(sign, delta))
         print("Debug messages enabled")
         print("Python version: {}.{}.{}".format(sys.version_info.major, sys.version_info.minor, sys.version_info.micro))
         print("CherryPy version: ", cherrypy.__version__)
@@ -99,6 +106,12 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
             "script-src 'self'")
         if (cherrypy.server.ssl_certificate != None and cherrypy.server.ssl_private_key != None):
             headers['Strict-Transport-Security'] = 'max-age=31536000'
+            
+    @cherrypy.tools.register('before_finalize', priority=61)
+    def staticcacheheaders():
+        headers = cherrypy.response.headers
+        headers['Cache-Control'] = 'public, max-age=31536000'
+        headers['Expires'] = (datetime.utcnow()+timedelta(seconds=31536000)).strftime("%a, %d %b %Y %H:%M:%S GMT")
 
     def handle_error():
         cherrypy.response.status = 500
@@ -142,19 +155,23 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
         },
         '/static': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': './static'
+            'tools.staticdir.dir': './static',
+            'tools.staticcacheheaders.on': True
         },
         '/styles': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': './styles'
+            'tools.staticdir.dir': './styles',
+            'tools.staticcacheheaders.on': True
         },
         '/scripts': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': './scripts'
+            'tools.staticdir.dir': './scripts',
+            'tools.staticcacheheaders.on': True
         },
         '/favicon.ico': {
             'tools.staticfile.on': True,
-            'tools.staticfile.filename': os.path.abspath("static/favicon.ico")
+            'tools.staticfile.filename': os.path.abspath("static/favicon.ico"),
+            'tools.staticcacheheaders.on': True
         }
     }
     # start the webserver
