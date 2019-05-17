@@ -132,6 +132,7 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
             is_http = True
         if is_http:
             # redirect requesting user to https
+            cherrypy.log.error("Info: Redirecting from {} to {}".format(cherrypy.url(), cherrypy.url().replace("http:", "https:")))
             raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
                                     status=301)
 
