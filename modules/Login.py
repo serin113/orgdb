@@ -21,6 +21,7 @@
 # 2019/05/17 (Simon) - Added createCookies() method
 #                    - Added SameSite attribute to token cookies (only sent to same domain, mostly avoids CSRF)
 #                    - Remove unused parameter
+#                    - Add more debug messages
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -220,9 +221,6 @@ def login(ID, PIN, DBConnection=None):
             Token = urandom(64).hex()
             # create database cursor
             cur = sqlcnx.cursor(buffered=True)
-            cherrypy.log.error(
-                "Info (Login.login): logged in (ID={0}, Token={1})".format(
-                    ID, Token))
             # insert new ID-Token pair in LoginAccessTable, expiring 1 hour from now
             cur.execute(
                 "INSERT INTO LoginAccessTable (ID, Token, Expires) VALUES (%(ID)s, %(Token)s, DATE_ADD(NOW(), INTERVAL 1 HOUR))",
@@ -236,8 +234,10 @@ def login(ID, PIN, DBConnection=None):
             sqlcnx.commit()
             # close database cursor
             cur.close()
+            cherrypy.log.error("Info (Login.login): Login successful (ID={}, Token={})".format(ID, Token))
             # True: user login succeeded
             return True
+    cherrypy.log.error("Warning (Login.login): Login failed (ID={}, Token={})".format(ID, Token))
     # False: user login failed
     return False
 
