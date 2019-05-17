@@ -46,6 +46,7 @@
 # 2019/05/17 (Simon) - Added HTTP caching headers
 #                    - System timezone printed as a debug message on startup
 #                    - Added more CSP directives, http requests redirect to https, HSTS default
+#                    - Disabled unused sessions feature
 
 import os  # for resolving filesystem paths
 import sys # for fetching system info (debugging & arguments)
@@ -110,6 +111,7 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
             "form-action 'self'")
         headers['Strict-Transport-Security'] = 'max-age=31536000'
         headers["Referrer-Policy"] = 'same-origin'
+        headers["X-Content-Type-Options"] = 'nosniff'
             
     @cherrypy.tools.register('before_finalize', priority=61)
     def staticcacheheaders():
@@ -166,7 +168,6 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
     
     conf = {
         '/': {
-            'tools.sessions.on': True,
             'tools.staticdir.root': os.path.abspath(os.getcwd()),
             'tools.secureheaders.on': True
         },
