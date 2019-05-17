@@ -16,6 +16,7 @@ Code History:
 2019/03/29 (Simon) - home and login/logout icons added
 2019/04/02 (Simon) - added /dialog for debugging (dev accounts only)
 2019/04/24 (Simon) - updated username field format
+2019/05/17 (Simon) - removed inline styles
 </%doc>
 
 
@@ -38,7 +39,7 @@ ID, type = user
 <div class="ui container">
     <div class="ui hidden fitted horizontal divider"></div>
     <h1 class="ui image header">
-        <img src="/static/psysc.png" class="ui image" style="margin:0">
+        <img src="/static/psysc.png" class="ui image" id="logo">
         <div class="content">
             <a href="/">PSYSC</a>
             <div class="tiny sub header">Affiliation Database</div>
@@ -46,7 +47,7 @@ ID, type = user
     </h1>
 </div>
 <div class="ui fluid container">
-    <div class="ui stackable secondary inverted blue menu" style="margin:0 0 2rem 0">
+    <div class="ui stackable secondary inverted blue menu" id="menu">
         <div class="ui container">
             <a class="${is_active['index']} item" href="/index"><i class="home icon"></i></a>
             % if type == -1:

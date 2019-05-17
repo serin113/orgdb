@@ -20,6 +20,7 @@ Code History:
 2019/05/17 (Simon) - Added default sorting
                    - Added status column in affiliation table
                    - Changed some labels
+                   - Removed inline styles
 </%doc>
 
 
@@ -172,7 +173,7 @@ def printEmpty(s):
                 </div>
                 % if affiliations is not None:
                 <div class="ui segment">
-                    <div class="ui attached container" style="overflow-x:auto">
+                    <div class="ui container overflow">
                         <table class="ui selectable stackable compact striped celled sortable blue small table">
                             <thead class="full-width">
                                 <tr>

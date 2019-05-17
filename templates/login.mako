@@ -10,31 +10,37 @@ Code History:
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
                    - Renamed header > _header, footer > _footer
+2019/05/17 (Simon) - UI updated
+                   - Uses login.css for styling
+                   - Removed unused parameter
 </%doc>
 
 
-<%page args="user=None"/>
 <%inherit file="_base.mako"/>
 
 
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-        <link rel="stylesheet" href="/styles/index.css"/>
+        <link rel="stylesheet" href="/styles/login.css"/>
         <link rel="stylesheet" type="text/css" href="/styles/semantic.min.css">
-        <script src="/scripts/jquery-3.3.1.min.js"></script>
-        <script src="/scripts/semantic.min.js"></script>
         <title>PSYSC - Login</title>
     </head>
-    <body style="min-width:320px; margin:0px; padding:0px">
-        <header>
-            <%include file="_header.mako" args="user=user, current='view'"/>
-        </header>
-        <div class="ui center aligned grid">
-            <div class="column" style="max-width:450px">
-                <h2 class="ui blue image header">Log in to PSYSC</h2>
+    <body>
+        <div class="ui middle aligned center aligned grid" id="login_form">
+            <div class="column">
+                <div class="ui left aligned container">
+                    <a href="/" class="ui small basic blue icon button" id="button"><i class="home icon"></i></a>
+                </div>
+                <h1 class="ui left aligned image header">
+                    <img src="/static/psysc.png" class="ui image" id="#logo">
+                    <div class="content">
+                        <a href="/">PSYSC</a>
+                        <div class="tiny sub header">Affiliation Database</div>
+                    </div>
+                </h1>
                 <form class="ui large form" method="POST" action="verify">
-                    <div class="ui raised blue segment">
+                    <div class="ui stacked blue segment">
                         <div class="field">
                             <div class="ui left icon input">
                                 <i class="user icon"></i>

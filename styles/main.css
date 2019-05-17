@@ -6,17 +6,9 @@
     text-align: center;
 }
 
-/*.title {
-    margin-bottom: 10px;
-}*/
-
-/*section {
-    padding: 10px 50px;
-    margin: 0px;
-    overflow: auto;
-    width: 100%;
-    display: block;
-}*/
+.overflow {
+    overflow-x: auto;
+}
 
 h1 {
     margin: 0px;
@@ -42,12 +34,15 @@ a {
     text-decoration: none;
 }
 
-/*header {
-    margin: 0px;
-    padding: 25px 0px;
-}*/
-
 footer {
     margin: 0px;
     padding: 25px 0px;
+}
+
+#logo {
+    margin: 0px;
+}
+
+#menu {
+    margin: 0 0 2rem 0;
 }

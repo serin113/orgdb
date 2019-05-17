@@ -20,6 +20,7 @@
 #                    - Added Secure flag to token cookies (only sent through HTTPS)
 # 2019/05/17 (Simon) - Added createCookies() method
 #                    - Added SameSite attribute to token cookies (only sent to same domain, mostly avoids CSRF)
+#                    - Remove unused parameter
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -436,8 +437,7 @@ class Login(object):
         if checkCredentials(self.DBC) != -1:
             raise cherrypy.HTTPRedirect("/")
         # else, display login page
-        return self.renderer.render("login.mako",
-                                    {'user': None})  # display summary data
+        return self.renderer.render("login.mako")  # display summary data
 
     @cherrypy.expose
     def verify(self, ID=None, PIN=None, **kwargs):

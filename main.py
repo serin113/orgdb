@@ -45,6 +45,7 @@
 #                    - Enforce HTTPS (HSTS), hide server version from HTTP header (for deployment)
 # 2019/05/17 (Simon) - Added HTTP caching headers
 #                    - System timezone printed as a debug message on startup
+#                    - Added more CSP directives, http requests redirect to https, HSTS default
 
 import os  # for resolving filesystem paths
 import sys # for fetching system info (debugging & arguments)
@@ -99,19 +100,29 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
         headers['X-Frame-Options'] = 'DENY'
         headers['X-XSS-Protection'] = '1; mode=block'
         headers['Content-Security-Policy'] = (
-            "default-src 'self';"
-            "style-src 'self' 'unsafe-inline';"
+            "default-src 'none';"
+            "style-src 'self';"
             "font-src 'self' data: https://fonts.gstatic.com;"
             "img-src 'self' data:;"
-            "script-src 'self'")
-        if (cherrypy.server.ssl_certificate != None and cherrypy.server.ssl_private_key != None):
-            headers['Strict-Transport-Security'] = 'max-age=31536000'
+            "script-src 'self';"
+            "frame-ancestors 'none';"
+            "base-uri 'self';"
+            "form-action 'self'")
+        headers['Strict-Transport-Security'] = 'max-age=31536000'
+        headers["Referrer-Policy"] = 'same-origin'
             
     @cherrypy.tools.register('before_finalize', priority=61)
     def staticcacheheaders():
         headers = cherrypy.response.headers
         headers['Cache-Control'] = 'public, max-age=31536000'
         headers['Expires'] = (datetime.utcnow()+timedelta(seconds=31536000)).strftime("%a, %d %b %Y %H:%M:%S GMT")
+    
+    @cherrypy.tools.register('before_handler', priority=50)    
+    def check_ssl():
+        # check if url is in https and redirect if http
+        if cherrypy.request.scheme == "http":
+            raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
+                                    status=301)
 
     def handle_error():
         cherrypy.response.status = 500
@@ -134,7 +145,8 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
         'error_page.404': error_page_404,
         'request.error_response': handle_error,
         'request.show_tracebacks': debug,
-        'engine.autoreload.on': reload
+        'engine.autoreload.on': reload,
+        'tools.check_ssl.on': True
     })
     if ON_HEROKU:
         cherrypy.config.update({

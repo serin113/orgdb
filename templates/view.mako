@@ -25,6 +25,7 @@ Code History:
                    - Resized search bar
                    - Use "q" parameter for edit button link
 2019/05/17 (Simon) - Added default sorting
+                   - Removed inline styles
 </%doc>
 
 
@@ -102,7 +103,7 @@ typeName = {
             </form>
             % if (data is not None):
             % if len(data) > 0:
-            <div class="ui container" style="overflow-x:auto">
+            <div class="ui container overflow">
                 <table class="ui selectable stackable compact striped celled sortable blue small table">
                     <thead class="full-width">
                         <tr>
