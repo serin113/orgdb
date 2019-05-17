@@ -2,13 +2,13 @@
 
 body {
     height: 100%;
-    min-width: 320px;
+    min-width: 300px;
     overflow-x: hidden;
 }
 body > #login_form {
     height: 100%;
     width: 100%;
-    margin: -1rem;
+    margin: 0;
 }
 #login_form .column {
     max-width: 450px;
