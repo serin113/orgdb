@@ -119,9 +119,14 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
     
     @cherrypy.tools.register('before_handler', priority=50)    
     def check_ssl():
-        # check if url is in https and redirect if http
+        # if received request is in http
         if cherrypy.request.scheme == "http":
-            raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
+            # if request was forwarded
+            if "X-Forwarded-Proto" in cherrypy.request.headers.keys():
+                # if original request is in http
+                if cherrypy.request.headers["X-Forwarded-Proto"] == "http":
+                    # redirect requesting user to https
+                    raise cherrypy.HTTPRedirect(cherrypy.url().replace("http:", "https:"),
                                     status=301)
 
     def handle_error():
