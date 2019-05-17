@@ -11,6 +11,7 @@ Code History:
                    - Renamed header > _header, footer > _footer
                    - Added return button
                    - Template accepts "q" parameter
+2019/05/17 (Simon) - Form action attribute uses relative path
 </%doc>
 
 
@@ -67,7 +68,7 @@ if record_info is not None:
             <h1 class="ui header title">Edit Affiliation Record</h1>
             % if record_info is not None:
             <div class="ui fluid raised blue left aligned container segment">
-                <form method="post" action="update" id="add-form" class="ui form">
+                <form method="post" action="./update" id="add-form" class="ui form">
                     <div class="ui stackable grid">
                         <div class="ui sixteen wide blue column">
                             <h1 class="ui inverted header">

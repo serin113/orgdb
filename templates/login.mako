@@ -13,6 +13,7 @@ Code History:
 2019/05/17 (Simon) - UI updated
                    - Uses login.css for styling
                    - Removed unused parameter
+                   - Form action attribute uses relative path
 </%doc>
 
 
@@ -39,7 +40,7 @@ Code History:
                         <div class="tiny sub header">Affiliation Database</div>
                     </div>
                 </h1>
-                <form class="ui large form" method="POST" action="verify">
+                <form class="ui large form" method="post" action="./verify">
                     <div class="ui stacked blue segment">
                         <div class="field">
                             <div class="ui left icon input">

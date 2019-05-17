@@ -20,6 +20,7 @@ Code History:
 2019/05/17 (Simon) - Added modal UI for adding remarks & benefits before approving an application
                    - Removed table sorting (no tables to sort anymore)
                    - Rearranged buttons
+                   - Form action attribute uses relative path
 </%doc>
 
 
@@ -103,7 +104,7 @@ ID, type = user
                 % for app in data:
                 <div class="ui modal" id="modal_${app['appID']}">
                     <div class="content">
-                        <form method="post" action="approve/${app['appID']}" class="ui form">
+                        <form method="post" action="./approve/${app['appID']}" class="ui form">
                             <div class="field">
                                 <label>Benefits</label>
                                 <input type="text" name="benefits" placeholder="optional, leave blank if none">

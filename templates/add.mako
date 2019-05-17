@@ -19,6 +19,7 @@ Code History:
 2019/05/15 (Simon) - Template inherits _base.mako for whitespace removal
                    - Added <title>
                    - Renamed header > _header, footer > _footer
+2019/05/17 (Simon) - Form action attribute uses relative path
 </%doc>
 
 
@@ -43,7 +44,7 @@ Code History:
         <div class="ui center aligned container">
             <h1 class="ui header title">Add Affiliation Record</h1>
             <div class="ui fluid raised blue left aligned container segment">
-                <form method="post" action="insert" id="add-form" class="ui form">
+                <form method="post" action="./insert" id="add-form" class="ui form">
                     <div class="ui stackable grid">
                         <div class="sixteen wide blue column">
                             <h2 class="ui inverted header">Club Info</h2>
