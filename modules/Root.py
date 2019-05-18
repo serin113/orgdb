@@ -12,6 +12,7 @@
 # 2019/04/05 (Simon) - Removed persistent InputValidator class from handler classes
 # 2019/04/24 (Simon) - Added @accessible_by("all") to CherryPy page handler methods
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
+# 2019/05/18 (Simon) - Root.logout() returns its value (redirect HTML)
 
 from ._helpers import *
 from .AddApplication import *
@@ -73,4 +74,4 @@ class Root(object):
     @cherrypy.expose
     @accessible_by("all")
     def logout(self, **kwargs):
-        self.login.logout()
+        return self.login.logout()

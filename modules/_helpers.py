@@ -20,6 +20,7 @@
 # 2019/05/15 (Simon) - Modified TemplateLookup() initialization in ContentRenderer
 #                    - Remove infinite while loop in DBConnection.__enter__()
 #                    - Added exception handling in DBConnection.__enter__()
+# 2019/05/18 (Simon) - Added redirect() helper method
 
 import re  # for input validation
 from base64 import urlsafe_b64encode  # for encoding sha512 hash to base64
@@ -77,6 +78,17 @@ def today(hasTime=True):
     if hasTime:
         return (datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     return (datetime.now().strftime("%Y-%m-%d"))
+    
+    
+# display a redirect page that redirects somewhere else
+# after 2 seconds
+def redirect(link="/", message="", delay=1):
+    html = (
+        "<html><head><meta http-equiv='refresh' content='{0};url={1}'/>"
+        "</head><body><p>{2}</p><br>"
+        "<a href='{1}'>Click here if not automatically redirected...</a></body></body></html>"
+    ).format(int(delay),link,message)
+    return html
 
 
 #

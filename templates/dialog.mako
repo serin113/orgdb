@@ -14,6 +14,7 @@ Code History:
                    - Added <title>
                    - Renamed header.mako > _header.mako, footer.mako > _footer.mako
                    - Renamed dialog.js > back.js
+2019/05/18 (Simon) - Added spacing between title+message and links
 </%doc>
 
 
@@ -65,6 +66,7 @@ Mako variables:
                 </div>
                 % endif
                 % if (linkaddr is not None) or (linktext is not None):
+                <div class="ui hidden divider"></div>
                 <a href="${linkaddr}" class="ui small basic blue button" id="button">${linktext}</a>
                 % endif
                 % if (linkaddr2 is not None) or (linktext2 is not None):

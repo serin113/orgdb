@@ -20,6 +20,7 @@ Code History:
                    - Added <title>
                    - Renamed header > _header, footer > _footer
 2019/05/17 (Simon) - Form action attribute uses relative path
+2019/05/18 (Simon) - paymentdate input field now not required
 </%doc>
 
 
@@ -234,9 +235,9 @@ Code History:
                             </div>
                         </div>
                         <div class="five wide column">
-                            <div class="required field">
+                            <div class="field">
                                 <label>Payment Date</label>
-                                <input type="date" name="paymentdate" required>
+                                <input type="date" name="paymentdate">
                             </div>
                         </div>
                         <div class="four wide column">

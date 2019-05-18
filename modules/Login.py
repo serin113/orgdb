@@ -22,6 +22,7 @@
 #                    - Added SameSite attribute to token cookies (only sent to same domain, mostly avoids CSRF)
 #                    - Remove unused parameter
 #                    - Add more debug messages
+# 2019/05/18 (Simon) - Redirect uses the _helpers.redirect() method instead
 
 from functools import wraps
 from hashlib import pbkdf2_hmac
@@ -435,7 +436,8 @@ class Login(object):
     def index(self, **kwargs):
         # if user is logged in, redirect to homepage
         if checkCredentials(self.DBC) != -1:
-            raise cherrypy.HTTPRedirect("/")
+            #raise cherrypy.HTTPRedirect("/")
+            return redirect(link="/", message="Login successful / already logged in.", delay=1)
         # else, display login page
         return self.renderer.render("login.mako")  # display summary data
 
@@ -447,11 +449,14 @@ class Login(object):
                 # if input credentials are valid
                 if login(ID, PIN, self.DBC) is False:
                     # go back to login page
-                    raise cherrypy.HTTPRedirect("/login")
+                    #raise cherrypy.HTTPRedirect("/login")
+                    return redirect(link="/login", message="Login failed, returning to login page.", delay=5)
             # successful login / already logged in
-            raise cherrypy.HTTPRedirect("/")
+            #raise cherrypy.HTTPRedirect("/")
+            return redirect(link="/", message="Login successful / already logged in.", delay=1)
         cherrypy.log.error("Failed to connect to database")
 
     def logout(self):
         logout(self.DBC)
-        raise cherrypy.HTTPRedirect("/")
+        #raise cherrypy.HTTPRedirect("/")
+        return redirect(link="/", message="Logged out, going back to homepage.", delay=3)

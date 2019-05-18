@@ -8,6 +8,7 @@
 # 2019/04/05 (Simon) - Removed duplicate checking in update()
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 #                    - index() passes "q" parameter through template
+# 2019/05/18 (Simon) - Redirect uses the _helpers.redirect() method instead
 
 from ._helpers import *
 from .Login import *
@@ -114,7 +115,8 @@ class EditRecord(object):
         if record_id is None:
             cherrypy.log.error("Error (EditRecord.update): Missing club ID: " +
                                record_id)
-            raise cherrypy.HTTPRedirect("/edit")
+            #raise cherrypy.HTTPRedirect("/edit")
+            return redirect(link="/view", message="", delay=1)
         with self.DBC as sqlcnx:
             # string format for updating record_data in SQL database
             # table structure is defined in db.sql
@@ -146,13 +148,15 @@ class EditRecord(object):
                 cherrypy.log.error(
                     "Error (EditRecord.update): Tried to edit nonexistent club ID: "
                     + clubid)
-                raise cherrypy.HTTPRedirect("/edit")
+                #raise cherrypy.HTTPRedirect("/edit")
+                return redirect(link="/view", message="", delay=1)
             # log if more than 1 club with same ID
             elif len(res) > 1:
                 cherrypy.log.error(
                     "Error (EditRecord.update): More than one club with same ID: "
                     + clubid)
-                raise cherrypy.HTTPRedirect("/edit")
+                #raise cherrypy.HTTPRedirect("/edit")
+                return redirect(link="/view", message="", delay=1)
             # prepare updated data
             date_today = today()
             record_data = {

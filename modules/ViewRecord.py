@@ -18,6 +18,7 @@
 #                    - Simplified usertype conditions in index()
 #                    - Fetch affiliations from AffiliationTable for viewing individual record
 # 2019/05/17 (Simon) - Fixed SQL query typo in index()
+# 2019/05/18 (Simon) - Redirect uses the _helpers.redirect() method instead
 
 from ._helpers import *
 from .Login import *
@@ -85,7 +86,8 @@ class ViewRecord(object):
                     # logged-in club cannot view other record_id's
                     if usertype[1] == 0:
                         if record_id is not None:
-                            raise cherrypy.HTTPRedirect("/view")
+                            #raise cherrypy.HTTPRedirect("/view")
+                            return redirect(link="/view", message="", delay=1)
                         else:
                             record_id = usertype[0]
                         
@@ -129,7 +131,8 @@ class ViewRecord(object):
             # if user is not logged-in
             else:
                 # go to login page
-                raise cherrypy.HTTPRedirect("/login")
+                #raise cherrypy.HTTPRedirect("/login")
+                return redirect(link="/login", message="", delay=1)
         return self.renderer.render(
             "dialog.mako", {
                 'title': "Error!",
