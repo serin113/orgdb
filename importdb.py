@@ -17,11 +17,11 @@ if os.environ.get('DYNO') is not None:
     db_conf.close()
     print("Creating database connection")
     # create database connection
-    dbc = modules.DBConnection("db_tableonly.conf")
+    dbc = modules.DBConnection("db.conf")
 
     with dbc as sqlcnx:
         cur = sqlcnx.cursor()
-        f = open("db.sql", "r")
+        f = open("db_tableonly.sql", "r")
         sqlfile = f.read()
         f.close()
         commands = sqlfile.split(";")
