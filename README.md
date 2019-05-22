@@ -10,25 +10,27 @@ This is a course requirement for CS191/192 Software Engineering Courses of the D
 - [CherryPy](https://cherrypy.org)
 - [Mako](https://www.makotemplates.org)
 
-## Setup
+## Installation & Configuration
 #### `main.py` running in a Heroku dyno with [ClearDB MySQL](https://elements.heroku.com/addons/cleardb)
-0. Clone this repo
+1. Clone this repo
     1. Run `heroku create` in the `orgdb/` folder
     2. Run `heroku addons:create cleardb:ignite` (change `ignite` to something else if on a different plan)
-1. Deploy this Git repo into a Heroku app using `git push heroku master`
-2. Run `heroku run python initcredentials.py` in a terminal
-3. Input new passwords for the `admin` & `dev` accounts (can be skipped)
-4. Run `heroku ps:scale web=1`
-5. Run `heroku open`
+2. Deploy this Git repo into a Heroku app using `git push heroku master`
+3. Run `heroku run python importdb.py` in a terminal, ignore the `[Command skipped]` messages
+4. Run `heroku run python initcredentials.py` in a terminal
+5. Input new passwords for the `admin` & `dev` accounts (can be skipped by pressing Enter)
+6. Run `heroku ps:scale web=1`
+7. Run `heroku open`
 #### `main.py` and MySQL/MariaDB running locally (*not* for deployment)
-0. Install requirements: `pip install -r requirements.txt`
-1. Copy `dbconf.sample` and rename it as `db.conf`, edit server configuration accordingly
-2. Run the MySQL/MariaDB server
-3. Run `source db.sql;` in an SQL command prompt
-4. Run `python initcredentials.py` in a terminal
-3. Input new passwords for the `admin` & `dev` accounts (can be skipped)
-5. Run `python main.py` in a terminal
-6. Open [https://localhost:8080](https://localhost:8080) in a browser
+1. Install requirements: `pip install -r requirements.txt`
+2. Copy `dbconf.sample` and rename it as `db.conf`
+3. Edit `db.conf` according to the MySQL/MariaDB settings
+3. Run the MySQL/MariaDB server
+4. Run `source db.sql;` in an SQL command prompt
+5. Run `python initcredentials.py` in a terminal
+6. Input new passwords for the `admin` & `dev` accounts (can be skipped)
+7. Run `python main.py` in a terminal
+8. Open [https://localhost:8080](https://localhost:8080) in a browser
 
 ## Website
 
