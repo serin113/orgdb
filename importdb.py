@@ -15,10 +15,6 @@ if os.environ.get('DYNO') is not None:
     db_conf.write("[connector_python]\n")
     db_conf.write("host = {}\ndatabase = {}\nuser = {}\npassword = {}\nport = {}\nraise_on_warnings = True\n".format(url.hostname, url.path[1:], url.username, url.password, 3306))
     db_conf.close()
-    
-    test = open("db.conf", "r")
-    print(test.read())
-    test.close()
     print("Creating database connection")
     # create database connection
     dbc = modules.DBConnection("db.conf")
@@ -34,3 +30,5 @@ if os.environ.get('DYNO') is not None:
                 cur.execute(command)
             except mysql.connector.errors.OperationalError as msg:
                 print("[Command skipped] ", msg)
+        cur.close()
+        sqlcnx.commit()
