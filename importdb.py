@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import modules
+import os
 
 if os.environ.get('DYNO') is not None:
     print("Creating db.conf from Heroku environment vars")
