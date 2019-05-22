@@ -28,7 +28,7 @@ if os.environ.get('DYNO') is not None:
         for command in commands:
             try:
                 cur.execute(command)
-            except mysql.connector.errors.OperationalError as msg:
+            except mysql.connector.errors.DatabaseError as msg:
                 print("[Command skipped] ", msg)
         cur.close()
         sqlcnx.commit()
