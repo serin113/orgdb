@@ -21,6 +21,7 @@
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 #                    - Handles condition: add record for existing club+school, with non-colliding school year
 # 2019/05/17 (Simon) - Update dateModified field row in AffiliationRecordsTable if a row is created in AffiliationTable
+# 2019/05/24 (Simon) - Add "header" option for some render("dialog.mako") calls
 
 from ._helpers import *
 from .Login import *
@@ -121,7 +122,7 @@ class AddRecord(object):
                     "dialog.mako", {
                         'title': "Error!",
                         'message':
-                        "Invalid affiliation record data:<br>" + errortext,
+                        "Invalid affiliation record data",
                         'linkaddr': "#back",
                         'linktext': "< Back",
                         'errors': errors,
@@ -158,7 +159,7 @@ class AddRecord(object):
                     "dialog.mako", {
                         'title': "Error!",
                         'message':
-                        "Invalid affiliation record data:<br>" + errortext,
+                        "Invalid affiliation record data",
                         'linkaddr': "#back",
                         'linktext': "< Back",
                         'errors': res,
@@ -199,7 +200,7 @@ class AddRecord(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })
 
     @cherrypy.expose

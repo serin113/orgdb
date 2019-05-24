@@ -16,6 +16,8 @@
 # 2019/04/02 (Simon) - Changed "back" URL
 # 2019/04/24 (Simon) - Added gzip compression to page handler
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
+# 2019/05/24 (Simon) - Add "header" option for some render("dialog.mako") calls
+#                    - Remove getUserType() call from render("dialog.mako") on database error
 
 from ._helpers import *
 from .Login import *
@@ -91,5 +93,5 @@ class Summary(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })

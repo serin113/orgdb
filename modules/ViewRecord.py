@@ -19,6 +19,8 @@
 #                    - Fetch affiliations from AffiliationTable for viewing individual record
 # 2019/05/17 (Simon) - Fixed SQL query typo in index()
 # 2019/05/18 (Simon) - Redirect uses the _helpers.redirect() method instead
+# 2019/05/24 (Simon) - Add "header" option for some render("dialog.mako") calls
+#                    - Remove getUserType() call from render("dialog.mako") on database error
 
 from ._helpers import *
 from .Login import *
@@ -139,5 +141,5 @@ class ViewRecord(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })

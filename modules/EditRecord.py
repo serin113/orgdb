@@ -9,6 +9,8 @@
 # 2019/05/15 (Simon) - Added **kwargs to CherryPy-exposed methods to catch unexpected parameters w/o an error
 #                    - index() passes "q" parameter through template
 # 2019/05/18 (Simon) - Redirect uses the _helpers.redirect() method instead
+# 2019/05/24 (Simon) - Add "header" option for some render("dialog.mako") calls
+#                    - Remove getUserType() call from render("dialog.mako") on database error
 
 from ._helpers import *
 from .Login import *
@@ -90,7 +92,7 @@ class EditRecord(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })
 
     @cherrypy.expose
@@ -184,7 +186,7 @@ class EditRecord(object):
                     "dialog.mako", {
                         'title': "Error!",
                         'message':
-                        "Invalid affiliation record data:<br>" + errortext,
+                        "Invalid affiliation record data",
                         'linkaddr': "#back",
                         'linktext': "< Back",
                         'errors': errors,
@@ -209,5 +211,5 @@ class EditRecord(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })

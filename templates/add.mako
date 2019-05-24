@@ -21,6 +21,7 @@ Code History:
                    - Renamed header > _header, footer > _footer
 2019/05/17 (Simon) - Form action attribute uses relative path
 2019/05/18 (Simon) - paymentdate input field now not required
+2019/05/24 (Simon) - Add "max" attribute to "yearsaffiliated" field
 </%doc>
 
 
@@ -207,7 +208,7 @@ Code History:
                         <div class="four wide column">
                             <div class="required field">
                                 <label>Number of years paid</label>
-                                <input type="number"  name="yearsaffiliated" min="1" value = "1" required>
+                                <input type="number"  name="yearsaffiliated" min="1" max="50" value="1" required>
                             </div>
                         </div>
                         <div class="six wide column">

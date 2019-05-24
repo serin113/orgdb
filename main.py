@@ -47,6 +47,7 @@
 #                    - System timezone printed as a debug message on startup
 #                    - Added more CSP directives, http requests redirect to https, HSTS default
 #                    - Disabled unused sessions feature
+# 2019/05/24 (Simon) - Add HTTP error 500 handling
 
 import os  # for resolving filesystem paths
 import sys # for fetching system info (debugging & arguments)
@@ -146,6 +147,17 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
         from modules.Login import getUserType  # for fetching current logged-in user for template
         return renderer.render(
             "404.mako", {'user': getUserType(helper.DBConnection("db.conf"))})
+            
+    def error_page_500(status, message, traceback, version):
+        from modules.Login import getUserType  # for fetching current logged-in user for template
+        return renderer.render(
+            "dialog.mako", {
+                'title': "Error!",
+                'message': "A database error occured.",
+                'linkaddr': "#back",
+                'linktext': "< Back",
+                'header': False
+            })
 
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
@@ -155,6 +167,7 @@ def main(debug=None, clearlogs=None, reload=None, output=None, output_file=None)
         'log.error_file': 'error.log' if output_file else "",
         'log.access_file': 'access.log' if output_file else "",
         'error_page.404': error_page_404,
+        'error_page.500': error_page_500,
         'request.error_response': handle_error,
         'request.show_tracebacks': debug,
         'engine.autoreload.on': reload,

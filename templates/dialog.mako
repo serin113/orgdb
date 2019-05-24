@@ -15,6 +15,7 @@ Code History:
                    - Renamed header.mako > _header.mako, footer.mako > _footer.mako
                    - Renamed dialog.js > back.js
 2019/05/18 (Simon) - Added spacing between title+message and links
+2019/05/24 (Simon) - Add "header" boolean arg
 </%doc>
 
 
@@ -30,7 +31,7 @@ Mako variables:
 </%doc>
 
 
-<%page args="user=None, title=None, message=None, errors=None, linkaddr=None, linktext=None, linkaddr2=None, linktext2=None"/>
+<%page args="user=None, title=None, message=None, errors=None, linkaddr=None, linktext=None, linkaddr2=None, linktext2=None, header=True"/>
 <%inherit file="_base.mako"/>
 
 
@@ -45,9 +46,11 @@ Mako variables:
         <title>PSYSC</title>
     </head>
     <body>
+        % if header:
         <header>
             <%include file="_header.mako" args="user=user"/>
         </header>
+        % endif
         <section class="ui container">
             <div class="ui message">
                 % if title is not None:

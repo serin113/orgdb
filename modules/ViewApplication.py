@@ -23,6 +23,8 @@
 # 2019/05/17 (Simon) - Added handling for missing affiliation_id case in approve() and reject()
 #                    - Added benefits & remarks parameters in approve()
 #                    - cursor.fetchall() returns dictionary list instead of tuple list when needed
+# 2019/05/24 (Simon) - Add "header" option for some render("dialog.mako") calls
+#                    - Remove getUserType() call from render("dialog.mako") on database error
 
 from ._helpers import *
 from .AddRecord import *
@@ -126,7 +128,7 @@ class ViewApplication(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })
 
     # Handles /applications/approve/<application_id>/
@@ -212,7 +214,7 @@ class ViewApplication(object):
                                 'message': "A database error occured.",
                                 'linkaddr': "#back",
                                 'linktext': "< Back",
-                                'user': getUserType(self.DBC)
+                                'header': False
                             })
             # if application indicates an existing record with clubID
             else:
@@ -248,7 +250,7 @@ class ViewApplication(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })
 
     # Handles /applications/reject/<application_id>/
@@ -291,5 +293,5 @@ class ViewApplication(object):
                 'message': "A database error occured.",
                 'linkaddr': "#back",
                 'linktext': "< Back",
-                'user': getUserType(self.DBC)
+                'header': False
             })
