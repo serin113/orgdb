@@ -136,7 +136,7 @@ typeName = {
                             <table class="ui striped sortable unstackable compact blue table">
                                 <thead>
                                     <tr>
-                                        <th data-vivaldi-spatnav-clickable="1">level</th>
+                                        <th data-vivaldi-spatnav-clickable="1" class="default-sort">level</th>
                                         <th data-vivaldi-spatnav-clickable="1">total</th>
                                     </tr>
                                 </thead>
@@ -154,7 +154,7 @@ typeName = {
                             <table class="ui striped sortable unstackable compact blue table">
                                 <thead>
                                     <tr>
-                                        <th data-vivaldi-spatnav-clickable="1">type</th>
+                                        <th data-vivaldi-spatnav-clickable="1" class="default-sort">type</th>
                                         <th data-vivaldi-spatnav-clickable="1">total</th>
                                     </tr>
                                 </thead>
